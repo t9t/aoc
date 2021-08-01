@@ -1,6 +1,7 @@
 package main
 
 import (
+	"aoc/registry"
 	"aoc/year2015"
 	"fmt"
 	"os"
@@ -8,6 +9,9 @@ import (
 )
 
 func main() {
+	registry.Register(2015, 1, 1, year2015.Day1Part1)
+	registry.Register(2015, 1, 2, year2015.Day1Part2)
+
 	args := os.Args[1:]
 
 	if len(args) != 3 {
@@ -18,28 +22,26 @@ func main() {
 	day := mustParseIntArg("day", args[1])
 	part := mustParseIntArg("part", args[2])
 
-	if year == 2015 && day == 1 && (part == 1 || part == 2) {
-		fmt.Printf("Running Year: %d; Day: %d; Part: %d\n", year, day, part)
-		data, err := os.ReadFile("input/2015-1.txt")
-		if err != nil {
-			fmt.Printf("Unable to read input file: %v\n", err)
-			os.Exit(3)
-		}
-		var i int
-		if part == 1 {
-			i, err = year2015.Day1Part1(string(data))
-		} else {
-			i, err = year2015.Day1Part2(string(data))
-		}
-		if err != nil {
-			fmt.Printf("Error running: %v\n", err)
-			os.Exit(4)
-		}
-		fmt.Printf("Result: %d\n", i)
-	} else {
+	execution, found := registry.Get(year, day, part)
+	if !found {
 		fmt.Printf("Unsupported arguments, Year: %d; Day: %d; Part: %d\n", year, day, part)
 		os.Exit(2)
 	}
+	inputFile := fmt.Sprintf("input/%d-%d.txt", year, day)
+	inputData, err := os.ReadFile(inputFile)
+	if err != nil {
+		fmt.Printf("Could not read input from %q: %v\n", inputFile, err)
+		os.Exit(3)
+	}
+
+	fmt.Printf("Running Year: %d; Day: %d; Part: %d\n", year, day, part)
+	result, err := execution(string(inputData))
+	if err != nil {
+		fmt.Printf("Error running: %v\n", err)
+		os.Exit(4)
+	}
+
+	fmt.Printf("Result: %v\n", result)
 }
 
 func mustParseIntArg(argName, v string) int {
