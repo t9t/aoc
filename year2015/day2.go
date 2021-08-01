@@ -2,6 +2,7 @@ package year2015
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -15,6 +16,19 @@ func Day2Part1(input string) (int, error) {
 			return 0, fmt.Errorf("invalid input: %w", err)
 		}
 		total += wrappingPaperNeeded(l, w, h)
+	}
+	return total, nil
+}
+
+func Day2Part2(input string) (int, error) {
+	presents := strings.Split(input, "\n")
+	total := 0
+	for _, present := range presents {
+		l, w, h, err := parseDimensions(present)
+		if err != nil {
+			return 0, fmt.Errorf("invalid input: %w", err)
+		}
+		total += ribbonNeeded(l, w, h)
 	}
 	return total, nil
 }
@@ -58,4 +72,15 @@ func wrappingPaperNeeded(l, w, h int) int {
 
 func surfaceArea(l, w, h int) int {
 	return 2*l*w + 2*w*h + 2*h*l
+}
+
+func ribbonNeeded(l, w, h int) int {
+	dims := []int{l, w, h}
+	sort.Slice(dims, func(i, j int) bool {
+		return dims[i] < dims[j]
+	})
+	s1, s2 := dims[0], dims[1]
+	shortestPathAround := 2*s1 + 2*s2
+	bow := l * w * h
+	return shortestPathAround + bow
 }
