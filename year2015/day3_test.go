@@ -31,11 +31,11 @@ func Test_traverseSingleSanta(t *testing.T) {
 		t.Run(tt.instructions, func(t *testing.T) {
 			got, err := traverseSingleSanta(tt.instructions)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("traverse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("traverseSingleSanta() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("traverse() = %v, want %v", got, tt.want)
+				t.Errorf("traverseSingleSanta() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -76,11 +76,11 @@ func Test_traverseDoubleSanta(t *testing.T) {
 		t.Run(tt.instructions, func(t *testing.T) {
 			got, err := traverseDoubleSanta(tt.instructions)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("traverse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("traverseDoubleSanta() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("traverse() = %v, want %v", got, tt.want)
+				t.Errorf("traverseDoubleSanta() = %v, want %v", got, tt.want)
 			}
 		})
 	}
