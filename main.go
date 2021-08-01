@@ -10,12 +10,7 @@ import (
 )
 
 func main() {
-	registry.Register(2015, 1, 1, year2015.Day1Part1)
-	registry.Register(2015, 1, 2, year2015.Day1Part2)
-	registry.Register(2015, 2, 1, year2015.Day2Part1)
-	registry.Register(2015, 2, 2, year2015.Day2Part2)
-	registry.Register(2015, 3, 1, year2015.Day3Part1)
-	registry.Register(2015, 3, 2, year2015.Day3Part2)
+	year2015.RegisterAll()
 
 	args := os.Args[1:]
 
