@@ -8,19 +8,14 @@ import (
 )
 
 func Day2Part1(input string) (int, error) {
-	presents := strings.Split(input, "\n")
-	total := 0
-	for _, present := range presents {
-		l, w, h, err := parseDimensions(present)
-		if err != nil {
-			return 0, fmt.Errorf("invalid input: %w", err)
-		}
-		total += wrappingPaperNeeded(l, w, h)
-	}
-	return total, nil
+	return totalForEachDimension(input, wrappingPaperNeeded)
 }
 
 func Day2Part2(input string) (int, error) {
+	return totalForEachDimension(input, ribbonNeeded)
+}
+
+func totalForEachDimension(input string, f func(l, w, h int) int) (int, error) {
 	presents := strings.Split(input, "\n")
 	total := 0
 	for _, present := range presents {
@@ -28,7 +23,7 @@ func Day2Part2(input string) (int, error) {
 		if err != nil {
 			return 0, fmt.Errorf("invalid input: %w", err)
 		}
-		total += ribbonNeeded(l, w, h)
+		total += f(l, w, h)
 	}
 	return total, nil
 }
