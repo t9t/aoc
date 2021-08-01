@@ -2,12 +2,9 @@ package year2015
 
 import (
 	"fmt"
-	"strings"
 )
 
 func Day1Part1(input string) (int, error) {
-	input = strings.TrimSpace(input)
-
 	floor := 0
 	for i := 0; i < len(input); i++ {
 		c := input[i]
@@ -23,8 +20,6 @@ func Day1Part1(input string) (int, error) {
 }
 
 func Day1Part2(input string) (int, error) {
-	input = strings.TrimSpace(input)
-
 	floor := 0
 	for i := 0; i < len(input); i++ {
 		c := input[i]

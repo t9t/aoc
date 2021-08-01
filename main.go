@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
 	registry.Register(2015, 1, 1, year2015.Day1Part1)
 	registry.Register(2015, 1, 2, year2015.Day1Part2)
+	registry.Register(2015, 2, 1, year2015.Day2Part1)
 
 	args := os.Args[1:]
 
@@ -35,7 +37,7 @@ func main() {
 	}
 
 	fmt.Printf("Running Year: %d; Day: %d; Part: %d\n", year, day, part)
-	result, err := execution(string(inputData))
+	result, err := execution(strings.TrimSpace(string(inputData)))
 	if err != nil {
 		fmt.Printf("Error running: %v\n", err)
 		os.Exit(4)
