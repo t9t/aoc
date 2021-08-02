@@ -7,6 +7,7 @@ import (
 )
 
 type lightOperation int
+type lightTransformationFunc func(cur int, op lightOperation) int
 
 const (
 	turnLightOn = iota
@@ -28,21 +29,34 @@ func Day6Part1(input string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	grid := newLightGrid(lightsCount)
+	grid := newLightGrid(lightsCount, applyTransformation)
 	for _, instruction := range instructions {
 		grid.applyInstruction(instruction)
 	}
 	return grid.countLit(), nil
 }
 
-func newLightGrid(sideLength int) *lightGrid {
+func Day6Part2(input string) (int, error) {
+	instructions, err := parseLightInstructions(strings.Split(strings.TrimSpace(input), "\n"))
+	if err != nil {
+		return 0, err
+	}
+	grid := newLightGrid(lightsCount, applyAncientNordicElvishTransformation)
+	for _, instruction := range instructions {
+		grid.applyInstruction(instruction)
+	}
+	return grid.totalBrightness(), nil
+}
+
+func newLightGrid(sideLength int, transformationFunc lightTransformationFunc) *lightGrid {
 	grid := make([]int, sideLength*sideLength)
-	return &lightGrid{grid: grid, sideLength: sideLength}
+	return &lightGrid{grid: grid, sideLength: sideLength, transformationFunc: transformationFunc}
 }
 
 type lightGrid struct {
-	grid       []int
-	sideLength int
+	grid               []int
+	sideLength         int
+	transformationFunc lightTransformationFunc
 }
 
 func (g *lightGrid) countLit() int {
@@ -55,11 +69,19 @@ func (g *lightGrid) countLit() int {
 	return lit
 }
 
+func (g *lightGrid) totalBrightness() int {
+	brightness := 0
+	for _, v := range g.grid {
+		brightness += v
+	}
+	return brightness
+}
+
 func (g *lightGrid) applyInstruction(i lightInstruction) {
 	for x := i.startX; x <= i.endX; x++ {
 		for y := i.startY; y <= i.endY; y++ {
 			idx := g.idx(x, y)
-			g.grid[idx] = applyTransformation(g.grid[idx], i.op)
+			g.grid[idx] = g.transformationFunc(g.grid[idx], i.op)
 		}
 	}
 }
@@ -77,7 +99,23 @@ func applyTransformation(cur int, op lightOperation) int {
 			return 0
 		}
 	}
-	return 0
+	panic(fmt.Sprintf("invalid operation %d", op))
+}
+
+func applyAncientNordicElvishTransformation(cur int, op lightOperation) int {
+	switch op {
+	case turnLightOn:
+		return cur + 1
+	case turnLightOff:
+		new := cur - 1
+		if new < 0 {
+			return 0
+		}
+		return new
+	case toggleLight:
+		return cur + 2
+	}
+	panic(fmt.Sprintf("invalid operation %d", op))
 }
 
 func (g *lightGrid) idx(x, y int) int {
