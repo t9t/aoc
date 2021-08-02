@@ -36,19 +36,19 @@ func Day6Part1(input string) (int, error) {
 }
 
 func newLightGrid(sideLength int) *lightGrid {
-	grid := make([]bool, sideLength*sideLength)
+	grid := make([]int, sideLength*sideLength)
 	return &lightGrid{grid: grid, sideLength: sideLength}
 }
 
 type lightGrid struct {
-	grid       []bool
+	grid       []int
 	sideLength int
 }
 
 func (g *lightGrid) countLit() int {
 	lit := 0
 	for _, on := range g.grid {
-		if on {
+		if on == 1 {
 			lit++
 		}
 	}
@@ -63,11 +63,15 @@ func (g *lightGrid) applyInstruction(i lightInstruction) {
 			new := cur
 			switch i.op {
 			case turnLightOn:
-				new = true
+				new = 1
 			case turnLightOff:
-				new = false
+				new = 0
 			case toggleLight:
-				new = !cur
+				if cur == 0 {
+					new = 1
+				} else {
+					new = 0
+				}
 			}
 			g.grid[idx] = new
 		}
