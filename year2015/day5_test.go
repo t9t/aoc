@@ -114,3 +114,98 @@ func TestDay5Part1(t *testing.T) {
 		})
 	}
 }
+
+func Test_hasRepeatingNonOverlappingPair(t *testing.T) {
+	tests := []struct {
+		input string
+		want  bool
+	}{
+		{"", false},
+		{"a", false},
+		{"aa", false},
+		{"aba", false},
+		{"xyxy", true},
+		{"axyxy", true},
+		{"aabcdefgaa", true},
+		{"aaa", false},
+		{"qjhvhtzxzqqjkmpb", true},
+		{"xxyxx", true},
+		{"uurcxstgmygtbstg", true},
+		{"ieodomkazucvgmuy", false},
+		{"qiqqlmcgnhzparyg", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			if got := hasRepeatingNonOverlappingPair(tt.input); got != tt.want {
+				t.Errorf("hasRepeatingNonOverlappingPair() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_hasLetterSandwichedInPair(t *testing.T) {
+	tests := []struct {
+		input string
+		want  bool
+	}{
+		{"", false},
+		{"a", false},
+		{"ab", false},
+		{"abb", false},
+		{"xyx", true},
+		{"abcdefeghi", true},
+		{"aaa", true},
+		{"qjhvhtzxzqqjkmpb", true},
+		{"xxyxx", true},
+		{"uurcxstgmygtbstg", false},
+		{"ieodomkazucvgmuy", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			if got := hasLetterSandwichedInPair(tt.input); got != tt.want {
+				t.Errorf("hasLetterSandwichedInPair() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_isActuallyNice(t *testing.T) {
+	tests := []struct {
+		input string
+		want  bool
+	}{
+		{"qjhvhtzxzqqjkmpb", true},
+		{"xxyxx", true},
+		{"uurcxstgmygtbstg", false},
+		{"ieodomkazucvgmuy", false},
+		{"qiqqlmcgnhzparyg", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			if got := isActuallyNice(tt.input); got != tt.want {
+				t.Errorf("isActuallyNice() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDay5Part2(t *testing.T) {
+	tests := []struct {
+		input string
+		want  int
+	}{
+		{"qjhvhtzxzqqjkmpb\nxxyxx\nuurcxstgmygtbstg\nieodomkazucvgmuy", 2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			got, err := Day5Part2(tt.input)
+			if err != nil {
+				t.Errorf("Day5Part2() error = %v, wantErr %v", err, false)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Day5Part2() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
