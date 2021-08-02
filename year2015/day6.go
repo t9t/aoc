@@ -59,23 +59,25 @@ func (g *lightGrid) applyInstruction(i lightInstruction) {
 	for x := i.startX; x <= i.endX; x++ {
 		for y := i.startY; y <= i.endY; y++ {
 			idx := g.idx(x, y)
-			cur := g.grid[idx]
-			new := cur
-			switch i.op {
-			case turnLightOn:
-				new = 1
-			case turnLightOff:
-				new = 0
-			case toggleLight:
-				if cur == 0 {
-					new = 1
-				} else {
-					new = 0
-				}
-			}
-			g.grid[idx] = new
+			g.grid[idx] = applyTransformation(g.grid[idx], i.op)
 		}
 	}
+}
+
+func applyTransformation(cur int, op lightOperation) int {
+	switch op {
+	case turnLightOn:
+		return 1
+	case turnLightOff:
+		return 0
+	case toggleLight:
+		if cur == 0 {
+			return 1
+		} else {
+			return 0
+		}
+	}
+	return 0
 }
 
 func (g *lightGrid) idx(x, y int) int {
