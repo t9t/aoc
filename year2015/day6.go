@@ -28,24 +28,38 @@ func Day6Part1(input string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	grid := make([]bool, lightsCount*lightsCount)
-	for _, i := range instructions {
-		applyInstruction(grid, i)
+	grid := newLightGrid(lightsCount)
+	for _, instruction := range instructions {
+		grid.applyInstruction(instruction)
 	}
+	return grid.countLit(), nil
+}
+
+func newLightGrid(sideLength int) *lightGrid {
+	grid := make([]bool, sideLength*sideLength)
+	return &lightGrid{grid: grid, sideLength: sideLength}
+}
+
+type lightGrid struct {
+	grid       []bool
+	sideLength int
+}
+
+func (g *lightGrid) countLit() int {
 	lit := 0
-	for _, on := range grid {
+	for _, on := range g.grid {
 		if on {
 			lit++
 		}
 	}
-	return lit, nil
+	return lit
 }
 
-func applyInstruction(grid []bool, i lightInstruction) {
+func (g *lightGrid) applyInstruction(i lightInstruction) {
 	for x := i.startX; x <= i.endX; x++ {
 		for y := i.startY; y <= i.endY; y++ {
-			idx := lightIndex(x, y)
-			cur := grid[idx]
+			idx := g.idx(x, y)
+			cur := g.grid[idx]
 			new := cur
 			switch i.op {
 			case turnLightOn:
@@ -55,13 +69,13 @@ func applyInstruction(grid []bool, i lightInstruction) {
 			case toggleLight:
 				new = !cur
 			}
-			grid[idx] = new
+			g.grid[idx] = new
 		}
 	}
 }
 
-func lightIndex(x, y int) int {
-	return y*lightsCount + x
+func (g *lightGrid) idx(x, y int) int {
+	return y*g.sideLength + x
 }
 
 func parseLightInstructions(lines []string) ([]lightInstruction, error) {

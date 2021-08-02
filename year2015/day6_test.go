@@ -87,3 +87,41 @@ func Test_parseCoords(t *testing.T) {
 		})
 	}
 }
+
+func Test_lightGrid_applyInstructionz(t *testing.T) {
+	tests := []struct {
+		name        string
+		instruction lightInstruction
+		inputGrid   []bool
+		outputGrid  []bool
+	}{
+		{"turn all on", lightInstruction{op: turnLightOn, startX: 0, startY: 0, endX: 2, endY: 2},
+			[]bool{false, true, false, true, true, false, false, true, false},
+			[]bool{true, true, true, true, true, true, true, true, true}},
+		{"turn all off", lightInstruction{op: turnLightOff, startX: 0, startY: 0, endX: 2, endY: 2},
+			[]bool{false, true, false, true, true, false, false, true, false},
+			[]bool{false, false, false, false, false, false, false, false, false}},
+		{"toggle all", lightInstruction{op: toggleLight, startX: 0, startY: 0, endX: 2, endY: 2},
+			[]bool{false, true, false, true, true, false, false, true, false},
+			[]bool{true, false, true, false, false, true, true, false, true}},
+		{"turn some on", lightInstruction{op: turnLightOn, startX: 1, startY: 1, endX: 1, endY: 2},
+			[]bool{false, false, false, false, false, false, false, false, false},
+			[]bool{false, false, false, false, true, false, false, true, false}},
+		{"turn some off", lightInstruction{op: turnLightOff, startX: 0, startY: 0, endX: 2, endY: 1},
+			[]bool{true, true, true, true, true, true, true, true, true},
+			[]bool{false, false, false, false, false, false, true, true, true}},
+		{"toggle some", lightInstruction{op: toggleLight, startX: 2, startY: 1, endX: 2, endY: 2},
+			[]bool{false, true, false, true, true, false, false, true, false},
+			[]bool{false, true, false, true, true, true, false, true, true}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			grid := lightGrid{grid: tt.inputGrid, sideLength: 3}
+			grid.applyInstruction(tt.instruction)
+
+			if !reflect.DeepEqual(grid.grid, tt.outputGrid) {
+				t.Errorf("lightGrid.applyInstruction() = %v, want %v", grid.grid, tt.outputGrid)
+			}
+		})
+	}
+}
