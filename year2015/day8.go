@@ -1,7 +1,6 @@
 package year2015
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -12,6 +11,17 @@ func Day8Part1(input string) (int, error) {
 		line = strings.TrimSpace(line)
 		n += len(line)
 		n -= characterLength(line)
+	}
+	return n, nil
+}
+
+func Day8Part2(input string) (int, error) {
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	n := 0
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		n += countEncodedStringLength(line)
+		n -= len(line)
 	}
 	return n, nil
 }
@@ -33,6 +43,14 @@ func characterLength(inputString string) int {
 	return length
 }
 
-func Day8Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
+func countEncodedStringLength(s string) int {
+	length := 2 // starting and ending quotes
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		length++
+		if c == '\\' || c == '"' {
+			length++
+		}
+	}
+	return length
 }
