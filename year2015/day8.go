@@ -20,26 +20,15 @@ func characterLength(inputString string) int {
 	v := inputString[1 : len(inputString)-1]
 	length := 0
 	for i := 0; i < len(v); i++ {
-		c := v[i]
 		length++
-		if c != '\\' {
-			// regular character, just continue to the next
-			continue
+		sub := v[i:]
+		if strings.HasPrefix(sub, `\x`) {
+			// \xNN escaping, increment i by 1+3 = 4 to move beyond escape sequence
+			i += 3
+		} else if strings.HasPrefix(sub, `\\`) || strings.HasPrefix(sub, `\"`) {
+			// \\ or \", increment i by 1 to move to next character
+			i += 1
 		}
-
-		i++
-		next := v[i]
-		if next == '\\' || next == '"' {
-			// escaping a \ or " which we counted, so continue on
-			continue
-		} else if next != 'x' {
-			// not escaping anything, also count this character and move on
-			length++
-			continue
-		}
-
-		// hex char escaping; we counted the character already, so just increment i by 2 more
-		i += 2
 	}
 	return length
 }
