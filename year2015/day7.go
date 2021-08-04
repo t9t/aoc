@@ -11,19 +11,35 @@ func Day7Part1(input string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	a, found := wireValues["a"]
-	if !found {
-		return 0, fmt.Errorf("wire value \"a\" not found")
+	return int(wireValues["a"]), nil
+}
+
+func Day7Part2(input string) (int, error) {
+	wireMap, err := toWireMap(input)
+	if err != nil {
+		return 0, fmt.Errorf("cannot parse signals: %w", err)
 	}
-	return int(a), nil
+
+	wireValues, err := resolveSignalsUsingWireMap(wireMap)
+	if err != nil {
+		return 0, err
+	}
+
+	a := wireValues["a"]
+	wireMap["b"] = strconv.Itoa(int(a))
+	newValues, err := resolveSignalsUsingWireMap(wireMap)
+	return int(newValues["a"]), err
 }
 
 func resolveSignals(input string) (map[string]uint16, error) {
 	wireMap, err := toWireMap(input)
 	if err != nil {
-		return nil, fmt.Errorf("cannot resolve signals: %w", err)
+		return nil, fmt.Errorf("cannot parse signals: %w", err)
 	}
+	return resolveSignalsUsingWireMap(wireMap)
+}
 
+func resolveSignalsUsingWireMap(wireMap map[string]string) (map[string]uint16, error) {
 	wireValues := make(map[string]uint16)
 	for wire, def := range wireMap {
 		v, err := resolveWire(def, wireMap, wireValues)
