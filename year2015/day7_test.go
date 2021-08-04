@@ -91,10 +91,12 @@ func Test_resolveWire(t *testing.T) {
 		{"OR reference", args{"x OR y", map[string]string{"x": "4312", "y": "8421"}}, 12541, false},
 		{"LSHIFT reference", args{"x LSHIFT y", map[string]string{"x": "621", "y": "2"}}, 2484, false},
 		{"RSHIFT reference", args{"x RSHIFT y", map[string]string{"x": "9381", "y": "3"}}, 1172, false},
+		{"duplicate reference", args{"x AND y", map[string]string{"x": "9381", "y": "x AND z", "z": "1491"}}, 1153, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := resolveWire(tt.args.def, tt.args.wireMap)
+			wireValues := make(map[string]uint16)
+			got, err := resolveWire(tt.args.def, tt.args.wireMap, wireValues)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("resolveWire() error = %v, wantErr %v", err, tt.wantErr)
 				return

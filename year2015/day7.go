@@ -24,39 +24,39 @@ func resolveSignals(input string) (map[string]uint16, error) {
 		return nil, fmt.Errorf("cannot resolve signals: %w", err)
 	}
 
-	out := make(map[string]uint16)
+	wireValues := make(map[string]uint16)
 	for wire, def := range wireMap {
-		v, err := resolveWire(def, wireMap)
+		v, err := resolveWire(def, wireMap, wireValues)
 		if err != nil {
 			return nil, fmt.Errorf("cannot resolve wire %q: %w", wire, err)
 		}
-		out[wire] = v
+		wireValues[wire] = v
 	}
 
-	return out, nil
+	return wireValues, nil
 }
 
-func resolveWire(def string, wireMap map[string]string) (uint16, error) {
+func resolveWire(def string, wireMap map[string]string, wireValues map[string]uint16) (uint16, error) {
 	parts := strings.Split(def, " ")
 	if len(parts) == 1 {
 		// simple value
-		return resolveOrParse(parts[0], wireMap)
+		return resolveOrParse(parts[0], wireMap, wireValues)
 	} else if len(parts) == 2 {
 		operator := strings.TrimSpace(parts[0])
 		if !strings.HasPrefix(operator, "NOT") {
 			return 0, fmt.Errorf("invalid operator %q in %q", operator, def)
 		}
-		i, err := resolveOrParse(parts[1], wireMap)
+		i, err := resolveOrParse(parts[1], wireMap, wireValues)
 		if err != nil {
 			return 0, err
 		}
 		return ^i, nil
 	} else if len(parts) == 3 {
-		i1, err := resolveOrParse(parts[0], wireMap)
+		i1, err := resolveOrParse(parts[0], wireMap, wireValues)
 		if err != nil {
 			return 0, err
 		}
-		i2, err := resolveOrParse(parts[2], wireMap)
+		i2, err := resolveOrParse(parts[2], wireMap, wireValues)
 		if err != nil {
 			return 0, err
 		}
@@ -77,16 +77,26 @@ func resolveWire(def string, wireMap map[string]string) (uint16, error) {
 	return 0, fmt.Errorf("invalid wire def %q", def)
 }
 
-func resolveOrParse(s string, wireMap map[string]string) (uint16, error) {
+func resolveOrParse(s string, wireMap map[string]string, wireValues map[string]uint16) (uint16, error) {
 	i, err := parseUint16(s)
 	if err == nil {
 		return i, nil
 	}
+	refValue, found := wireValues[s]
+	if found {
+		return refValue, nil
+	}
+
 	refDef, found := wireMap[s]
 	if !found {
 		return 0, fmt.Errorf("invalid reference %q", s)
 	}
-	return resolveWire(refDef, wireMap)
+	v, err := resolveWire(refDef, wireMap, wireValues)
+	if err != nil {
+		return 0, err
+	}
+	wireValues[s] = v
+	return v, nil
 }
 
 func parseUint16(s string) (uint16, error) {
