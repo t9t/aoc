@@ -23,6 +23,24 @@ London to Belfast = 518
 	}
 }
 
+func TestDay9Part2(t *testing.T) {
+	input := `Dublin to Belfast = 141
+London to Dublin = 464
+London to Belfast = 518
+`
+	want := 982
+
+	got, err := Day9Part2(input)
+	if err != nil {
+		t.Errorf("Day9Part2() error = %v", err)
+		return
+	}
+
+	if got != want {
+		t.Errorf("Day9Part2() = %v, want %v", got, want)
+	}
+}
+
 func Test_parseRoute(t *testing.T) {
 	tests := []struct {
 		input   string

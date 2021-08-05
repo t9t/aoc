@@ -17,12 +17,6 @@ func (r route) connectsTo(other route) bool {
 	return r.from == other.from || r.from == other.to || r.to == other.from || r.to == other.to
 }
 
-func (r route) hasShorterDistanceThan(other route) bool {
-	return r.distance < other.distance
-}
-
-const ridiculouslyLongDistance = math.MaxInt32
-
 type destination struct {
 	to       string
 	distance int
@@ -31,9 +25,21 @@ type destination struct {
 var routeRegexp = regexp.MustCompile(`(\w+) to (\w+) = (\d+)`)
 
 func Day9Part1(input string) (int, error) {
+	return findBestRouteDistance(input, math.MaxInt32, func(left, right int) bool {
+		return left < right
+	})
+}
+
+func Day9Part2(input string) (int, error) {
+	return findBestRouteDistance(input, 0, func(left, right int) bool {
+		return left > right
+	})
+}
+
+func findBestRouteDistance(input string, initDistance int, isLeftBetter func(left, right int) bool) (int, error) {
 	lines := strings.Split(strings.TrimSpace(input), "\n")
 	routes := make([]route, len(lines))
-	currentRoute := route{distance: ridiculouslyLongDistance}
+	currentRoute := route{distance: initDistance}
 	for i, line := range lines {
 		route, err := parseRoute(line)
 		if err != nil {
@@ -41,7 +47,7 @@ func Day9Part1(input string) (int, error) {
 		}
 		routes[i] = route
 
-		if route.hasShorterDistanceThan(currentRoute) {
+		if isLeftBetter(route.distance, currentRoute.distance) {
 			currentRoute = route
 		}
 	}
@@ -52,13 +58,13 @@ func Day9Part1(input string) (int, error) {
 
 	for {
 		found := false
-		next := route{distance: ridiculouslyLongDistance}
+		next := route{distance: initDistance}
 		for _, route := range routes {
 			if visited[route.from] && visited[route.to] {
 				continue
 			}
 
-			if currentRoute.connectsTo(route) && route.hasShorterDistanceThan(next) {
+			if currentRoute.connectsTo(route) && isLeftBetter(route.distance, next.distance) {
 				next = route
 				found = true
 			}
@@ -71,7 +77,7 @@ func Day9Part1(input string) (int, error) {
 		visited[next.to] = true
 		currentRoute.distance += next.distance
 		if currentRoute.from == next.from {
-			currentRoute.from = currentRoute.to
+			currentRoute.from = next.to
 		} else if currentRoute.from == next.to {
 			currentRoute.from = next.from
 		} else if currentRoute.to == next.from {
@@ -93,13 +99,5 @@ func parseRoute(s string) (route, error) {
 	if err != nil {
 		return route{}, fmt.Errorf("invalid distance in route %q: %w", s, err)
 	}
-	return route{
-		from:     matches[1],
-		to:       matches[2],
-		distance: distance,
-	}, nil
-}
-
-func Day9Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
+	return route{from: matches[1], to: matches[2], distance: distance}, nil
 }
