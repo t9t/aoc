@@ -34,5 +34,5 @@ func RegisterAll() {
 	registry.Register(2015, 10, 1, fromInt(Day10Part1))
 	registry.Register(2015, 10, 2, fromInt(Day10Part2))
 	registry.Register(2015, 11, 1, Day11Part1)
-	registry.Register(2015, 11, 2, fromInt(Day11Part2))
+	registry.Register(2015, 11, 2, Day11Part2)
 }

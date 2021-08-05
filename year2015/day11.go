@@ -9,8 +9,8 @@ func Day11Part1(input string) (string, error) {
 	return nextValidPassword(strings.TrimSpace(input)), nil
 }
 
-func Day11Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
+func Day11Part2(input string) (string, error) {
+	return nextValidPassword(nextValidPassword(strings.TrimSpace(input))), nil
 }
 
 func nextValidPassword(s string) string {
