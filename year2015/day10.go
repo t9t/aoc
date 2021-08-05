@@ -1,17 +1,24 @@
 package year2015
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
 
 func Day10Part1(input string) (int, error) {
+	return len(lookAndSayNTimes(input, 40)), nil
+}
+
+func Day10Part2(input string) (int, error) {
+	return len(lookAndSayNTimes(input, 50)), nil
+}
+
+func lookAndSayNTimes(input string, n int) string {
 	current := strings.TrimSpace(input)
-	for i := 0; i < 40; i++ {
+	for i := 0; i < n; i++ {
 		current = lookAndSay(current)
 	}
-	return len(current), nil
+	return current
 }
 
 func lookAndSay(s string) string {
@@ -40,8 +47,4 @@ func lookAndSay(s string) string {
 	}
 	writeOut()
 	return out.String()
-}
-
-func Day10Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
 }
