@@ -17,11 +17,6 @@ func (r route) connectsTo(other route) bool {
 	return r.from == other.from || r.from == other.to || r.to == other.from || r.to == other.to
 }
 
-type destination struct {
-	to       string
-	distance int
-}
-
 var routeRegexp = regexp.MustCompile(`(\w+) to (\w+) = (\d+)`)
 
 func Day9Part1(input string) (int, error) {

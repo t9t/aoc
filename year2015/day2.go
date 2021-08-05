@@ -45,14 +45,6 @@ func parseDimensions(s string) (l int, w int, h int, err error) {
 	return l, w, h, nil
 }
 
-func parseDimension(s string) (int, error) {
-	if i, err := strconv.Atoi(s); err != nil {
-		return 0, err
-	} else {
-		return i, nil
-	}
-}
-
 func wrappingPaperNeeded(l, w, h int) int {
 	area := surfaceArea(l, w, h)
 	slack := l * w

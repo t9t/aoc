@@ -10,6 +10,13 @@ type selector struct {
 
 var registry map[selector]Execution = make(map[selector]Execution)
 
+func MustRegister(year, day, part int, function Execution) {
+	err := Register(year, day, part, function)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Register(year, day, part int, function Execution) error {
 	selector := selector{year: year, day: day, part: part}
 	if _, ok := registry[selector]; ok {
