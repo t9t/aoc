@@ -21,4 +21,6 @@ func RegisterAll() {
 	registry.Register(2015, 8, 2, Day8Part2)
 	registry.Register(2015, 9, 1, Day9Part1)
 	registry.Register(2015, 9, 2, Day9Part2)
+	registry.Register(2015, 10, 1, Day10Part1)
+	registry.Register(2015, 10, 2, Day10Part2)
 }
