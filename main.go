@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -35,13 +36,14 @@ func main() {
 	}
 
 	fmt.Printf("Running Year: %d; Day: %d; Part: %d\n", year, day, part)
+	start := time.Now()
 	result, err := execution(strings.TrimSpace(string(inputData)))
 	if err != nil {
 		fmt.Printf("Error running: %v\n", err)
 		os.Exit(4)
 	}
 
-	fmt.Printf("Result: %v\n", result)
+	fmt.Printf("Result (%v): %v\n", time.Since(start), result)
 }
 
 func mustParseIntArg(argName, v string) int {
