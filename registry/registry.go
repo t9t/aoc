@@ -2,7 +2,7 @@ package registry
 
 import "fmt"
 
-type Execution func(input string) (int, error)
+type Execution func(input string) (string, error)
 
 type selector struct {
 	year, day, part int

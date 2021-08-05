@@ -13,7 +13,8 @@ import (
 )
 
 type result struct {
-	year, day, part, result int
+	year, day, part int
+	result          string
 }
 
 func Test_allTheThings(t *testing.T) {
@@ -48,7 +49,7 @@ func Test_allTheThings(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error executing: %v", err)
 			} else if result != r.result {
-				t.Fatalf("wrong result: %d != %d", r.result, result)
+				t.Fatalf("wrong result: %v != %v", r.result, result)
 			}
 		})
 	}
@@ -78,7 +79,7 @@ func parseLine(line string) (result, error) {
 		return result{}, fmt.Errorf("invalid line %q", line)
 	}
 
-	var year, day, part, r int
+	var year, day, part int
 	var err error
 	if year, err = strconv.Atoi(inputParts[0]); err != nil {
 		return result{}, fmt.Errorf("invalid line %q: %v", line, err)
@@ -90,9 +91,5 @@ func parseLine(line string) (result, error) {
 		return result{}, fmt.Errorf("invalid line %q: %v", line, err)
 	}
 
-	if r, err = strconv.Atoi(strings.TrimSpace(parts[1])); err != nil {
-		return result{}, fmt.Errorf("invalid line %q: %v", line, err)
-	}
-
-	return result{year: year, day: day, part: part, result: r}, nil
+	return result{year: year, day: day, part: part, result: strings.TrimSpace(parts[1])}, nil
 }

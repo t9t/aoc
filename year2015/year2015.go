@@ -1,28 +1,38 @@
 package year2015
 
-import "aoc/registry"
+import (
+	"aoc/registry"
+	"strconv"
+)
+
+func fromInt(f func(input string) (int, error)) registry.Execution {
+	return func(input string) (string, error) {
+		i, err := f(input)
+		return strconv.Itoa(i), err
+	}
+}
 
 func RegisterAll() {
-	registry.Register(2015, 1, 1, Day1Part1)
-	registry.Register(2015, 1, 2, Day1Part2)
-	registry.Register(2015, 2, 1, Day2Part1)
-	registry.Register(2015, 2, 2, Day2Part2)
-	registry.Register(2015, 3, 1, Day3Part1)
-	registry.Register(2015, 3, 2, Day3Part2)
-	registry.Register(2015, 4, 1, Day4Part1)
-	registry.Register(2015, 4, 2, Day4Part2)
-	registry.Register(2015, 5, 1, Day5Part1)
-	registry.Register(2015, 5, 2, Day5Part2)
-	registry.Register(2015, 6, 1, Day6Part1)
-	registry.Register(2015, 6, 2, Day6Part2)
-	registry.Register(2015, 7, 1, Day7Part1)
-	registry.Register(2015, 7, 2, Day7Part2)
-	registry.Register(2015, 8, 1, Day8Part1)
-	registry.Register(2015, 8, 2, Day8Part2)
-	registry.Register(2015, 9, 1, Day9Part1)
-	registry.Register(2015, 9, 2, Day9Part2)
-	registry.Register(2015, 10, 1, Day10Part1)
-	registry.Register(2015, 10, 2, Day10Part2)
+	registry.Register(2015, 1, 1, fromInt(Day1Part1))
+	registry.Register(2015, 1, 2, fromInt(Day1Part2))
+	registry.Register(2015, 2, 1, fromInt(Day2Part1))
+	registry.Register(2015, 2, 2, fromInt(Day2Part2))
+	registry.Register(2015, 3, 1, fromInt(Day3Part1))
+	registry.Register(2015, 3, 2, fromInt(Day3Part2))
+	registry.Register(2015, 4, 1, fromInt(Day4Part1))
+	registry.Register(2015, 4, 2, fromInt(Day4Part2))
+	registry.Register(2015, 5, 1, fromInt(Day5Part1))
+	registry.Register(2015, 5, 2, fromInt(Day5Part2))
+	registry.Register(2015, 6, 1, fromInt(Day6Part1))
+	registry.Register(2015, 6, 2, fromInt(Day6Part2))
+	registry.Register(2015, 7, 1, fromInt(Day7Part1))
+	registry.Register(2015, 7, 2, fromInt(Day7Part2))
+	registry.Register(2015, 8, 1, fromInt(Day8Part1))
+	registry.Register(2015, 8, 2, fromInt(Day8Part2))
+	registry.Register(2015, 9, 1, fromInt(Day9Part1))
+	registry.Register(2015, 9, 2, fromInt(Day9Part2))
+	registry.Register(2015, 10, 1, fromInt(Day10Part1))
+	registry.Register(2015, 10, 2, fromInt(Day10Part2))
 	registry.Register(2015, 11, 1, Day11Part1)
-	registry.Register(2015, 11, 2, Day11Part2)
+	registry.Register(2015, 11, 2, fromInt(Day11Part2))
 }

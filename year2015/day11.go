@@ -5,9 +5,8 @@ import (
 	"strings"
 )
 
-func Day11Part1(input string) (int, error) {
-	fmt.Printf("next: %s\n", nextValidPassword(strings.TrimSpace(input)))
-	return 0, fmt.Errorf("not implemented")
+func Day11Part1(input string) (string, error) {
+	return nextValidPassword(strings.TrimSpace(input)), nil
 }
 
 func Day11Part2(input string) (int, error) {
