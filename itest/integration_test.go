@@ -7,6 +7,7 @@ import (
 	"aoc/year2015"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -68,28 +69,22 @@ func parseResults(s string) ([]result, error) {
 	return out, nil
 }
 
-func parseLine(line string) (result, error) {
-	parts := strings.Split(line, ":")
-	if len(parts) != 2 {
-		return result{}, fmt.Errorf("invalid line %q", line)
-	}
+var resultRegex = regexp.MustCompile(`(\d{4})-(\d{1,2})-(\d{1,2}): (.+)`)
 
-	inputParts := strings.Split(strings.TrimSpace(parts[0]), "-")
-	if len(inputParts) != 3 {
-		return result{}, fmt.Errorf("invalid line %q", line)
+func parseLine(line string) (r result, err error) {
+	parts := resultRegex.FindStringSubmatch(line)
+	if len(parts) != 5 {
+		return r, fmt.Errorf("invalid line %q", line)
 	}
 
 	var year, day, part int
-	var err error
-	if year, err = strconv.Atoi(inputParts[0]); err != nil {
-		return result{}, fmt.Errorf("invalid line %q: %v", line, err)
-	}
-	if day, err = strconv.Atoi(inputParts[1]); err != nil {
-		return result{}, fmt.Errorf("invalid line %q: %v", line, err)
-	}
-	if part, err = strconv.Atoi(inputParts[2]); err != nil {
-		return result{}, fmt.Errorf("invalid line %q: %v", line, err)
+	if year, err = strconv.Atoi(parts[1]); err != nil {
+		return r, fmt.Errorf("invalid line %q: %v", line, err)
+	} else if day, err = strconv.Atoi(parts[2]); err != nil {
+		return r, fmt.Errorf("invalid line %q: %v", line, err)
+	} else if part, err = strconv.Atoi(parts[3]); err != nil {
+		return r, fmt.Errorf("invalid line %q: %v", line, err)
 	}
 
-	return result{year: year, day: day, part: part, result: strings.TrimSpace(parts[1])}, nil
+	return result{year: year, day: day, part: part, result: strings.TrimSpace(parts[4])}, nil
 }
