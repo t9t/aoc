@@ -12,6 +12,7 @@ func Day4Part1(input string) (int, error) {
 }
 
 func Day4Part2(input string) (int, error) {
+	// TODO: try to parallelize
 	return findSumStartingWith(input, "000000")
 }
 
