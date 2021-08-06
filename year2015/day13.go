@@ -14,7 +14,33 @@ func Day13Part1(input string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	return findMaximumHappinessChange(m), nil
+}
 
+func Day13Part2(input string) (int, error) {
+	m, err := parseHappinessSpecs(strings.TrimSpace(input))
+	if err != nil {
+		return 0, err
+	}
+
+	injectYou(m)
+	return findMaximumHappinessChange(m), nil
+}
+
+func injectYou(m happinessChangeMap) {
+	names := collectAllNames(m)
+	youName := "You"
+	for _, spec := range m {
+		spec[youName] = 0
+	}
+	you := make(map[string]int)
+	m[youName] = you
+	for _, name := range names {
+		you[name] = 0
+	}
+}
+
+func findMaximumHappinessChange(m happinessChangeMap) int {
 	names := collectAllNames(m)
 	maxHappinessChange := 0
 	namePermutations := permutate(names)
@@ -25,7 +51,7 @@ func Day13Part1(input string) (int, error) {
 		}
 	}
 
-	return maxHappinessChange, nil
+	return maxHappinessChange
 }
 
 func calculateTotalHappinessChange(m happinessChangeMap, seatings []string) int {
@@ -122,8 +148,4 @@ func copySkipping(s []string, skipIndex int) []string {
 	copy(out, s[:skipIndex])
 	copy(out[skipIndex:], s[skipIndex+1:])
 	return out
-}
-
-func Day13Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
 }

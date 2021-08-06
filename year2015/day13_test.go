@@ -117,15 +117,33 @@ David would gain 41 happiness units by sitting next to Carol.`
 	}
 }
 
-func Test_collectAllNames(t *testing.T) {
-	input := happinessChangeMap{
-		"a": {"b": 1, "d": 3},
-		"b": {"a": -1, "d": 5},
-		"d": {"a": 7, "b": -8},
+func TestDay13Part2(t *testing.T) {
+	input := `Alice would gain 54 happiness units by sitting next to Bob.
+Alice would lose 79 happiness units by sitting next to Carol.
+Alice would lose 2 happiness units by sitting next to David.
+Bob would gain 83 happiness units by sitting next to Alice.
+Bob would lose 7 happiness units by sitting next to Carol.
+Bob would lose 63 happiness units by sitting next to David.
+Carol would lose 62 happiness units by sitting next to Alice.
+Carol would gain 60 happiness units by sitting next to Bob.
+Carol would gain 55 happiness units by sitting next to David.
+David would gain 46 happiness units by sitting next to Alice.
+David would lose 7 happiness units by sitting next to Bob.
+David would gain 41 happiness units by sitting next to Carol.
+Alice would gain 0 happiness units by sitting next to You.
+Bob would gain 0 happiness units by sitting next to You.
+Carol would gain 0 happiness units by sitting next to You.
+David would gain 0 happiness units by sitting next to You.`
+
+	want := 286
+
+	got, err := Day13Part2(input)
+	if err != nil {
+		t.Errorf("Day13Part1() error = %v", err)
+		return
 	}
-	want := []string{"a", "b", "d"}
-	if got := collectAllNames(input); !reflect.DeepEqual(got, want) {
-		t.Errorf("collectAllNames() = %v, want %v", got, want)
+	if got != want {
+		t.Errorf("Day13Part1() = %v, want %v", got, want)
 	}
 }
 
