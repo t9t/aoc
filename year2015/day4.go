@@ -16,6 +16,7 @@ func Day4Part2(input string) (int, error) {
 	return findSumStartingWithParallel(input, "000000")
 }
 
+//nolint:deadcode,unused
 func findSumStartingWith(input, prefix string) (int, error) {
 	const max = 10_000_000
 	for i := 0; i < max; i++ {
