@@ -16,21 +16,33 @@ func Day15Part1(input string) (int, error) {
 }
 
 func Day15Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
+	props, err := parseCookieProperties(input)
+	if err != nil {
+		return 0, err
+	}
+	return determineHighestScoringCookieScoreWithExactCalories(props, 500), nil
+
 }
 
 func determineHighestScoringCookieScore(props []cookieProperties) int {
-	amounts := make(map[cookieProperties]int)
-	return findHighestScoringCookieScore(props, 100, amounts)
+	return determineHighestScoringCookieScoreWithExactCalories(props, 0)
 }
 
-func findHighestScoringCookieScore(props []cookieProperties, remaining int, amounts map[cookieProperties]int) int {
+func determineHighestScoringCookieScoreWithExactCalories(props []cookieProperties, matchCalories int) int {
+	amounts := make(map[cookieProperties]int)
+	return findHighestScoringCookieScore(props, 100, amounts, matchCalories)
+}
+
+func findHighestScoringCookieScore(props []cookieProperties, remaining int, amounts map[cookieProperties]int, matchCalories int) int {
 	if len(props) == 0 {
 		totalAmount := 0
 		for _, n := range amounts {
 			totalAmount += n
 		}
 		if totalAmount == 100 {
+			if matchCalories != 0 && determineTotalCalories(amounts) != matchCalories {
+				return 0
+			}
 			return determineTotalScore(amounts)
 		} else {
 			return 0
@@ -40,7 +52,7 @@ func findHighestScoringCookieScore(props []cookieProperties, remaining int, amou
 	max := 0
 	for i := 0; i <= remaining; i++ {
 		amounts[props[0]] = i
-		score := findHighestScoringCookieScore(props[1:], remaining-i, amounts)
+		score := findHighestScoringCookieScore(props[1:], remaining-i, amounts, matchCalories)
 		if score > max {
 			max = score
 		}
@@ -57,6 +69,14 @@ func determineTotalScore(amounts map[cookieProperties]int) int {
 		totalTexture += props.texture * amount
 	}
 	return negativeToZero(totalCapacity) * negativeToZero(totalDurability) * negativeToZero(totalFlavor) * negativeToZero(totalTexture)
+}
+
+func determineTotalCalories(amounts map[cookieProperties]int) int {
+	total := 0
+	for props, amount := range amounts {
+		total += props.calories * amount
+	}
+	return total
 }
 
 func negativeToZero(i int) int {
