@@ -34,24 +34,12 @@ func determineHighestScoringCookieScoreWithExactCalories(props []cookiePropertie
 }
 
 func findHighestScoringCookieScore(props []cookieProperties, remaining int, amounts map[cookieProperties]int, matchCalories int) int {
-	if len(props) == 0 {
-		totalAmount := 0
-		for _, n := range amounts {
-			totalAmount += n
-		}
-		if totalAmount == 100 {
-			if matchCalories != 0 && determineTotalCalories(amounts) != matchCalories {
-				return 0
-			}
-			return determineTotalScore(amounts)
-		} else {
-			return 0
-		}
-	}
-
 	if len(props) == 1 {
 		amounts[props[0]] = remaining
-		return findHighestScoringCookieScore(props[1:], remaining, amounts, matchCalories)
+		if matchCalories != 0 && determineTotalCalories(amounts) != matchCalories {
+			return 0
+		}
+		return determineTotalScore(amounts)
 	}
 
 	max := 0
