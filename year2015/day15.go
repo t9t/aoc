@@ -12,60 +12,37 @@ func Day15Part1(input string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return determineHighestScoringCookieScore4(props), nil
+	return determineHighestScoringCookieScore(props), nil
 }
 
 func Day15Part2(input string) (int, error) {
 	return 0, fmt.Errorf("not implemented")
 }
 
-func determineHighestScoringCookieScore2(props []cookieProperties) int {
-	if len(props) != 2 {
-		panic(fmt.Sprintf("%d != %d", len(props), 2))
-	}
-	max := 0
-	for i1 := 0; i1 <= 100; i1++ {
-		for i2 := 0; i2 <= 100; i2++ {
-			if i1+i2 != 100 {
-				continue
-			}
-			amounts := map[cookieProperties]int{
-				props[0]: i1,
-				props[1]: i2,
-			}
-			score := determineTotalScore(amounts)
-			if score > max {
-				max = score
-			}
-		}
-	}
-	return max
+func determineHighestScoringCookieScore(props []cookieProperties) int {
+	amounts := make(map[cookieProperties]int)
+	return findHighestScoringCookieScore(props, 100, amounts)
 }
 
-func determineHighestScoringCookieScore4(props []cookieProperties) int {
-	if len(props) != 4 {
-		panic(fmt.Sprintf("%d != %d", len(props), 4))
+func findHighestScoringCookieScore(props []cookieProperties, remaining int, amounts map[cookieProperties]int) int {
+	if len(props) == 0 {
+		totalAmount := 0
+		for _, n := range amounts {
+			totalAmount += n
+		}
+		if totalAmount == 100 {
+			return determineTotalScore(amounts)
+		} else {
+			return 0
+		}
 	}
+
 	max := 0
-	for i1 := 0; i1 <= 100; i1++ {
-		for i2 := 0; i2 <= 100; i2++ {
-			for i3 := 0; i3 <= 100; i3++ {
-				for i4 := 0; i4 <= 100; i4++ {
-					if i1+i2+i3+i4 != 100 {
-						continue
-					}
-					amounts := map[cookieProperties]int{
-						props[0]: i1,
-						props[1]: i2,
-						props[2]: i3,
-						props[3]: i4,
-					}
-					score := determineTotalScore(amounts)
-					if score > max {
-						max = score
-					}
-				}
-			}
+	for i := 0; i <= remaining; i++ {
+		amounts[props[0]] = i
+		score := findHighestScoringCookieScore(props[1:], remaining-i, amounts)
+		if score > max {
+			max = score
 		}
 	}
 	return max

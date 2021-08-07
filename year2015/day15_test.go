@@ -47,11 +47,11 @@ func Test_determineTotalScore(t *testing.T) {
 	}
 }
 
-func Test_determineHighestScoringCookieScore2(t *testing.T) {
+func Test_determineHighestScoringCookieScore(t *testing.T) {
 	props := []cookieProperties{{name: "Butterscotch", capacity: -1, durability: -2, flavor: 6, texture: 3, calories: 8},
 		{name: "Cinnamon", capacity: 2, durability: 3, flavor: -2, texture: -1, calories: 3}}
 	want := 62842880
-	if got := determineHighestScoringCookieScore2(props); got != want {
+	if got := determineHighestScoringCookieScore(props); got != want {
 		t.Errorf("determineHighestScoringCookieScore() = %v, want %v", got, want)
 	}
 }
