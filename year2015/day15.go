@@ -49,6 +49,11 @@ func findHighestScoringCookieScore(props []cookieProperties, remaining int, amou
 		}
 	}
 
+	if len(props) == 1 {
+		amounts[props[0]] = remaining
+		return findHighestScoringCookieScore(props[1:], remaining, amounts, matchCalories)
+	}
+
 	max := 0
 	for i := 0; i <= remaining; i++ {
 		amounts[props[0]] = i
