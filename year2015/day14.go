@@ -29,7 +29,40 @@ func findMaxDistanceTraveled(input string, seconds int) (int, error) {
 }
 
 func Day14Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
+	return findMaxReindeerScoreAfter(input, 2503)
+}
+
+func findMaxReindeerScoreAfter(input string, totalSeconds int) (int, error) {
+	reindeer, err := parseReindeerDescriptions(input)
+	if err != nil {
+		return 0, err
+	}
+
+	scores := make(map[reindeerDescription]int)
+	for i := 1; i <= totalSeconds; i++ {
+		max := 0
+		for _, r := range reindeer {
+			dist := r.distanceTraveledAfter(i)
+			if dist > max {
+				max = dist
+			}
+		}
+
+		for _, r := range reindeer {
+			if r.distanceTraveledAfter(i) == max {
+				scores[r]++
+			}
+		}
+	}
+
+	maxScore := 0
+	for _, score := range scores {
+		if score > maxScore {
+			maxScore = score
+		}
+	}
+
+	return maxScore, nil
 }
 
 type reindeerDescription struct {
