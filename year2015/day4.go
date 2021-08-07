@@ -31,35 +31,29 @@ func findSumStartingWith(input, prefix string) (int, error) {
 }
 
 func findSumStartingWithParallel(input, prefix string) (int, error) {
-	const max = 10_000_000
 	workerCount := runtime.NumCPU()
-	batchSize := 10_000
-
+	batchSize := 30_000
 	resultChan := make(chan int, workerCount)
-	batchChans := make([]chan []int, workerCount)
-	for i := 0; i < workerCount; i++ {
-		batchChans[i] = make(chan []int)
-		startWorker(input, prefix, batchChans[i], resultChan)
-	}
 	defer func() {
-		for _, c := range batchChans {
-			close(c)
-		}
+		close(resultChan)
 	}()
 
-	for i := 0; i < max; i++ {
-		for b := 0; b < workerCount; b++ {
-			batch := make([]int, batchSize)
-			for j := 0; j < len(batch); j++ {
-				batch[j] = i
-				i++
-			}
-			batchChans[b] <- batch
+	i := 0
+	for {
+		for w := 0; w < workerCount; w++ {
+			go func(start, end int) {
+				if result, found := findSumStartingWithBetweenStartAndEnd(input, prefix, start, end); found {
+					resultChan <- result
+				} else {
+					resultChan <- -1
+				}
+			}(i, i+batchSize)
+			i += batchSize
 		}
+
 		lowestResult := -1
-		for j := 0; j < workerCount; j++ {
-			r := <-resultChan
-			if r != -1 {
+		for w := 0; w < workerCount; w++ {
+			if r := <-resultChan; r != -1 {
 				if lowestResult == -1 || r < lowestResult {
 					lowestResult = r
 				}
@@ -70,27 +64,10 @@ func findSumStartingWithParallel(input, prefix string) (int, error) {
 			return lowestResult, nil
 		}
 	}
-	return 0, fmt.Errorf("no hash starting with %q found after %d iterations", prefix, max)
 }
 
-func startWorker(input, prefix string, batchChan chan []int, resultChan chan int) {
-	go func() {
-		for {
-			batch, ok := <-batchChan
-			if !ok {
-				break
-			}
-			if result, found := findSumStartingWithInBatch(input, prefix, batch); found {
-				resultChan <- result
-			} else {
-				resultChan <- -1
-			}
-		}
-	}()
-}
-
-func findSumStartingWithInBatch(input, prefix string, batch []int) (int, bool) {
-	for _, i := range batch {
+func findSumStartingWithBetweenStartAndEnd(input, prefix string, start, end int) (int, bool) {
+	for i := start; i < end; i++ {
 		sum := fmt.Sprintf("%x", md5.Sum([]byte(input+strconv.Itoa(i))))
 
 		if strings.HasPrefix(sum, prefix) {
