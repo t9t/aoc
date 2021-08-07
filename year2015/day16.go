@@ -7,24 +7,28 @@ import (
 	"strings"
 )
 
-func Day16Part1(input string) (int, error) {
-	senderProperties := map[string]int{
-		"children":    3,
-		"cats":        7,
-		"samoyeds":    2,
-		"pomeranians": 3,
-		"akitas":      0,
-		"vizslas":     0,
-		"goldfish":    5,
-		"trees":       3,
-		"cars":        2,
-		"perfumes":    1,
-	}
-
-	return findMatchingAuntSue(input, senderProperties)
+var auntSueSenderProperties = map[string]int{
+	"children":    3,
+	"cats":        7,
+	"samoyeds":    2,
+	"pomeranians": 3,
+	"akitas":      0,
+	"vizslas":     0,
+	"goldfish":    5,
+	"trees":       3,
+	"cars":        2,
+	"perfumes":    1,
 }
 
-func findMatchingAuntSue(input string, senderProperties map[string]int) (int, error) {
+func Day16Part1(input string) (int, error) {
+	return findMatchingAuntSue(input, auntSueSenderProperties, false)
+}
+
+func Day16Part2(input string) (int, error) {
+	return findMatchingAuntSue(input, auntSueSenderProperties, true)
+}
+
+func findMatchingAuntSue(input string, senderProperties map[string]int, useRanges bool) (int, error) {
 	lines := strings.Split(strings.TrimSpace(input), "\n")
 	for _, line := range lines {
 		auntNumber, aunt, err := parseAuntSueLine(line)
@@ -35,7 +39,17 @@ func findMatchingAuntSue(input string, senderProperties map[string]int) (int, er
 		match := true
 		for property, auntValue := range aunt {
 			senderValue := senderProperties[property]
-			if senderValue != auntValue {
+			if useRanges && (property == "cats" || property == "trees") {
+				if auntValue <= senderValue {
+					match = false
+					break
+				}
+			} else if useRanges && (property == "pomeranians" || property == "goldfish") {
+				if auntValue >= senderValue {
+					match = false
+					break
+				}
+			} else if senderValue != auntValue {
 				match = false
 				break
 			}
@@ -75,8 +89,4 @@ func parseAuntSueLine(s string) (int, map[string]int, error) {
 			matches[6]: v3,
 		}, nil
 	}
-}
-
-func Day16Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
 }

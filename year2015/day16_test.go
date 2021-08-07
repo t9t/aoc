@@ -33,19 +33,31 @@ func Test_parseAuntSueLine(t *testing.T) {
 }
 
 func Test_findMatchingAuntSue(t *testing.T) {
-	props := map[string]int{"children": 3, "cats": 7, "akitas": 11, "trees": 8}
+	props := map[string]int{"children": 3, "cats": 7, "goldfish": 11, "trees": 8}
 	input := `
-Sue 7: children: 3, cats: 7, akitas: 0
+Sue 7: children: 3, cats: 7, goldfish: 0
 Sue 13: children: 3, cats: 7, trees: 8
-Sue 251: children: 5, cats: 9, akias: 11
+Sue 251: children: 3, cats: 9, goldfish: 11
+Sue 456: children: 3, cats: 9, goldfish: 7
 	`
-	want := 13
-	got, err := findMatchingAuntSue(input, props)
-	if err != nil {
-		t.Errorf("findMatchingAuntSue() error = %v", err)
-		return
+	tests := []struct {
+		name      string
+		useRanges bool
+		want      int
+	}{
+		{"useRanges false", false, 13},
+		{"useRanges true", true, 456},
 	}
-	if got != want {
-		t.Errorf("findMatchingAuntSue() = %v, want %v", got, want)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := findMatchingAuntSue(input, props, tt.useRanges)
+			if err != nil {
+				t.Errorf("findMatchingAuntSue() error = %v", err)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("findMatchingAuntSue() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
