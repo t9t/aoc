@@ -1,7 +1,6 @@
 package year2015
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -11,7 +10,17 @@ func Day17Part1(input string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return findNumberOfCombinationsOfContainersToFitEggnog(containers, 150), nil
+	n, _ := findNumberOfCombinationsOfContainersToFitEggnog(containers, 150)
+	return n, nil
+}
+
+func Day17Part2(input string) (int, error) {
+	containers, err := parseContainers(input)
+	if err != nil {
+		return 0, err
+	}
+	_, n := findNumberOfCombinationsOfContainersToFitEggnog(containers, 150)
+	return n, nil
 }
 
 func parseContainers(input string) ([]int, error) {
@@ -27,24 +36,33 @@ func parseContainers(input string) ([]int, error) {
 	return out, nil
 }
 
-func findNumberOfCombinationsOfContainersToFitEggnog(containers []int, eggnog int) int {
+func findNumberOfCombinationsOfContainersToFitEggnog(containers []int, eggnog int) (int, int) {
 	totalWays := 0
-	for i := 0; i < (1 << len(containers)); i++ {
-		step := i
+	minWays := 0
+	minContainerCount := len(containers)
+	allCombinationsBitMask := 1 << len(containers)
+	for i := 1; i <= allCombinationsBitMask; i++ {
 		total := 0
-		for _, container := range containers {
-			if step%2 == 1 {
+		containerCount := 0
+
+		for c, container := range containers {
+			if (i>>c)&1 != 0 {
 				total += container
+				containerCount++
 			}
-			step = step / 2
 		}
-		if total == eggnog {
-			totalWays += 1
+
+		if total != eggnog {
+			continue
+		}
+
+		totalWays += 1
+		if containerCount < minContainerCount {
+			minContainerCount = containerCount
+			minWays = 1
+		} else if minContainerCount == containerCount {
+			minWays++
 		}
 	}
-	return totalWays
-}
-
-func Day17Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
+	return totalWays, minWays
 }

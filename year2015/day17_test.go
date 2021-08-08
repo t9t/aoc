@@ -5,12 +5,18 @@ import (
 	"testing"
 )
 
-func Test_findNumberOfCombinationsOfContainersToFitEggnog(t *testing.T) {
+func Test_findNumberOfCombinationsOfContainersToFitEggnogz(t *testing.T) {
 	containers := []int{20, 15, 10, 5, 5}
 	eggnog := 25
-	want := 4
-	if got := findNumberOfCombinationsOfContainersToFitEggnog(containers, eggnog); got != want {
-		t.Errorf("findNumberOfCombinationsOfContainersToFitEggnog() = %v, want %v", got, want)
+	wantTotal := 4
+	wantMin := 3
+
+	total, min := findNumberOfCombinationsOfContainersToFitEggnog(containers, eggnog)
+	if total != wantTotal {
+		t.Errorf("findNumberOfCombinationsOfContainersToFitEggnog() got = %v, want %v", total, wantTotal)
+	}
+	if min != wantMin {
+		t.Errorf("findNumberOfCombinationsOfContainersToFitEggnog() got1 = %v, want %v", min, wantMin)
 	}
 }
 
