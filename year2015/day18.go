@@ -11,11 +11,30 @@ func Day18Part1(input string) (int, error) {
 		return 0, err
 	}
 
-	for i := 0; i < 100; i++ {
-		lights = processLightsAnimationStep(lights)
+	return process100StepsAndCountLitLights(lights, false), nil
+}
+
+func Day18Part2(input string) (int, error) {
+	lights, err := parseLightsGrid(input)
+	if err != nil {
+		return 0, err
 	}
 
-	return countLitLights(lights), nil
+	max := len(lights) - 1
+	lights[0][0] = true
+	lights[max][0] = true
+	lights[0][max] = true
+	lights[max][max] = true
+
+	return process100StepsAndCountLitLights(lights, true), nil
+}
+
+func process100StepsAndCountLitLights(lights [][]bool, cornerLightsAreStuck bool) int {
+	for i := 0; i < 100; i++ {
+		lights = processLightsAnimationStep(lights, cornerLightsAreStuck)
+	}
+
+	return countLitLights(lights)
 }
 
 func parseLightsGrid(input string) ([][]bool, error) {
@@ -45,7 +64,7 @@ func parseLightsGrid(input string) ([][]bool, error) {
 	return out, nil
 }
 
-func processLightsAnimationStep(lights [][]bool) [][]bool {
+func processLightsAnimationStep(lights [][]bool, cornerLightsAreStuck bool) [][]bool {
 	l := len(lights)
 	out := make([][]bool, l)
 	for y, line := range lights {
@@ -55,6 +74,11 @@ func processLightsAnimationStep(lights [][]bool) [][]bool {
 
 	for y, line := range lights {
 		for x, on := range line {
+			if cornerLightsAreStuck && isCornerLight(y, x, l) {
+				// No touchy
+				continue
+			}
+
 			n := countOnNeighborLights(lights, y, x)
 			if on {
 				if n != 2 && n != 3 {
@@ -68,6 +92,11 @@ func processLightsAnimationStep(lights [][]bool) [][]bool {
 		}
 	}
 	return out
+}
+
+func isCornerLight(y, x, total int) bool {
+	max := total - 1
+	return (y == 0 && x == 0) || (y == max && x == max) || (y == max && x == 0) || (y == 0 && x == max)
 }
 
 func countLitLights(lights [][]bool) int {
@@ -100,8 +129,4 @@ func countOnNeighborLights(lights [][]bool, y, x int) int {
 		}
 	}
 	return neighborsOn
-}
-
-func Day18Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
 }
