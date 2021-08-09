@@ -15,12 +15,75 @@ func Day19Part1(input string) (int, error) {
 }
 
 func Day19Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
+	molecule, _, err := parseMoleculeAndAtomReplacements(input)
+	if err != nil {
+		return 0, err
+	}
+
+	rn, ar, y := 0, 0, 0
+	for _, atom := range molecule {
+		if atom == "Rn" {
+			rn++
+		} else if atom == "Ar" {
+			ar++
+		} else if atom == "Y" {
+			y++
+		}
+	}
+	return len(molecule) - rn - ar - 2*y - 1, nil
 }
 
 type atomReplacement struct {
 	from string
 	to   []string
+}
+
+var b4 = make(map[string]bool)
+
+func bla(molecule []string, replacements []atomReplacement) {
+	//c := 0
+	if len(molecule) == 1 {
+		fmt.Printf("Len 1: %v\n", molecule)
+		return
+	}
+
+	for i := 0; i < len(molecule); i++ {
+		for _, replacement := range replacements {
+			v := molecule[i:]
+			if stringSliceStartsWith(v, replacement.to) {
+				//c++
+				new := combineStringSlices(molecule[:i], []string{replacement.from}, molecule[i+len(replacement.to):])
+				//fmt.Printf("Molecule: %v\n    Slice: %v\n    Matches: %#v\n    New: %v\n", molecule, v, replacement, new)
+				//return
+				s := strings.Join(new, "")
+				if !b4[s] {
+					b4[s] = true
+					bla(new, replacements)
+				}
+			}
+		}
+	}
+	//fmt.Printf("c: %d\n", c)
+}
+
+func combineStringSlices(slices ...[]string) []string {
+	out := make([]string, 0)
+	for _, slice := range slices {
+		out = append(out, slice...)
+	}
+	return out
+}
+
+func stringSliceStartsWith(toCheck []string, startsWith []string) bool {
+	if len(toCheck) < len(startsWith) {
+		return false
+	}
+	for i, v := range startsWith {
+		if toCheck[i] != v {
+			return false
+		}
+	}
+	return true
 }
 
 func countPossibleAtomReplacements(molecule []string, replacements []atomReplacement) int {
