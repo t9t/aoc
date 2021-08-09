@@ -19,7 +19,8 @@ func Day19Part2(input string) (int, error) {
 }
 
 type atomReplacement struct {
-	from, to string
+	from string
+	to   []string
 }
 
 func countPossibleAtomReplacements(molecule []string, replacements []atomReplacement) int {
@@ -31,7 +32,9 @@ func countPossibleAtomReplacements(molecule []string, replacements []atomReplace
 				for _, orig := range molecule[:i] {
 					sb.WriteString(orig)
 				}
-				sb.WriteString(replacement.to)
+				for _, r := range replacement.to {
+					sb.WriteString(r)
+				}
 				for _, orig := range molecule[i+1:] {
 					sb.WriteString(orig)
 				}
@@ -62,7 +65,8 @@ func parseAtomReplacement(s string) (atomReplacement, error) {
 	if len(parts) != 2 {
 		return atomReplacement{}, fmt.Errorf("invalid atom replacement %q", s)
 	}
-	return atomReplacement{from: strings.TrimSpace(parts[0]), to: strings.TrimSpace(parts[1])}, nil
+	to := strings.TrimSpace(parts[1])
+	return atomReplacement{from: strings.TrimSpace(parts[0]), to: untangleMolecule(to)}, nil
 }
 
 func untangleMolecule(molecule string) []string {

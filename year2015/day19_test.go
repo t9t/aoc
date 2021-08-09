@@ -40,7 +40,7 @@ H => OH
 O => HH
 
 HOOHBu`, []string{"H", "O", "O", "H", "Bu"},
-			[]atomReplacement{{from: "H", to: "HO"}, {from: "H", to: "OH"}, {from: "O", to: "HH"}}, false},
+			[]atomReplacement{{from: "H", to: []string{"H", "O"}}, {from: "H", to: []string{"O", "H"}}, {from: "O", to: []string{"H", "H"}}}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -65,8 +65,8 @@ func Test_parseAtomReplacement(t *testing.T) {
 		want    atomReplacement
 		wantErr bool
 	}{
-		{"H => HO", atomReplacement{from: "H", to: "HO"}, false},
-		{"Ca => CaCa", atomReplacement{from: "Ca", to: "CaCa"}, false},
+		{"H => HO", atomReplacement{from: "H", to: []string{"H", "O"}}, false},
+		{"Ca => CaCa", atomReplacement{from: "Ca", to: []string{"Ca", "Ca"}}, false},
 		{"boo", atomReplacement{}, true},
 	}
 	for _, tt := range tests {
@@ -85,9 +85,9 @@ func Test_parseAtomReplacement(t *testing.T) {
 
 func Test_countPossibleAtomReplacements(t *testing.T) {
 	replacements := []atomReplacement{
-		{from: "H", to: "HO"},
-		{from: "H", to: "OH"},
-		{from: "O", to: "HH"},
+		{from: "H", to: []string{"H", "O"}},
+		{from: "H", to: []string{"O", "H"}},
+		{from: "O", to: []string{"H", "H"}},
 	}
 	tests := []struct {
 		name     string
