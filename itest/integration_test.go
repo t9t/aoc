@@ -39,7 +39,7 @@ func Test_allTheThings(t *testing.T) {
 				t.Fatal("could not find execution")
 			}
 
-			inputFile := fmt.Sprintf("../input/%d-%d.txt", r.year, r.day)
+			inputFile := fmt.Sprintf("../input/%d/%d.txt", r.year, r.day)
 			inputData, err := os.ReadFile(inputFile)
 			if err != nil {
 				t.Fatalf("could not read input file %q: %v", inputFile, err)
