@@ -13,19 +13,36 @@ func Day20Part1(input string) (int, error) {
 	}
 
 	// TODO: remove start param and improve solution a lot
-	start := 770000
-	return lowestHouseNumberToGetMoreThanNumberOfPresents(numberOfPresents, start), nil
+	start := 775000
+	return lowestHouseNumberToGetMoreThanNumberOfPresents(numberOfPresents, start, 0, 10), nil
 }
 
-func lowestHouseNumberToGetMoreThanNumberOfPresents(n, start int) int {
+func Day20Part2(input string) (int, error) {
+	numberOfPresents, err := strconv.Atoi(strings.TrimSpace(input))
+	if err != nil {
+		return 0, fmt.Errorf("invalid input: %w", err)
+	}
+
+	// TODO: remove start param and improve solution a lot
+	start := 785000
+	return lowestHouseNumberToGetMoreThanNumberOfPresents(numberOfPresents, start, 50, 11), nil
+}
+
+func lowestHouseNumberToGetMoreThanNumberOfPresents(n, start, maxElfVisits, elfPresents int) int {
 	houseNumber := start
 	maxHouseNumber := 10_000_000
 	for {
 		presents := 0
 		for elf := houseNumber; elf >= 1; elf-- {
+			elfVisit := houseNumber / elf
+			if maxElfVisits > 0 && elfVisit > maxElfVisits {
+				break
+			}
+
 			if houseNumber%elf == 0 {
-				presents += 10 * elf
+				presents += elfPresents * elf
 				if presents >= n {
+					fmt.Printf("Presents: %d\n", presents)
 					return houseNumber
 				}
 			}
@@ -37,8 +54,4 @@ func lowestHouseNumberToGetMoreThanNumberOfPresents(n, start int) int {
 
 		houseNumber++
 	}
-}
-
-func Day20Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
 }

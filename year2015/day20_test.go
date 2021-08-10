@@ -16,7 +16,7 @@ func Test_lowestHouseNumberToGetMoreThanNumberOfPresents(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(strconv.Itoa(tt.n), func(t *testing.T) {
-			if houseNumber := lowestHouseNumberToGetMoreThanNumberOfPresents(tt.n, 1); houseNumber != tt.want {
+			if houseNumber := lowestHouseNumberToGetMoreThanNumberOfPresents(tt.n, 1, 0, 10); houseNumber != tt.want {
 				t.Errorf("lowestHouseNumberToGetMoreThanNumberOfPresents() = %v, want %v", houseNumber, tt.want)
 			}
 		})
