@@ -7,50 +7,39 @@ import (
 )
 
 func Day20Part1(input string) (int, error) {
-	numberOfPresents, err := strconv.Atoi(strings.TrimSpace(input))
-	if err != nil {
-		return 0, fmt.Errorf("invalid input: %w", err)
-	}
-
-	// TODO: remove start param and improve solution a lot
-	start := 775000
-	return lowestHouseNumberToGetMoreThanNumberOfPresents(numberOfPresents, start, 0, 10), nil
+	return day20(input, 0, 10)
 }
 
 func Day20Part2(input string) (int, error) {
+	return day20(input, 50, 11)
+}
+
+func day20(input string, maxElfVisits, elfPresentsPerHouse int) (int, error) {
 	numberOfPresents, err := strconv.Atoi(strings.TrimSpace(input))
 	if err != nil {
 		return 0, fmt.Errorf("invalid input: %w", err)
 	}
 
-	// TODO: remove start param and improve solution a lot
-	start := 785000
-	return lowestHouseNumberToGetMoreThanNumberOfPresents(numberOfPresents, start, 50, 11), nil
+	return lowestHouseNumberToGetMoreThanNumberOfPresents(numberOfPresents, maxElfVisits, elfPresentsPerHouse)
 }
 
-func lowestHouseNumberToGetMoreThanNumberOfPresents(n, start, maxElfVisits, elfPresents int) int {
-	houseNumber := start
-	maxHouseNumber := 10_000_000
-	for {
-		presents := 0
-		for elf := houseNumber; elf >= 1; elf-- {
-			elfVisit := houseNumber / elf
-			if maxElfVisits > 0 && elfVisit > maxElfVisits {
+func lowestHouseNumberToGetMoreThanNumberOfPresents(n, maxElfVisits, elfPresentsPerHouse int) (int, error) {
+	size := n / 10
+	presentsPerHouseNumber := make([]int, size)
+	for i := 1; i < size; i++ {
+		elfVisits := 0
+		for j := i; j < size; j += i {
+			presentsPerHouseNumber[j] += i * elfPresentsPerHouse
+			elfVisits++
+			if maxElfVisits != 0 && elfVisits >= maxElfVisits {
 				break
 			}
-
-			if houseNumber%elf == 0 {
-				presents += elfPresents * elf
-				if presents >= n {
-					return houseNumber
-				}
-			}
 		}
-
-		if houseNumber >= maxHouseNumber {
-			panic(fmt.Sprintf("houseNumber %d >= maxHouseNumber %d", houseNumber, maxHouseNumber))
-		}
-
-		houseNumber++
 	}
+	for houseNumber, presents := range presentsPerHouseNumber {
+		if presents >= n {
+			return houseNumber, nil
+		}
+	}
+	return 0, fmt.Errorf("no house number found for >=%d presents", n)
 }
