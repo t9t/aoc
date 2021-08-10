@@ -38,54 +38,6 @@ type atomReplacement struct {
 	to   []string
 }
 
-var b4 = make(map[string]bool)
-
-func bla(molecule []string, replacements []atomReplacement) {
-	//c := 0
-	if len(molecule) == 1 {
-		fmt.Printf("Len 1: %v\n", molecule)
-		return
-	}
-
-	for i := 0; i < len(molecule); i++ {
-		for _, replacement := range replacements {
-			v := molecule[i:]
-			if stringSliceStartsWith(v, replacement.to) {
-				//c++
-				new := combineStringSlices(molecule[:i], []string{replacement.from}, molecule[i+len(replacement.to):])
-				//fmt.Printf("Molecule: %v\n    Slice: %v\n    Matches: %#v\n    New: %v\n", molecule, v, replacement, new)
-				//return
-				s := strings.Join(new, "")
-				if !b4[s] {
-					b4[s] = true
-					bla(new, replacements)
-				}
-			}
-		}
-	}
-	//fmt.Printf("c: %d\n", c)
-}
-
-func combineStringSlices(slices ...[]string) []string {
-	out := make([]string, 0)
-	for _, slice := range slices {
-		out = append(out, slice...)
-	}
-	return out
-}
-
-func stringSliceStartsWith(toCheck []string, startsWith []string) bool {
-	if len(toCheck) < len(startsWith) {
-		return false
-	}
-	for i, v := range startsWith {
-		if toCheck[i] != v {
-			return false
-		}
-	}
-	return true
-}
-
 func countPossibleAtomReplacements(molecule []string, replacements []atomReplacement) int {
 	results := make(map[string]bool)
 	for i, atom := range molecule {
