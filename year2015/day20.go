@@ -42,7 +42,6 @@ func lowestHouseNumberToGetMoreThanNumberOfPresents(n, start, maxElfVisits, elfP
 			if houseNumber%elf == 0 {
 				presents += elfPresents * elf
 				if presents >= n {
-					fmt.Printf("Presents: %d\n", presents)
 					return houseNumber
 				}
 			}
