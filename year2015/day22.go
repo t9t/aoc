@@ -92,7 +92,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 			continue
 		}
 
-		if inPlayer.totalManaSpent >= minMana.mana {
+		if branchPlayer.totalManaSpent >= minMana.mana {
 			// No hope in this branch
 			continue
 		}
