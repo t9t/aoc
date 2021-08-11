@@ -103,7 +103,7 @@ type rpgCharacter struct {
 	poisonTurns   int
 	rechargeTurns int
 
-	manaSpent int
+	totalManaSpent int
 }
 
 func (c rpgCharacter) isDead() bool {

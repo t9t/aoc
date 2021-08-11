@@ -33,34 +33,26 @@ func parseBossInputWithoutArmor(input string) (rpgCharacter, error) {
 	return parseBossInput(patched)
 }
 
-type wizardSpell int
-
-const (
-	spellMagicMissile wizardSpell = iota
-	spellDrain
-	spellShield
-	spellPoison
-	spellRecharge
-)
-
 const (
 	manaCostMagicMissile = 53
-	manaCostDrain        = 73
-	manaCostShield       = 113
-	manaCostPoison       = 173
-	manaCostRecharge     = 229
 )
 const shieldAc = 7
 
-var wizardSpells = []wizardSpell{spellMagicMissile, spellDrain, spellShield, spellPoison, spellRecharge}
+var wizardSpells = []wizardSpell{
+	&SpellMagicMissile{baseWizardSpell{manaCost: manaCostMagicMissile}},
+	&SpellDrain{baseWizardSpell{manaCost: 73}},
+	&SpellShield{baseWizardSpell{manaCost: 113}},
+	&SpellPoison{baseWizardSpell{manaCost: 173}},
+	&SpellRecharge{baseWizardSpell{manaCost: 229}},
+}
 
 type manaRegistration struct {
 	mana int
 }
 
 func (r *manaRegistration) update(c rpgCharacter) {
-	if c.manaSpent < r.mana {
-		r.mana = c.manaSpent
+	if c.totalManaSpent < r.mana {
+		r.mana = c.totalManaSpent
 	}
 }
 
@@ -88,35 +80,17 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 	for _, spell := range wizardSpells {
 		branchPlayer, branchBoss := inPlayer, inBoss
 
-		switch spell {
-		case spellMagicMissile:
-			if !branchPlayer.canAfford(manaCostMagicMissile) {
-				continue
-			}
-			branchPlayer, branchBoss = castMagicMissile(branchPlayer, branchBoss)
-		case spellDrain:
-			if !branchPlayer.canAfford(manaCostDrain) {
-				continue
-			}
-			branchPlayer, branchBoss = castDrain(branchPlayer, branchBoss)
-		case spellShield:
-			if !branchPlayer.canAfford(manaCostShield) || branchPlayer.shieldTurns > 0 {
-				continue
-			}
-			branchPlayer = applyShield(branchPlayer)
-		case spellPoison:
-			if !branchPlayer.canAfford(manaCostPoison) || branchBoss.poisonTurns > 0 {
-				continue
-			}
-			branchPlayer, branchBoss = applyPoison(branchPlayer, branchBoss)
-		case spellRecharge:
-			if !branchPlayer.canAfford(manaCostRecharge) || branchPlayer.rechargeTurns > 0 {
-				continue
-			}
-			branchPlayer = applyRecharge(branchPlayer)
+		if !branchPlayer.canAfford(spell.ManaCost()) {
+			continue
 		}
 
-		if inPlayer.manaSpent >= minMana.mana {
+		var wasCast bool
+		branchPlayer, branchBoss, wasCast = spell.Cast(branchPlayer, branchBoss)
+		if !wasCast {
+			continue
+		}
+
+		if inPlayer.totalManaSpent >= minMana.mana {
 			// No hope in this branch
 			continue
 		}
@@ -146,70 +120,82 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 	}
 }
 
-// Magic Missile costs 53 mana. It instantly does 4 damage.
-func castMagicMissile(src, dest rpgCharacter) (rpgCharacter, rpgCharacter) {
-	if src.mana < manaCostMagicMissile {
-		panic(fmt.Sprintf("Player %+v does not have >= %d mana for Magic Missile", src, manaCostMagicMissile))
-	}
-	src.mana -= manaCostMagicMissile
-	src.manaSpent += manaCostMagicMissile
-	dest.hp -= 4
-	return src, dest
+type wizardSpell interface {
+	ManaCost() int
+	Cast(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool)
 }
+
+type baseWizardSpell struct {
+	manaCost int
+}
+
+func (s *baseWizardSpell) payMana(player rpgCharacter) rpgCharacter {
+	if !player.canAfford(s.manaCost) {
+		panic(fmt.Sprintf("Player %+v cannot afford spell %+v", player, s))
+	}
+	player.mana -= s.manaCost
+	player.totalManaSpent += s.manaCost
+	return player
+}
+
+func (s *baseWizardSpell) ManaCost() int {
+	return s.manaCost
+}
+
+type SpellMagicMissile struct{ baseWizardSpell }
+
+// Magic Missile costs 53 mana. It instantly does 4 damage.
+func (s *SpellMagicMissile) Cast(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+	player = s.payMana(player)
+	boss.hp -= 4
+	return player, boss, true
+}
+
+type SpellDrain struct{ baseWizardSpell }
 
 // Drain costs 73 mana. It instantly does 2 damage and heals you for 2 hit points.
-func castDrain(player, boss rpgCharacter) (rpgCharacter, rpgCharacter) {
-	if player.mana < manaCostDrain {
-		panic(fmt.Sprintf("Player %+v does not have >= %d mana for Drain", player, manaCostDrain))
-	}
-	player.mana -= manaCostDrain
-	player.manaSpent += manaCostDrain
+func (s *SpellDrain) Cast(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+	player = s.payMana(player)
 	boss.hp -= 2
 	player.hp += 2
-	return player, boss
+	return player, boss, true
 }
+
+type SpellShield struct{ baseWizardSpell }
 
 // Shield costs 113 mana. It starts an effect that lasts for 6 turns. While it is active, your armor is increased by 7.
-func applyShield(c rpgCharacter) rpgCharacter {
-	if c.mana < manaCostShield {
-		panic(fmt.Sprintf("Player %+v does not have >= %d mana for Shield", c, manaCostShield))
+func (s *SpellShield) Cast(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+	if player.shieldTurns > 0 {
+		return player, boss, false
 	}
-	if c.shieldTurns > 0 {
-		panic(fmt.Sprintf("Shield already active on %+v", c))
-	}
-	c.mana -= manaCostShield
-	c.manaSpent += manaCostShield
-	c.shieldTurns = 6
-	c.ac += shieldAc
-	return c
+	player = s.payMana(player)
+	player.shieldTurns = 6
+	player.ac += shieldAc
+	return player, boss, true
 }
+
+type SpellPoison struct{ baseWizardSpell }
 
 // Poison costs 173 mana. It starts an effect that lasts for 6 turns. At the start of each turn while it is active, it deals the boss 3 damage.
-func applyPoison(src, dest rpgCharacter) (rpgCharacter, rpgCharacter) {
-	if src.mana < manaCostPoison {
-		panic(fmt.Sprintf("Player %+v does not have >= %d mana for Poison", src, manaCostPoison))
+func (s *SpellPoison) Cast(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+	if boss.poisonTurns > 0 {
+		return player, boss, false
 	}
-	if dest.poisonTurns > 0 {
-		panic(fmt.Sprintf("Poison already active on %+v", dest))
-	}
-	src.mana -= manaCostPoison
-	src.manaSpent += manaCostPoison
-	dest.poisonTurns = 6
-	return src, dest
+	player = s.payMana(player)
+	boss.poisonTurns = 6
+	return player, boss, true
 }
 
+type SpellRecharge struct{ baseWizardSpell }
+
 // Recharge costs 229 mana. It starts an effect that lasts for 5 turns. At the start of each turn while it is active, it gives you 101 new mana.
-func applyRecharge(c rpgCharacter) rpgCharacter {
-	if c.mana < manaCostRecharge {
-		panic(fmt.Sprintf("Player %+v does not have >= %d mana for Recharge", c, manaCostRecharge))
+func (s *SpellRecharge) Cast(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+	if player.rechargeTurns > 0 {
+		return player, boss, false
 	}
-	if c.rechargeTurns > 0 {
-		panic(fmt.Sprintf("Recharge already active on %+v", c))
-	}
-	c.mana -= manaCostRecharge
-	c.manaSpent += manaCostRecharge
-	c.rechargeTurns = 5
-	return c
+	player = s.payMana(player)
+	player.rechargeTurns = 5
+	return player, boss, true
 }
 
 func bossAttack(player, boss rpgCharacter) (rpgCharacter, rpgCharacter) {
