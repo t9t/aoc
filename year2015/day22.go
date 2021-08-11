@@ -75,7 +75,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 		return
 	}
 
-	inPlayer, inBoss = processAllEffects(inPlayer, inBoss)
+	processAllEffects(&inPlayer, &inBoss)
 
 	if inBoss.isDead() {
 		// Boss died from a status effect (eg. poison)
@@ -104,7 +104,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 		}
 
 		// Boss turn
-		branchPlayer, branchBoss = processAllEffects(branchPlayer, branchBoss)
+		processAllEffects(&branchPlayer, &branchBoss)
 		if branchBoss.isDead() {
 			// Boss died from a status effect (eg. poison)
 			minMana.update(branchPlayer)
@@ -142,8 +142,7 @@ func tryCastMagicMissile(player, boss rpgCharacter) (rpgCharacter, rpgCharacter,
 	if player.mana < manaCostMagicMissile {
 		return player, boss, false
 	}
-	player.mana -= manaCostMagicMissile
-	player.totalManaSpent += manaCostMagicMissile
+	player.spendMana(manaCostMagicMissile)
 	boss.hp -= 4
 	return player, boss, true
 }
@@ -152,8 +151,7 @@ func tryCastDrain(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) 
 	if player.mana < manaCostDrain {
 		return player, boss, false
 	}
-	player.mana -= manaCostDrain
-	player.totalManaSpent += manaCostDrain
+	player.spendMana(manaCostDrain)
 	player.hp += 2
 	boss.hp -= 2
 	return player, boss, true
@@ -163,8 +161,7 @@ func tryCastShield(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool)
 	if player.mana < manaCostShield || player.shieldTurns > 0 {
 		return player, boss, false
 	}
-	player.mana -= manaCostShield
-	player.totalManaSpent += manaCostShield
+	player.spendMana(manaCostShield)
 	player.shieldTurns = 6
 	player.ac = 7
 	return player, boss, true
@@ -174,8 +171,7 @@ func tryCastPoison(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool)
 	if player.mana < manaCostPoison || boss.poisonTurns > 0 {
 		return player, boss, false
 	}
-	player.mana -= manaCostPoison
-	player.totalManaSpent += manaCostPoison
+	player.spendMana(manaCostPoison)
 	boss.poisonTurns = 6
 	return player, boss, true
 }
@@ -184,8 +180,7 @@ func tryCastRecharge(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, boo
 	if player.mana < manaCostRecharge || player.rechargeTurns > 0 {
 		return player, boss, false
 	}
-	player.mana -= manaCostRecharge
-	player.totalManaSpent += manaCostRecharge
+	player.spendMana(manaCostRecharge)
 	player.rechargeTurns = 5
 	return player, boss, true
 }
@@ -195,7 +190,7 @@ func bossAttack(player, boss rpgCharacter) (rpgCharacter, rpgCharacter) {
 	return player, boss
 }
 
-func processEffects(c rpgCharacter) rpgCharacter {
+func (c *rpgCharacter) processEffects() {
 	if c.poisonTurns > 0 {
 		c.poisonTurns--
 		c.hp -= 3
@@ -210,10 +205,9 @@ func processEffects(c rpgCharacter) rpgCharacter {
 		c.rechargeTurns--
 		c.mana += 101
 	}
-	return c
 }
 
-func processAllEffects(player, boss rpgCharacter) (rpgCharacter, rpgCharacter) {
-	player, boss = processEffects(player), processEffects(boss)
-	return player, boss
+func processAllEffects(player *rpgCharacter, boss *rpgCharacter) {
+	player.processEffects()
+	boss.processEffects()
 }

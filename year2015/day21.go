@@ -106,12 +106,13 @@ type rpgCharacter struct {
 	totalManaSpent int
 }
 
-func (c rpgCharacter) isDead() bool {
+func (c *rpgCharacter) isDead() bool {
 	return c.hp <= 0
 }
 
-func (c rpgCharacter) canAfford(manaCost int) bool {
-	return c.mana >= manaCost
+func (c *rpgCharacter) spendMana(manaCost int) {
+	c.mana -= manaCost
+	c.totalManaSpent += manaCost
 }
 
 type rpgItem struct {
