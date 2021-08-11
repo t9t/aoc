@@ -33,13 +33,10 @@ func parseBossInputWithoutArmor(input string) (rpgCharacter, error) {
 	return parseBossInput(patched)
 }
 
-const (
-	manaCostMagicMissile = 53
-)
 const shieldAc = 7
 
 var wizardSpells = []wizardSpell{
-	&SpellMagicMissile{baseWizardSpell{manaCost: manaCostMagicMissile}},
+	&SpellMagicMissile{baseWizardSpell{manaCost: 53}},
 	&SpellDrain{baseWizardSpell{manaCost: 73}},
 	&SpellShield{baseWizardSpell{manaCost: 113}},
 	&SpellPoison{baseWizardSpell{manaCost: 173}},
@@ -69,11 +66,6 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 	if inBoss.isDead() {
 		// Boss died from a status effect (eg. poison)
 		minMana.update(inPlayer)
-		return
-	}
-
-	// TODO: implement better way to termine min mana spell
-	if !inPlayer.canAfford(manaCostMagicMissile) {
 		return
 	}
 
