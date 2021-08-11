@@ -123,66 +123,67 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 }
 
 func tryCastSpell(spell wizardSpell, player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+	var cast bool
 	switch spell {
 	case spellMagicMissile:
-		return tryCastMagicMissile(player, boss)
+		cast = tryCastMagicMissile(&player, &boss)
 	case spellDrain:
-		return tryCastDrain(player, boss)
+		cast = tryCastDrain(&player, &boss)
 	case spellShield:
-		return tryCastShield(player, boss)
+		cast = tryCastShield(&player, &boss)
 	case spellPoison:
-		return tryCastPoison(player, boss)
+		cast = tryCastPoison(&player, &boss)
 	case spellRecharge:
-		return tryCastRecharge(player, boss)
+		cast = tryCastRecharge(&player, &boss)
 	}
-	return player, boss, false
+	return player, boss, cast
 }
 
-func tryCastMagicMissile(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+func tryCastMagicMissile(player, boss *rpgCharacter) bool {
 	if player.mana < manaCostMagicMissile {
-		return player, boss, false
+		return false
 	}
 	player.spendMana(manaCostMagicMissile)
 	boss.hp -= 4
-	return player, boss, true
+	return true
 }
 
-func tryCastDrain(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+func tryCastDrain(player, boss *rpgCharacter) bool {
 	if player.mana < manaCostDrain {
-		return player, boss, false
+		return false
 	}
 	player.spendMana(manaCostDrain)
 	player.hp += 2
 	boss.hp -= 2
-	return player, boss, true
+	return true
 }
 
-func tryCastShield(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+func tryCastShield(player, boss *rpgCharacter) bool {
 	if player.mana < manaCostShield || player.shieldTurns > 0 {
-		return player, boss, false
+		return false
 	}
 	player.spendMana(manaCostShield)
 	player.shieldTurns = 6
 	player.ac = 7
-	return player, boss, true
+	return true
 }
 
-func tryCastPoison(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+func tryCastPoison(player, boss *rpgCharacter) bool {
 	if player.mana < manaCostPoison || boss.poisonTurns > 0 {
-		return player, boss, false
+		return false
 	}
 	player.spendMana(manaCostPoison)
 	boss.poisonTurns = 6
-	return player, boss, true
+	return true
 }
 
-func tryCastRecharge(player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
+func tryCastRecharge(player, boss *rpgCharacter) bool {
 	if player.mana < manaCostRecharge || player.rechargeTurns > 0 {
-		return player, boss, false
+		return false
 	}
 	player.spendMana(manaCostRecharge)
 	player.rechargeTurns = 5
-	return player, boss, true
+	return true
 }
 
 func bossAttack(player, boss rpgCharacter) (rpgCharacter, rpgCharacter) {
