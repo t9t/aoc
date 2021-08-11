@@ -110,7 +110,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 			continue
 		}
 
-		branchPlayer, branchBoss = bossAttack(branchPlayer, branchBoss)
+		bossAttack(&branchPlayer, &branchBoss)
 		if branchPlayer.isDead() {
 			// RIP
 			continue
@@ -184,9 +184,8 @@ func tryCastRecharge(player, boss *rpgCharacter) bool {
 	return true
 }
 
-func bossAttack(player, boss rpgCharacter) (rpgCharacter, rpgCharacter) {
+func bossAttack(player, boss *rpgCharacter) {
 	player.hp -= atLeastOne(boss.dmg - player.ac)
-	return player, boss
 }
 
 func (c *rpgCharacter) processEffects() {
