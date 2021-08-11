@@ -7,21 +7,25 @@ import (
 )
 
 func Day22Part1(input string) (int, error) {
-	return determineMinimumManaToWin(input, false)
+	return day22(input, false)
 }
 
 func Day22Part2(input string) (int, error) {
-	return determineMinimumManaToWin(input, true)
+	return day22(input, true)
 }
 
-func determineMinimumManaToWin(input string, hardMode bool) (int, error) {
+func day22(input string, hardMode bool) (int, error) {
 	boss, err := parseBossInputWithoutArmor(input)
 	if err != nil {
 		return 0, err
 	}
 
+	return determineMinimumManaToWin(rpgCharacter{hp: 50, mana: 500}, boss, hardMode)
+}
+
+func determineMinimumManaToWin(player, boss rpgCharacter, hardMode bool) (int, error) {
 	min := &manaRegistration{mana: math.MaxInt32}
-	tryNextWizardMove(rpgCharacter{hp: 50, mana: 500}, boss, hardMode, min)
+	tryNextWizardMove(player, boss, hardMode, min)
 	if min.mana == math.MaxInt32 {
 		return 0, fmt.Errorf("player did not win")
 	}
