@@ -20,12 +20,12 @@ func determineMinimumManaToWin(input string, hardMode bool) (int, error) {
 		return 0, err
 	}
 
-	minManaToWin = math.MaxInt32
-	tryNextWizardMove(rpgCharacter{hp: 50, mana: 500}, boss, hardMode)
-	if minManaToWin == math.MaxInt32 {
+	min := &manaRegistration{mana: math.MaxInt32}
+	tryNextWizardMove(rpgCharacter{hp: 50, mana: 500}, boss, hardMode, min)
+	if min.mana == math.MaxInt32 {
 		return 0, fmt.Errorf("player did not win")
 	}
-	return minManaToWin, nil
+	return min.mana, nil
 }
 
 func parseBossInputWithoutArmor(input string) (rpgCharacter, error) {
@@ -54,16 +54,17 @@ const shieldAc = 7
 
 var wizardSpells = []wizardSpell{spellMagicMissile, spellDrain, spellShield, spellPoison, spellRecharge}
 
-// TODO: global variables are bad mmkay
-var minManaToWin = math.MaxInt32
+type manaRegistration struct {
+	mana int
+}
 
-func registerMinMana(c rpgCharacter) {
-	if c.manaSpent < minManaToWin {
-		minManaToWin = c.manaSpent
+func (r *manaRegistration) update(c rpgCharacter) {
+	if c.manaSpent < r.mana {
+		r.mana = c.manaSpent
 	}
 }
 
-func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool) {
+func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool, minMana *manaRegistration) {
 	if hardMode {
 		inPlayer.hp -= 1
 		if inPlayer.isDead() {
@@ -75,7 +76,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 
 	if inBoss.isDead() {
 		// Boss died from a status effect (eg. poison)
-		registerMinMana(inPlayer)
+		minMana.update(inPlayer)
 		return
 	}
 
@@ -115,14 +116,14 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 			branchPlayer = applyRecharge(branchPlayer)
 		}
 
-		if inPlayer.manaSpent >= minManaToWin {
+		if inPlayer.manaSpent >= minMana.mana {
 			// No hope in this branch
 			continue
 		}
 
 		if branchBoss.isDead() {
 			// Boss died from the attack
-			registerMinMana(branchPlayer)
+			minMana.update(branchPlayer)
 			continue
 		}
 
@@ -130,7 +131,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 		branchPlayer, branchBoss = processEffects(branchPlayer), processEffects(branchBoss)
 		if branchBoss.isDead() {
 			// Boss died from a status effect (eg. poison)
-			registerMinMana(branchPlayer)
+			minMana.update(branchPlayer)
 			continue
 		}
 
@@ -141,7 +142,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 		}
 
 		// Still alive, we need to go deeper
-		tryNextWizardMove(branchPlayer, branchBoss, hardMode)
+		tryNextWizardMove(branchPlayer, branchBoss, hardMode, minMana)
 	}
 }
 
