@@ -55,4 +55,6 @@ func RegisterAll() {
 	registry.MustRegister(2015, 20, 2, fromInt(Day20Part2))
 	registry.MustRegister(2015, 21, 1, fromInt(Day21Part1))
 	registry.MustRegister(2015, 21, 2, fromInt(Day21Part2))
+	registry.MustRegister(2015, 22, 1, fromInt(Day22Part1))
+	registry.MustRegister(2015, 22, 2, fromInt(Day22Part2))
 }

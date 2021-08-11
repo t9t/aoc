@@ -96,6 +96,22 @@ func parseBossInput(input string) (boss rpgCharacter, err error) {
 
 type rpgCharacter struct {
 	hp, dmg, ac int
+	mana        int
+
+	// Effects (day 22)
+	shieldTurns   int
+	poisonTurns   int
+	rechargeTurns int
+
+	manaSpent int
+}
+
+func (c rpgCharacter) isDead() bool {
+	return c.hp <= 0
+}
+
+func (c rpgCharacter) canAfford(manaCost int) bool {
+	return c.mana >= manaCost
 }
 
 type rpgItem struct {
