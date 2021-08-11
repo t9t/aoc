@@ -7,21 +7,25 @@ import (
 )
 
 func Day22Part1(input string) (int, error) {
+	return determineMinimumManaToWin(input, false)
+}
+
+func Day22Part2(input string) (int, error) {
+	return determineMinimumManaToWin(input, true)
+}
+
+func determineMinimumManaToWin(input string, hardMode bool) (int, error) {
 	boss, err := parseBossInputWithoutArmor(input)
 	if err != nil {
 		return 0, err
 	}
 
 	minManaToWin = math.MaxInt32
-	tryNextWizardMove(rpgCharacter{hp: 50, mana: 500}, boss)
+	tryNextWizardMove(rpgCharacter{hp: 50, mana: 500}, boss, hardMode)
 	if minManaToWin == math.MaxInt32 {
 		return 0, fmt.Errorf("player did not win")
 	}
 	return minManaToWin, nil
-}
-
-func Day22Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
 }
 
 func parseBossInputWithoutArmor(input string) (rpgCharacter, error) {
@@ -59,7 +63,14 @@ func registerMinMana(c rpgCharacter) {
 	}
 }
 
-func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter) {
+func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool) {
+	if hardMode {
+		inPlayer.hp -= 1
+		if inPlayer.isDead() {
+			return
+		}
+	}
+
 	inPlayer, inBoss = processEffects(inPlayer), processEffects(inBoss)
 
 	if inBoss.isDead() {
@@ -130,7 +141,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter) {
 		}
 
 		// Still alive, we need to go deeper
-		tryNextWizardMove(branchPlayer, branchBoss)
+		tryNextWizardMove(branchPlayer, branchBoss, hardMode)
 	}
 }
 
