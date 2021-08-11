@@ -19,7 +19,8 @@ func day23(input string, regAStartingValue int) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return runProgram(instructions, regAStartingValue), nil
+	_, b := runProgram(instructions, regAStartingValue, 0)
+	return b, nil
 }
 
 func parseInstructions(input string) ([]instruction, error) {
@@ -74,14 +75,10 @@ type instruction struct {
 	arg         int
 }
 
-func runProgram(instructions []instruction, regAStartingValue int) int {
-	a, b := regAStartingValue, 0
-
+func runProgram(instructions []instruction, a, b int) (int, int) {
 	p := 0
 	l := len(instructions)
-	iters := 0
 	for p < l {
-		iters++
 		instruction := instructions[p]
 		regA := instruction.regA
 		arg := instruction.arg
@@ -126,5 +123,5 @@ func runProgram(instructions []instruction, regAStartingValue int) int {
 		}
 		p += jump
 	}
-	return b
+	return a, b
 }
