@@ -86,8 +86,7 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 	for _, spell := range wizardSpells {
 		branchPlayer, branchBoss := inPlayer, inBoss
 
-		var cast bool
-		branchPlayer, branchBoss, cast = tryCastSpell(spell, branchPlayer, branchBoss)
+		cast := tryCastSpell(spell, &branchPlayer, &branchBoss)
 		if !cast {
 			continue
 		}
@@ -122,21 +121,20 @@ func tryNextWizardMove(inPlayer rpgCharacter, inBoss rpgCharacter, hardMode bool
 	}
 }
 
-func tryCastSpell(spell wizardSpell, player, boss rpgCharacter) (rpgCharacter, rpgCharacter, bool) {
-	var cast bool
+func tryCastSpell(spell wizardSpell, player, boss *rpgCharacter) bool {
 	switch spell {
 	case spellMagicMissile:
-		cast = tryCastMagicMissile(&player, &boss)
+		return tryCastMagicMissile(player, boss)
 	case spellDrain:
-		cast = tryCastDrain(&player, &boss)
+		return tryCastDrain(player, boss)
 	case spellShield:
-		cast = tryCastShield(&player, &boss)
+		return tryCastShield(player, boss)
 	case spellPoison:
-		cast = tryCastPoison(&player, &boss)
+		return tryCastPoison(player, boss)
 	case spellRecharge:
-		cast = tryCastRecharge(&player, &boss)
+		return tryCastRecharge(player, boss)
 	}
-	return player, boss, cast
+	return false
 }
 
 func tryCastMagicMissile(player, boss *rpgCharacter) bool {
