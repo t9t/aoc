@@ -23,6 +23,31 @@ London to Belfast = 518
 	}
 }
 
+func TestDay9Part1_broken(t *testing.T) {
+	// TODO: fix code and enable
+	t.SkipNow()
+	input := `
+a to b = 1
+a to c = 3
+a to d = 1000
+b to c = 2
+b to d = 10
+c to d = 1000
+`
+	// c -> a -> b -> d = 3 + 1 + 10 = 14
+	want := 14
+
+	got, err := Day9Part1(input)
+	if err != nil {
+		t.Errorf("Day9Part1() error = %v", err)
+		return
+	}
+
+	if got != want {
+		t.Errorf("Day9Part1() = %v, want %v", got, want)
+	}
+}
+
 func TestDay9Part2(t *testing.T) {
 	input := `Dublin to Belfast = 141
 London to Dublin = 464
