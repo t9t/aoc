@@ -123,6 +123,10 @@ func Test_findQuantumEntanglementOfSmallestEquallySummedGroup(t *testing.T) {
 	}{
 		{"group size 3", "1\n2\n3\n4\n5\n7\n8\n9\n10\n11\n", 3, 99, false},
 		{"group size 4", "1\n2\n3\n4\n5\n7\n8\n9\n10\n11\n", 4, 44, false},
+		// TODO: breaking; enable when fixed
+		// TODO: {"sad face", "1\n2\n3\n6\n7\n8\n9\n11\n16\n", 3, 96, false},
+		// TODO: {"sad face 2", "1\n3\n5\n13\n17\n23\n31\n37\n53\n", 3, 795, false},
+		// TODO: {"sad face 3; should not be solvable", "1\n5\n9\n", 3, 0, true},
 		{"not equally divisible 3", "3\n8\n10\n20\n", 3, 0, true},
 		{"not equally divisible 4", "5\n6\n7\n8\n", 4, 0, true},
 		{"invalid input", "bla", 3, 0, true},
