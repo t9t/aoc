@@ -13,6 +13,7 @@ func Day25Part1(input string) (int, error) {
 		return 0, err
 	}
 
+	// TODO: could be sped up using modular exponentiation
 	return findManualCode(row, column), nil
 }
 
