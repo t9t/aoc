@@ -112,3 +112,31 @@ func Test_findSmallestSubsetSummingTo(t *testing.T) {
 		})
 	}
 }
+
+func Test_findQuantumEntanglementOfSmallestEquallySummedGroup(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     string
+		groupSize int
+		want      int
+		wantErr   bool
+	}{
+		{"group size 3", "1\n2\n3\n4\n5\n7\n8\n9\n10\n11\n", 3, 99, false},
+		{"group size 4", "1\n2\n3\n4\n5\n7\n8\n9\n10\n11\n", 4, 44, false},
+		{"not equally divisible 3", "3\n8\n10\n20\n", 3, 0, true},
+		{"not equally divisible 4", "5\n6\n7\n8\n", 4, 0, true},
+		{"invalid input", "bla", 3, 0, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := findQuantumEntanglementOfSmallestEquallySummedGroup(tt.input, tt.groupSize)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("findQuantumEntanglementOfSmallestEquallySummedGroup() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("findQuantumEntanglementOfSmallestEquallySummedGroup() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

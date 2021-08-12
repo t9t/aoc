@@ -9,16 +9,24 @@ import (
 )
 
 func Day24Part1(input string) (int, error) {
+	return findQuantumEntanglementOfSmallestEquallySummedGroup(input, 3)
+}
+
+func Day24Part2(input string) (int, error) {
+	return findQuantumEntanglementOfSmallestEquallySummedGroup(input, 4)
+}
+
+func findQuantumEntanglementOfSmallestEquallySummedGroup(input string, groupSize int) (int, error) {
 	packages, err := parsePackages(input)
 	if err != nil {
 		return 0, err
 	}
 
 	sum := sumInts(packages)
-	if sum%3 != 0 {
-		return 0, fmt.Errorf("sum %d of packages not equally divisible by 3", sum)
+	if sum%groupSize != 0 {
+		return 0, fmt.Errorf("sum %d of packages not equally divisible by %d", sum, groupSize)
 	}
-	groupSum := sum / 3
+	groupSum := sum / groupSize
 
 	smallest := findSmallestSubsetSummingTo(groupSum, packages)
 	if smallest == nil {
@@ -26,10 +34,6 @@ func Day24Part1(input string) (int, error) {
 	}
 
 	return calculateQuantumEntanglement(smallest), nil
-}
-
-func Day24Part2(input string) (int, error) {
-	return 0, fmt.Errorf("not implemented")
 }
 
 func parsePackages(input string) ([]int, error) {
