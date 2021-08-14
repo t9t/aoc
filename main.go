@@ -4,7 +4,6 @@ import (
 	"aoc/registry"
 	"aoc/year2015"
 	"fmt"
-	"math/rand"
 	"os"
 	"sort"
 	"strconv"
@@ -17,8 +16,8 @@ func main() {
 
 	args := os.Args[1:]
 
-	if len(args) == 1 && (args[0] == "benchmark" || args[0] == "all") {
-		err := runAll(args[0] == "benchmark")
+	if len(args) == 1 && (args[0] == "benchmark" || args[0] == "all" || args[0] == "results") {
+		err := runAll(args[0])
 		if err != nil {
 			fmt.Printf("\nError running all: %v\n", err)
 			os.Exit(4)
@@ -57,8 +56,10 @@ func main() {
 	fmt.Printf("Result (%v): %v\n", time.Since(start), result)
 }
 
-func runAll(benchmark bool) error {
-	rand.Seed(time.Now().UnixNano())
+func runAll(mode string) error {
+	modeBenchmark := mode == "benchmark"
+	modeResults := mode == "results"
+
 	sortedSelectors := registry.AllSelectorsSorted()
 
 	type result struct {
@@ -66,20 +67,28 @@ func runAll(benchmark bool) error {
 		runTime time.Duration
 	}
 
-	fmt.Println("| Year | Day | Part | Output               | Run time   |")
-	fmt.Println("|------|-----|------|----------------------|------------|")
+	if !modeResults {
+		fmt.Println("| Year | Day | Part | Output          | Run time   |")
+		fmt.Println("|------|-----|------|-----------------|------------|")
+	}
 
 	printOutput := func(selector registry.Selector, output string, runTime time.Duration) {
-		fmt.Printf("| %4d | %3d | %4d | %20v | %10v |\n", selector.Year, selector.Day, selector.Part, output, runTime)
+		if modeResults {
+			fmt.Printf("%d-%d-%d: %s\n", selector.Year, selector.Day, selector.Part, output)
+		} else {
+			fmt.Printf("%s| %4d | %3d | %4d | %15v | %10v |\n", clearLine(), selector.Year, selector.Day, selector.Part, output, runTime)
+		}
 	}
 
 	totalRunTime := time.Duration(0)
 	begin := time.Now()
 	results := make(map[registry.Selector]result)
 	for i, selector := range sortedSelectors {
-		fmt.Printf("%s%3d/%3d; %v; running year: %d; day: %d; part: %d", clearLine(),
-			i, len(sortedSelectors), time.Since(begin),
-			selector.Year, selector.Day, selector.Part)
+		if !modeResults {
+			fmt.Printf("%s%3d/%3d; %v; running year: %d; day: %d; part: %d", clearLine(),
+				i, len(sortedSelectors), time.Since(begin),
+				selector.Year, selector.Day, selector.Part)
+		}
 
 		input, err := readInputData(selector.Year, selector.Day)
 		if err != nil {
@@ -93,15 +102,14 @@ func runAll(benchmark bool) error {
 			return fmt.Errorf("error executing %d/%d/%d: %w", selector.Year, selector.Day, selector.Part, err)
 		}
 		totalRunTime += runTime
-		if !benchmark {
-			fmt.Print(clearLine())
+		if !modeBenchmark {
 			printOutput(selector, output, runTime)
 		} else {
 			results[selector] = result{output: output, runTime: runTime}
 		}
 	}
 
-	if benchmark {
+	if modeBenchmark {
 		sort.Slice(sortedSelectors, func(i, j int) bool {
 			l, r := sortedSelectors[i], sortedSelectors[j]
 			return results[l].runTime < results[r].runTime
@@ -113,7 +121,9 @@ func runAll(benchmark bool) error {
 			printOutput(selector, result.output, result.runTime)
 		}
 	}
-	fmt.Printf("\nTotal run time: %v\n", totalRunTime)
+	if !modeResults {
+		fmt.Printf("\nTotal run time: %v\n", totalRunTime)
+	}
 	return nil
 }
 
@@ -136,7 +146,7 @@ func fatalUsage(errorMessage string) {
 		fmt.Println()
 	}
 	fmt.Println("Usage:")
-	fmt.Printf("\t%s <year> <day> <part>\n", os.Args[0])
+	fmt.Printf("\t%s < <year> <day> <part> | all | benchmark | results >\n", os.Args[0])
 
 	os.Exit(1)
 }
