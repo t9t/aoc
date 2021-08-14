@@ -4,6 +4,7 @@ import (
 	"aoc/registry"
 	"aoc/year2015"
 	"fmt"
+	"math/rand"
 	"os"
 	"sort"
 	"strconv"
@@ -56,7 +57,8 @@ func main() {
 	fmt.Printf("Result (%v): %v\n", time.Since(start), result)
 }
 
-func runAll(sortByExecutionTime bool) error {
+func runAll(benchmark bool) error {
+	rand.Seed(time.Now().UnixNano())
 	sortedSelectors := registry.AllSelectorsSorted()
 
 	type result struct {
@@ -64,6 +66,14 @@ func runAll(sortByExecutionTime bool) error {
 		runTime time.Duration
 	}
 
+	fmt.Println("| Year | Day | Part | Output               | Run time   |")
+	fmt.Println("|------|-----|------|----------------------|------------|")
+
+	printOutput := func(selector registry.Selector, output string, runTime time.Duration) {
+		fmt.Printf("| %4d | %3d | %4d | %20v | %10v |\n", selector.Year, selector.Day, selector.Part, output, runTime)
+	}
+
+	totalRunTime := time.Duration(0)
 	begin := time.Now()
 	results := make(map[registry.Selector]result)
 	for i, selector := range sortedSelectors {
@@ -82,33 +92,26 @@ func runAll(sortByExecutionTime bool) error {
 		if err != nil {
 			return fmt.Errorf("error executing %d/%d/%d: %w", selector.Year, selector.Day, selector.Part, err)
 		}
-		results[selector] = result{output: output, runTime: runTime}
+		totalRunTime += runTime
+		if !benchmark {
+			fmt.Print(clearLine())
+			printOutput(selector, output, runTime)
+		} else {
+			results[selector] = result{output: output, runTime: runTime}
+		}
 	}
 
-	if sortByExecutionTime {
+	if benchmark {
 		sort.Slice(sortedSelectors, func(i, j int) bool {
 			l, r := sortedSelectors[i], sortedSelectors[j]
 			return results[l].runTime < results[r].runTime
 		})
-	}
 
-	outputLength := len("Output")
-	outputColumnWidth := outputLength
-	for _, result := range results {
-		if l := len(result.output); l > outputColumnWidth {
-			outputColumnWidth = l
+		fmt.Print(clearLine())
+		for _, selector := range sortedSelectors {
+			result := results[selector]
+			printOutput(selector, result.output, result.runTime)
 		}
-	}
-
-	fmt.Print(clearLine())
-	fmt.Printf("| Year | Day | Part | Output%s | Run time   |\n", strings.Repeat(" ", outputColumnWidth-outputLength))
-	fmt.Printf("|------|-----|------|-%s-|------------|\n", strings.Repeat("-", outputColumnWidth))
-	outputFormat := "| %4d | %3d | %4d | %" + strconv.Itoa(outputColumnWidth) + "v | %10v | \n"
-	var totalRunTime time.Duration
-	for _, selector := range sortedSelectors {
-		result := results[selector]
-		totalRunTime += result.runTime
-		fmt.Printf(outputFormat, selector.Year, selector.Day, selector.Part, result.output, result.runTime)
 	}
 	fmt.Printf("\nTotal run time: %v\n", totalRunTime)
 	return nil
