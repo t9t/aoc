@@ -16,10 +16,10 @@ func main() {
 
 	args := os.Args[1:]
 
-	if len(args) == 1 && args[0] == "benchmark" {
-		err := runBenchmark()
+	if len(args) == 1 && (args[0] == "benchmark" || args[0] == "all") {
+		err := runAll(args[0] == "benchmark")
 		if err != nil {
-			fmt.Printf("\nError running benchmark: %v\n", err)
+			fmt.Printf("\nError running all: %v\n", err)
 			os.Exit(4)
 		}
 		return
@@ -56,11 +56,16 @@ func main() {
 	fmt.Printf("Result (%v): %v\n", time.Since(start), result)
 }
 
-func runBenchmark() error {
+func runAll(sortByExecutionTime bool) error {
 	sortedSelectors := registry.AllSelectorsSorted()
 
+	type result struct {
+		output  string
+		runTime time.Duration
+	}
+
 	begin := time.Now()
-	runTimes := make(map[registry.Selector]time.Duration)
+	results := make(map[registry.Selector]result)
 	for i, selector := range sortedSelectors {
 		fmt.Printf("%s%3d/%3d; %v; running year: %d; day: %d; part: %d", clearLine(),
 			i, len(sortedSelectors), time.Since(begin),
@@ -72,27 +77,38 @@ func runBenchmark() error {
 		}
 
 		start := time.Now()
-		if _, err := registry.Map[selector](input); err != nil {
+		output, err := registry.Map[selector](input)
+		runTime := time.Since(start)
+		if err != nil {
 			return fmt.Errorf("error executing %d/%d/%d: %w", selector.Year, selector.Day, selector.Part, err)
 		}
-		runTime := time.Since(start)
-		runTimes[selector] = runTime
+		results[selector] = result{output: output, runTime: runTime}
 	}
 
-	sort.Slice(sortedSelectors, func(i, j int) bool {
-		l, r := sortedSelectors[i], sortedSelectors[j]
-		lt, rt := runTimes[l], runTimes[r]
-		return lt < rt
-	})
+	if sortByExecutionTime {
+		sort.Slice(sortedSelectors, func(i, j int) bool {
+			l, r := sortedSelectors[i], sortedSelectors[j]
+			return results[l].runTime < results[r].runTime
+		})
+	}
+
+	outputLength := len("Output")
+	outputColumnWidth := outputLength
+	for _, result := range results {
+		if l := len(result.output); l > outputColumnWidth {
+			outputColumnWidth = l
+		}
+	}
 
 	fmt.Print(clearLine())
-	fmt.Println("| Year | Day | Part | Run time   |")
-	fmt.Println("|------|-----|------|------------|")
+	fmt.Printf("| Year | Day | Part | Output%s | Run time   |\n", strings.Repeat(" ", outputColumnWidth-outputLength))
+	fmt.Printf("|------|-----|------|-%s-|------------|\n", strings.Repeat("-", outputColumnWidth))
+	outputFormat := "| %4d | %3d | %4d | %" + strconv.Itoa(outputColumnWidth) + "v | %10v | \n"
 	var totalRunTime time.Duration
 	for _, selector := range sortedSelectors {
-		runTime := runTimes[selector]
-		totalRunTime += runTime
-		fmt.Printf("| %4d | %3d | %4d | %10v | \n", selector.Year, selector.Day, selector.Part, runTime)
+		result := results[selector]
+		totalRunTime += result.runTime
+		fmt.Printf(outputFormat, selector.Year, selector.Day, selector.Part, result.output, result.runTime)
 	}
 	fmt.Printf("\nTotal run time: %v\n", totalRunTime)
 	return nil
