@@ -3,7 +3,7 @@ from year2016 import template
 import unittest
 
 
-class Test_Day1(unittest.TestCase):
+class Test_Template(unittest.TestCase):
     def test_part1(self):
         cases = {
             "A": "not implemented",
