@@ -40,9 +40,9 @@ def main(name, args):
 def format_duration(d: timedelta):
     s = d.total_seconds()
     if s < 1e-03:
-        return str(s / 1e-06) + "μs"
+        return str(round(s * 1_000_000, 3)) + "μs"
     if s < 1:
-        return str(s / 1000) + "ms"
+        return str(round(s * 1000, 3)) + "ms"
     return str(s) + "s"
 
 

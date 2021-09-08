@@ -14,7 +14,16 @@ def part1(input):
 
 
 def part2(input):
-    return "not implemented"
+    room_name = "northpole object storage"
+    matches = re.finditer(r"(.+)-(\d+)\[(\w{5})\]", input, re.MULTILINE)
+    sum = 0
+    for match in matches:
+        [name, sector, checksum] = match.groups()
+        name, sector = name.strip(), int(sector)
+        if is_real_room(name, checksum):
+            if shift_very_securely(name, sector) == room_name:
+                return sector
+    raise Exception("No room called {0} found".format(room_name))
 
 
 def is_real_room(name, checksum):
@@ -35,3 +44,14 @@ def compare_counts(l, r):
     if l[1] == r[1]:
         return 0 if l[0] == r[0] else 1 if l[0] > r[0] else -1
     return 1 if l[1] < r[1] else -1
+
+
+def shift_very_securely(s: str, n: int) -> str:
+    out = ""
+    a = ord("a")
+    for c in s:
+        if c == "-":
+            out += " "
+        else:
+            out += chr((ord(c)-a + n) % 26 + a)
+    return out
