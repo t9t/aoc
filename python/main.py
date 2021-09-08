@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from year2016 import *
 import sys
 from datetime import datetime
