@@ -152,7 +152,7 @@ func fatalUsage(errorMessage string) {
 }
 
 func readInputData(year, day int) (string, error) {
-	filename := fmt.Sprintf("input/%d/%d.txt", year, day)
+	filename := fmt.Sprintf("../input/%d/%d.txt", year, day)
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return "", fmt.Errorf("cannot read data for %d/%d: %w", year, day, err)
