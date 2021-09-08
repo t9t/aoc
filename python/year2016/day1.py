@@ -1,4 +1,5 @@
-def find_distance(input):
+
+def part1(input):
     directions = input.split(", ")
     x, y, face = 0, 0, 0
     for dir in directions:
@@ -19,9 +20,3 @@ def find_distance(input):
         elif face == 3:  # West
             x -= walk
     return abs(x)+abs(y)
-
-
-if __name__ == "__main__":
-    with open("../input/2016/1.txt") as f:
-        input = f.read()
-    print("distance:", find_distance(input))
