@@ -1,4 +1,4 @@
-// +build itest
+//go:build itest
 
 package itest
 
@@ -18,10 +18,10 @@ type result struct {
 	result          string
 }
 
-func Test_allTheThings(t *testing.T) {
+func Test_2015(t *testing.T) {
 	year2015.RegisterAll()
 
-	resultData, err := os.ReadFile("../input/results.txt")
+	resultData, err := os.ReadFile("../input/2015/results.txt")
 	if err != nil {
 		t.Fatalf("could not read result data: %v", err)
 	}
