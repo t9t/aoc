@@ -3,12 +3,14 @@
 from year2016 import *
 import sys
 from datetime import datetime
+from datetime import timedelta
+from time import sleep
 
-if __name__ == "__main__":
-    args = sys.argv[1:]
+
+def main(name, args):
     if len(args) != 3:
         print("Usage:")
-        print("\t{0} <year> <day> <part>\n".format(sys.argv[0]))
+        print("\t{0} <year> <day> <part>\n".format(name))
         sys.exit(1)
 
     year = int(args[0])
@@ -32,4 +34,17 @@ if __name__ == "__main__":
     result = part_func(input)
     end = datetime.now()
 
-    print("Result ({0}): {1}".format(end-start, result))
+    print("Result ({0}): {1}".format(format_duration(end-start), result))
+
+
+def format_duration(d: timedelta):
+    s = d.total_seconds()
+    if s < 1e-03:
+        return str(s / 1e-06) + "μs"
+    if s < 1:
+        return str(s / 1000) + "ms"
+    return str(s) + "s"
+
+
+if __name__ == "__main__":
+    main(sys.argv[0], sys.argv[1:])
