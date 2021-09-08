@@ -23,5 +23,6 @@ def find_distance(input):
 
 
 if __name__ == "__main__":
-    input = ""
+    with open("../input/2016/1.txt") as f:
+        input = f.read()
     print("distance:", find_distance(input))
