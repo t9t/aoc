@@ -3,7 +3,7 @@ from year2016 import day4
 import unittest
 
 
-class Test_Template(unittest.TestCase):
+class Test_Day4(unittest.TestCase):
     def test_part1(self):
         input = """aaaaa-bbb-z-y-x-123[abxyz]
                    a-b-c-d-e-f-g-h-987[abcde]

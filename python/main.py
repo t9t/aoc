@@ -28,7 +28,7 @@ def main(name, args):
     with open("../input/{0}/{1}.txt".format(year, day)) as f:
         input = f.read()
 
-    print("Running Year: {0}; Day: {1}; Part: {1}".format(year, day, part))
+    print("Running Year: {0}; Day: {1}; Part: {2}".format(year, day, part))
 
     start = datetime.now()
     result = part_func(input)
