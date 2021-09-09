@@ -3,11 +3,11 @@ import multiprocessing as mp
 
 
 def part1(input):
-    return find_door_password1(input.strip())
+    return find_door_password(input.strip(), part2=False)
 
 
 def part2(input):
-    return find_door_password(input.strip(), is_positionally_matching_id)
+    return find_door_password(input.strip(), part2=True)
 
 
 def calculate_hash(s: str) -> str:
@@ -32,53 +32,36 @@ def find_hashes(id, start, end):
     return results
 
 
-def find_door_password1(id):
+def find_door_password(id, part2):
     c = mp.cpu_count()
     bs = 500_000
     with mp.Pool(c) as pool:
         n = 0
-        d = dict()
+        password = list("________")
+        i = 0
         while True:
             batches = list()
             for _ in range(0, c):
                 batches.append((id, n, n+bs))
                 n += bs
 
+            d = dict()
             for results in pool.starmap(find_hashes, batches):
                 for (k, v) in results.items():
                     d[k] = v
 
-            if len(d) >= 8:
-                l = sorted(d.items(), key=lambda i: i[0])[:8]
-                return "".join([i[1][5] for i in l])
+            l = sorted(d.items(), key=lambda i: i[0])
+            for (_, hash) in l:
+                pos = i
+                i += 1
+                if part2:
+                    pos = hash[5]
+                    if pos >= '0' and pos <= '7':
+                        pos = int(pos)
+                    else:
+                        continue
 
-
-def find_door_password(id: str, matching_fun) -> str:
-    with mp.Pool(mp.cpu_count()) as pool:
-        max = 100_000_000
-        batch_size = 500_000
-        n = 0
-        i = 0
-        password = list("________")
-        while True:
-            results = pool.starmap(matching_fun, [(id, i) for i in range(n, n+batch_size)])
-            for r in results:
-                if not r:
-                    continue
-
-                pos, char = r[0], r[1]
-                if pos is None:
-                    pos = i
-                    i += 1
-
-                if password[pos] != "_":
-                    continue
-
-                password[pos] = char
-                if "_" not in password:
-                    return "".join(password)
-
-            n += batch_size
-
-            if n >= max:
-                raise Exception("No door password found after {0} iterations".format(max))
+                if password[pos] == "_":
+                    password[pos] = hash[6] if part2 else hash[5]
+                    if "_" not in password:
+                        return "".join(password)
