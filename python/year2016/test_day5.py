@@ -8,14 +8,7 @@ class Test_Day5(unittest.TestCase):
         self.assertEqual(day5.part1("abc"), "18f47a30")
 
     def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "b": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day5.part2(input), expected)
+        self.assertEqual(day5.part2("abc"), "05ace8e3")
 
 
 if __name__ == '__main__':
