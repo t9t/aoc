@@ -1,7 +1,7 @@
 
-def part1(input):
+def part1(input: str):
     return "not implemented"
 
 
-def part2(input):
+def part2(input: str):
     return "not implemented"
