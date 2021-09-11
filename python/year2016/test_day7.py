@@ -47,6 +47,18 @@ class Test_Day7(unittest.TestCase):
             with self.subTest(input):
                 self.assertEqual(day7.contains_abba(input), expected)
 
+    def test_supports_ssl(self):
+        cases = {
+            "aba[bab]xyz": True,
+            "xyx[xyx]xyx": False,
+            "aaa[kek]eke": True,
+            "zazbz[bzb]cdb": True,
+            "ashfajs[fjhads]fkasjd[asklhdlg]zazbz[bzb]cdb[gasjha]dakjfa": True,
+        }
+        for [input, expected] in cases.items():
+            with self.subTest(input):
+                self.assertEqual(day7.supports_ssl(input), expected)
+
 
 if __name__ == '__main__':
     unittest.main()
