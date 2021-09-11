@@ -4,19 +4,6 @@ import unittest
 
 
 class Test_Day8(unittest.TestCase):
-    def test_part1(self):
-        self.assertEqual(day8.part1("X"), "not implemented")
-
-    def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "b": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day8.part2(input), expected)
-
     def test_rect(self):
         display = day8.create_display(7, 3)
         day8.rect("3x2", display)

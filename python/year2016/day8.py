@@ -6,7 +6,10 @@ def part1(input: str):
 
 
 def part2(input: str):
-    return "not implemented"
+    display = create_display(50, 6)
+    process_input(input, display)
+    parts = split_horizontally(display, 5)
+    return "".join([parse_display_letter(part) for part in parts])
 
 
 def process_input(input: str, display: list):
@@ -75,3 +78,60 @@ def count_on_pixels(display: list) -> int:
             if pixel:
                 c += 1
     return c
+
+
+def split_horizontally(display: list, width: int) -> list:
+    if len(display[0]) % width != 0:
+        raise Exception("Display width {0} not divisible by len {1}".format(len(display[0], width)))
+    out = list()
+    for part in range(0, int(len(display[0]) / width)):
+        start = part*width
+        nd = create_display(width, len(display))
+        for y in range(0, len(display)):
+            for x in range(0, width):
+                nd[y][x] = display[y][start+x]
+        out.append(nd)
+    return out
+
+
+def parse_display_letter(display: list) -> str:
+    rendered = render_display(display)
+    letter = parse_letter(rendered)
+    return letter
+
+
+def parse_letter(s: str) -> str:
+    s = s.strip()
+    if s not in letter_map:
+        raise Exception("Unknown letter: {0}".format(s))
+    return letter_map[s]
+
+
+letter_map = {
+    ".##..\n#..#.\n#..#.\n####.\n#..#.\n#..#.": 'A',
+    "###..\n#..#.\n###..\n#..#.\n#..#.\n###..": 'B',
+    ".##..\n#..#.\n#....\n#....\n#..#.\n.##..": 'C',
+    "###..\n#..#.\n#..#.\n#..#.\n#..#.\n###..": 'D',  # guessed
+    "####.\n#....\n###..\n#....\n#....\n####.": 'E',
+    "####.\n#....\n###..\n#....\n#....\n#....": 'F',
+    ".##..\n#..#.\n#....\n#.##.\n#..#.\n.###.": 'G',
+    "#..#.\n#..#.\n####.\n#..#.\n#..#.\n#..#.": 'H',
+    ".###.\n..#..\n..#..\n..#..\n..#..\n.###.": 'I',
+    "..##.\n...#.\n...#.\n...#.\n#..#.\n.##..": 'J',
+    "#..#.\n#.#..\n##...\n#.#..\n#.#..\n#..#.": 'K',
+    "#....\n#....\n#....\n#....\n#....\n####.": 'L',
+    # M missing
+    "#...#\n##..#\n#.#.#\n#.#.#\n#..##\n#...#": 'N',  # guessed
+    ".##..\n#..#.\n#..#.\n#..#.\n#..#.\n.##..": 'O',
+    "###..\n#..#.\n#..#.\n###..\n#....\n#....": 'P',
+    # Q missing
+    "###..\n#..#.\n#..#.\n###..\n#.#..\n#..#.": 'R',
+    ".###.\n#....\n#....\n.##..\n...#.\n###..": 'S',
+    "#####\n..#..\n..#..\n..#..\n..#..\n..#..": 'T',  # guessed
+    "#..#.\n#..#.\n#..#.\n#..#.\n#..#.\n.##..": 'U',
+    "#...#\n#...#\n#...#\n.#.#.\n.#.#.\n..#..": 'V',  # guessed
+    # W missing
+    # X missing
+    "#...#\n#...#\n.#.#.\n..#..\n..#..\n..#..": 'Y',
+    "####.\n...#.\n..#..\n.#...\n#....\n####.": 'Z'
+}
