@@ -10,7 +10,7 @@ class Test_Template(unittest.TestCase):
     def test_part2(self):
         cases = {
             "A": "not implemented",
-            "b": "not implemented",
+            "B": "not implemented",
             "C": "not implemented",
         }
         for [input, expected] in cases.items():
