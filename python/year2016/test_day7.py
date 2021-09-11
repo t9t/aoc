@@ -4,16 +4,6 @@ import unittest
 
 
 class Test_Day7(unittest.TestCase):
-    def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "b": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day7.part2(input), expected)
-
     def test_supports_tls(self):
         cases = {
             "abba[mnop]qrst": True,
