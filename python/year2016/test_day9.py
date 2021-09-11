@@ -4,7 +4,7 @@ import unittest
 
 
 class Test_Day9(unittest.TestCase):
-    def test_get_decompressed_length(self):
+    def test_part1(self):
         cases = {
             "ADVENT": 6,
             "A(1x5)BC": 7,
@@ -16,9 +16,9 @@ class Test_Day9(unittest.TestCase):
         }
         for [input, expected] in cases.items():
             with self.subTest(input):
-                self.assertEqual(day9.get_decompressed_length(input), expected)
+                self.assertEqual(day9.part1(input), expected)
 
-    def test_get_decompressed_length_v2(self):
+    def test_part2(self):
         cases = {
             "(3x3)XYZ": 9,
             "X(8x2)(3x3)ABCY": 20,
@@ -27,7 +27,7 @@ class Test_Day9(unittest.TestCase):
         }
         for [input, expected] in cases.items():
             with self.subTest(input):
-                self.assertEqual(day9.get_decompressed_length_v2(input), expected)
+                self.assertEqual(day9.part2(input), expected)
 
 
 if __name__ == '__main__':
