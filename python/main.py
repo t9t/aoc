@@ -31,7 +31,7 @@ def main(name, args):
     print("Running Year: {0}; Day: {1}; Part: {2}".format(year, day, part))
 
     start = datetime.now()
-    result = part_func(input)
+    result = part_func(input.strip())
     end = datetime.now()
 
     print("Result ({0}): {1}".format(format_duration(end-start), result))

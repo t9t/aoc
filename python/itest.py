@@ -23,7 +23,7 @@ class Test_All(unittest.TestCase):
                 part_func = getattr(day_module, "part" + str(part))
                 with open("../input/{0}/{1}.txt".format(year, day)) as f:
                     input = f.read()
-                actual = str(part_func(input))
+                actual = str(part_func(input.strip()))
                 self.assertEqual(expected.strip(), actual)
 
 
