@@ -15,15 +15,13 @@ dec a
 """
         self.assertEqual(day12.part1(input), 42)
 
-    def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "B": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day12.part2(input), expected)
+    def test_process_c0(self):
+        input = "inc c\ninc c\ncpy c a"
+        self.assertEqual(day12.process(input, c=0), 2)
+
+    def test_process_custom_c(self):
+        input = """dec c\ninc c\ndec c\ncpy c a"""
+        self.assertEqual(day12.process(input, c=1337), 1336)
 
 
 if __name__ == '__main__':

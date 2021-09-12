@@ -1,7 +1,15 @@
 
 def part1(input: str):
+    return process(input, c=0)
+
+
+def part2(input: str):
+    return process(input, c=1)
+
+
+def process(input: str, c: int) -> int:
     instructions = input.strip().splitlines()
-    regs = {'a': 0, 'b': 0, 'c': 0, 'd': 0, }
+    regs = {'a': 0, 'b': 0, 'c': c, 'd': 0, }
 
     ptr = 0
     while ptr < len(instructions):
@@ -26,7 +34,3 @@ def part1(input: str):
         ptr += jump
 
     return regs['a']
-
-
-def part2(input: str):
-    return "not implemented"
