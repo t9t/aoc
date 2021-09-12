@@ -2,12 +2,20 @@ import hashlib
 
 
 def part1(input: str):
+    return find_key_index(input, stretching=False)
+
+
+def part2(input: str):
+    return find_key_index(input, stretching=True)
+
+
+def find_key_index(input: str, stretching: bool) -> int:
     maxi = 100_000
     keys = 0
     cache = dict()
 
     for i in range(0, maxi):
-        hash = cache.pop(i) if i in cache else md5(input+str(i))
+        hash = cache.pop(i) if i in cache else gen_key(input, i, stretching)
 
         triple = extract_first_triple(hash)
         if triple is None:
@@ -18,7 +26,7 @@ def part1(input: str):
             if j in cache:
                 other = cache[j]
             else:
-                other = md5(input+str(j))
+                other = gen_key(input, j, stretching)
                 cache[j] = other
 
             if quintuple in other:
@@ -30,12 +38,22 @@ def part1(input: str):
     raise Exception("No solution found after {} iterations".format(maxi))
 
 
-def part2(input: str):
-    return "not implemented"
+def gen_key(input: str, i: int, stretching: bool) -> str:
+    s = input+str(i)
+    hash = md5(s)
+    if not stretching:
+        return hash
+    return stretch(hash)
 
 
 def md5(s: str) -> str:
     return hashlib.md5(s.encode("utf-8")).hexdigest()
+
+
+def stretch(hash: str) -> str:
+    for _ in range(2016):
+        hash = md5(hash)
+    return hash
 
 
 def extract_first_triple(s: str) -> str:

@@ -8,14 +8,7 @@ class Test_Day14(unittest.TestCase):
         self.assertEqual(day14.part1("abc"), 22728)
 
     def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "B": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day14.part2(input), expected)
+        self.assertEqual(day14.part2("abc"), 22551)
 
     def test_extract_first_triple(self):
         cases = {
@@ -28,6 +21,11 @@ class Test_Day14(unittest.TestCase):
         for [input, expected] in cases.items():
             with self.subTest(input):
                 self.assertEqual(day14.extract_first_triple(input), expected)
+
+    def test_stretch(self):
+        input = "abc0"
+        initial_hash = day14.md5(input)
+        self.assertEqual(day14.stretch(initial_hash), "a107ff634856bb300138cac6568c0f24")
 
 
 if __name__ == '__main__':

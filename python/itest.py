@@ -2,7 +2,6 @@
 
 from year2016 import *
 import unittest
-import sys
 
 import year2016
 
