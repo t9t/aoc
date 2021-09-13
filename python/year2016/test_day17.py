@@ -15,7 +15,14 @@ class Test_Template(unittest.TestCase):
                 self.assertEqual(day17.part1(input), expected)
 
     def test_part2(self):
-        self.assertEqual(day17.part2("X"), "not implemented")
+        cases = {
+            "ihgpwlah": 370,
+            "kglvqrro": 492,
+            "ulqzkmiv": 830,
+        }
+        for [input, expected] in cases.items():
+            with self.subTest(input):
+                self.assertEqual(day17.part2(input), expected)
 
 
 if __name__ == '__main__':
