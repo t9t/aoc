@@ -20,16 +20,6 @@ class Test_Day18(unittest.TestCase):
     def test_count_safe_tiles(self):
         self.assertEqual(day18.count_safe_tiles(self._big_room), 38)
 
-    def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "B": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day18.part2(input), expected)
-
     _big_room = """
 .^^.^.^^^^
 ^^^...^..^

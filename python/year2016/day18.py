@@ -5,7 +5,8 @@ def part1(input: str):
 
 
 def part2(input: str):
-    return "not implemented"
+    room = generate_room(input.strip(), 400000)
+    return count_safe_tiles(room)
 
 
 def generate_room(input: str, rows: int) -> str:
