@@ -19,15 +19,14 @@ def count_safe_tiles_slow(input: str, rows: int) -> int:
         this = ""
         for x in range(len(input)):
             left = previous[x-1] if x > 0 else "."
-            center = previous[x]
             right = previous[x+1] if x < len(input)-1 else "."
 
-            traps = {"^^.", ".^^", "^..", "..^"}
-            if left+center+right in traps:
-                this += "^"
-            else:
+            # While there are 3 rules, it seems that if the right and left tile are the same, the tile will be safe
+            if left == right:
                 this += "."
                 safe += 1
+            else:
+                this += "^"
 
         previous = this
 
