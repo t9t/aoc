@@ -25,45 +25,29 @@ def number_of_allowed_ips(input: str, max_ip: int):
     for line in input.strip().splitlines():
         low, high = line.split("-")
         ranges.append((int(low), int(high)))
-    ranges.sort()
 
-    ranges = consolidate(ranges)
-    ranges.sort()
+    ranges = consolidate(sorted(ranges))
 
     allowed = 0
     for i in range(len(ranges)-1):
-        between = ranges[i+1][0] - ranges[i][1] - 1
-        allowed += between
+        allowed += (ranges[i+1][0] - ranges[i][1] - 1)
 
     allowed += (max_ip - ranges[len(ranges) - 1][1])
 
     return allowed
 
 
-def overlap_or_adjacent(range1, range2):
-    return range2[0] < range1[1] or range1[1]+1 == range2[0]
-
-
-def combine(range1, range2):
-    return (min(range1[0], range2[0]), max(range1[1], range2[1]))
-
-
 def consolidate(ranges):
     combined = list()
 
-    while True:
+    while len(ranges) > 0:
         first = ranges[0]
-        others = ranges[1:]
         no_overlap = list()
-        for other in others:
-            if overlap_or_adjacent(first, other):
-                first = combine(first, other)
+        for other in ranges[1:]:
+            if first[1]+1 >= other[0]:
+                first = (min(first[0], other[0]), max(first[1], other[1]))
             else:
                 no_overlap.append(other)
         combined.append(first)
         ranges = no_overlap
-        if len(ranges) == 1:
-            combined.append(ranges[0])
-            return combined
-        elif len(ranges) == 0:
-            return combined
+    return sorted(combined)
