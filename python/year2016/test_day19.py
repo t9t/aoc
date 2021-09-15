@@ -4,18 +4,11 @@ import unittest
 
 
 class Test_Day19(unittest.TestCase):
-    def test_who_gets_all_the_presents(self):
-        self.assertEqual(day19.who_gets_all_the_presents(5), 3)
+    def test_part1(self):
+        self.assertEqual(day19.part1("5"), 3)
 
     def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "B": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day19.part2(input), expected)
+        self.assertEqual(day19.part2("5"), 2)
 
 
 if __name__ == '__main__':
