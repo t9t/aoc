@@ -8,7 +8,9 @@ def part2(input: str):
 
 
 def who_gets_all_the_presents(elf_count: int) -> int:
-    elves = [1]*elf_count
+    elves = dict()
+    for i in range(elf_count):
+        elves[i] = 1
     while True:
         for i in range(elf_count):
             if elves[i] == 0:
