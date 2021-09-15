@@ -1,17 +1,20 @@
 
 def part1(input: str):
-    room = generate_room(input.strip(), 40)
-    return count_safe_tiles(room)
+    return count_total_safe_tiles(input, 40)
 
 
 def part2(input: str):
-    room = generate_room(input.strip(), 400000)
-    return count_safe_tiles(room)
+    return count_total_safe_tiles(input, 400_000)
 
 
-def generate_room(input: str, rows: int) -> str:
-    room = input + "\n"
+def count_total_safe_tiles(input: str, rows: int) -> int:
+    # return count_safe_tiles_slow(input, rows)
+    return start_count_safe_tiles_fast(input, rows)
+
+
+def count_safe_tiles_slow(input: str, rows: int) -> int:
     previous = input
+    safe = input.count(".")
     for _ in range(1, rows):
         this = ""
         for x in range(len(input)):
@@ -24,12 +27,27 @@ def generate_room(input: str, rows: int) -> str:
                 this += "^"
             else:
                 this += "."
+                safe += 1
 
-        room += this + "\n"
         previous = this
 
-    return room
+    return safe
 
 
-def count_safe_tiles(room: str) -> int:
-    return room.count(".")
+# Borrowed from: https://old.reddit.com/r/adventofcode/comments/5iyp50/2016_day_18_solutions/dbc0l6j/
+def start_count_safe_tiles_fast(input: str, rows: int) -> int:
+    traps = 0
+    mask = 0
+    for c in input:
+        traps = (traps << 1) | (c == '^')
+        mask = (mask << 1) | 1
+    return count_safe_tiles_fast(traps, mask, rows)
+
+
+def count_safe_tiles_fast(traps, mask, rows) -> int:
+    safe = 0
+    for _ in range(rows):
+        safe += bin(mask ^ traps).count('1')
+        traps = (traps << 1) ^ (traps >> 1)
+        traps &= mask
+    return safe
