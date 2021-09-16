@@ -18,6 +18,10 @@ def scramble(password: str, input: str) -> str:
     return scramble_or_unscramble(password, parse_list(input), all_operations)
 
 
+def unscramble(password: str, input: str) -> str:
+    return scramble_or_unscramble(password, reverse(parse_list(input)), all_unoperations)
+
+
 def scramble_or_unscramble(password: str, operations: list, all_operations: list) -> str:
     for operation in operations:
         match = None
@@ -37,8 +41,8 @@ def scramble_or_unscramble(password: str, operations: list, all_operations: list
 def parse_list(input: str) -> list:
     return input.strip().splitlines()
 
-##### Scramble functions #####
 
+##### Scramble functions #####
 
 def password_swap_pos(password: str, args: tuple) -> str:
     # swap position (\d+) with position (\d+)
@@ -84,31 +88,38 @@ def password_move(password: str, args: tuple) -> str:
 
 ##### Unscramble functions #####
 
+def unpassword_swap_pos(password: str, args: tuple) -> str:
+    # swap position (\d+) with position (\d+)
+    return password_swap_pos(password, args)
+
+
+def unpassword_swap_letter(password: str, args: tuple) -> str:
+    # swap letter (\w) with letter (\w)
+    return password_swap_letter(password, args)
+
+
 def unpassword_rotate_lr(password: str, args: tuple) -> str:
     # rotate (left|right) (\d+) steps?
-    return password_rotate_lr(password, ("left" if args == "right" else "left", args[1]))
+    return password_rotate_lr(password, (args[0], -int(args[1])))
 
 
 def unpassword_rotate_pos(password: str, args: tuple) -> str:
     # rotate based on position of letter (\w)
     for i in range(len(password)):
-        back = password_rotate_lr(password, ("left", i))
-        forward = password_rotate_pos(back, args)
-        if forward == password:
-            return back
-    raise Exception(f"Unable to solve unpassword_rotate_pos({password, args})")
+        unrotated = password_rotate_lr(password, ("left", i))
+        scrambled = password_rotate_pos(unrotated, args)
+        if scrambled == password:
+            return unrotated
 
 
 def unpassword_reverse(password: str, args: tuple) -> str:
     # reverse positions (\d+) through (\d+)
-    i, j = int(args[0]), int(args[1])+1
-    return password_reverse(password, (i, j))
+    return password_reverse(password, args)
 
 
 def unpassword_move(password: str, args: tuple) -> str:
     # move position (\d+) to position (\d+)
-    i, j = int(args[0]), int(args[1])
-    return password_move(password, (j, i))
+    return password_move(password, (args[1], args[0]))
 
 
 def reverse(s: str) -> str:
@@ -126,8 +137,8 @@ all_operations = [
 
 
 all_unoperations = [
-    (r"swap position (\d+) with position (\d+)", password_swap_pos),
-    (r"swap letter (\w) with letter (\w)", password_swap_letter),
+    (r"swap position (\d+) with position (\d+)", unpassword_swap_pos),
+    (r"swap letter (\w) with letter (\w)", unpassword_swap_letter),
     (r"rotate (left|right) (\d+) steps?", unpassword_rotate_lr),
     (r"rotate based on position of letter (\w)", unpassword_rotate_pos),
     (r"reverse positions (\d+) through (\d+)", unpassword_reverse),
