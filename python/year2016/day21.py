@@ -5,13 +5,8 @@ def part1(input: str):
     return scramble("abcdefgh", input)
 
 
-# no: chdgfeba
-# no: fahcgbed
-# no: hadbcfeg
-# no: egcbafdh
 def part2(input: str):
-    password = "fbgdceah"
-    return scramble_or_unscramble(password, reverse(parse_list(input)), all_unoperations)
+    return unscramble("fbgdceah", input)
 
 
 def scramble(password: str, input: str) -> str:
@@ -22,11 +17,11 @@ def unscramble(password: str, input: str) -> str:
     return scramble_or_unscramble(password, reverse(parse_list(input)), all_unoperations)
 
 
-def scramble_or_unscramble(password: str, operations: list, all_operations: list) -> str:
+def scramble_or_unscramble(password: str, operations: list, _operations: list) -> str:
     for operation in operations:
         match = None
         print(f"operation: {operation}")
-        for r, func in all_operations:
+        for r, func in _operations:
             if match := re.search(r, operation):
                 args = match.groups()
                 out = func(password, args)
