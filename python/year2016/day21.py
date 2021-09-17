@@ -20,12 +20,10 @@ def unscramble(password: str, input: str) -> str:
 def scramble_or_unscramble(password: str, operations: list, _operations: list) -> str:
     for operation in operations:
         match = None
-        print(f"operation: {operation}")
         for r, func in _operations:
             if match := re.search(r, operation):
                 args = match.groups()
                 out = func(password, args)
-                print(f"    {func}({password, args}) = {out}")
                 password = out
                 break
         if not match:
