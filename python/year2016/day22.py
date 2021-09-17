@@ -20,66 +20,46 @@ def part1(input: str):
 
 
 def part2(input: str):
-    if "  11T" in input:
-        # called from test, hard-coded for now while I figure this one out
-        return 7
-    return 185  # calculated by hand based on the drawn grid
-
-
-def draw_grid(input: str):
     grid = dict()
     xmax, ymax = 0, 0
+    empty_node = None
     for node in parse_nodes(input):
         if not (y := node[1]) in grid:
             grid[y] = dict()
-        grid[y][(x := node[0])] = node
+        grid[y][(x := node[0])] = node[2:]
+        if node[3] == 0:
+            empty_node = node
         if x > xmax:
             xmax = x
         if y > ymax:
             ymax = y
 
-    print(f"xmax: {xmax}; ymax: {ymax}")
-    target = grid[xmax][0]
-    print(f"Target data: x={xmax},y=0: {target}")
-    req = target[3]
+    # Step 1: "move" empty node "up" to the top row
+    empty_x, empty_y, _, _, _ = empty_node
+    empty = empty_node[2:]
+    moves = 0
+    while empty_y > 0:
+        moves += 1
+        empty_size, _, _ = empty
+        y_above = empty_y - 1
+        node = grid[y_above][empty_x]
+        _, above_used, _ = node
+        if empty_size >= above_used:
+            # The node above's data can fit the empty node, move data down (or "move empty node up")
+            empty = node
+            empty_y = y_above
+            continue
+        # The node above's data cannot fit on empty node, move left (assuming this is valid for all inputs)
+        empty_x -= 1
+        empty = grid[empty_x][empty_y]
 
-    for y in range(ymax+1):
-        row = " "
-        for x in range(xmax+1):
-            _, _, size, used, avail = grid[y][x]
+    # Step 2: "move" empty node "to the right"; we assume no obstacles here, so we just add the steps to get to the right
+    steps_right = xmax - empty_x
 
-            can_move_anywhere = False
-            for dy in (-1, 0, 1):
-                y2 = y+dy
-                if y2 < 0 or y2 > ymax:
-                    continue
-                for dx in (-1, 0, 1):
-                    x2 = x+dx
-                    if x2 < 0 or x2 > xmax:
-                        continue
-                    _, _, osize, oused, oavail = grid[y2][x2]
-                    if osize >= used:
-                        can_move_anywhere = True
-                        break
-                if can_move_anywhere:
-                    break
-
-            c = " . "
-            if used == 0:
-                c = " _ "
-            elif x == xmax and y == 0:
-                c = " G "
-            elif x == 0 and y == 0:
-                c = "(.)"
-            elif used > 100:
-                c = " ~ "
-            elif can_move_anywhere:
-                c = " . "
-            else:
-                c = " # "
-
-            row += c
-        print(row)
+    # Step 3: "move" empty node "to the left"; assuming no obstacles, moving one spot takes 5 steps and we're already 1 step towards the left
+    steps_left = (xmax-1)*5
+    total = moves + steps_right+steps_left
+    return total
 
 
 def parse_nodes(input: str) -> list:
