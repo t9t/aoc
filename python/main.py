@@ -7,8 +7,8 @@ from datetime import timedelta
 
 
 def main(name, args):
-    if len(args) == 1 and args[0] == "benchmark":
-        benchmark()
+    if len(args) == 1 and (args[0] == "benchmark" or args[0] == "all"):
+        run_all(args[0] == "benchmark")
         return
 
     if len(args) != 3:
@@ -40,12 +40,16 @@ def main(name, args):
     print("Result ({0}): {1}".format(format_duration(end-start), result))
 
 
-def benchmark():
+def run_all(benchmark_mode):
     year = 2016
     total = 49
     begin = datetime.now()
     total_run_time = timedelta()
     results = list()
+
+    print("| Year | Day | Part | Output             | Run time   |")
+    print("|------|-----|------|--------------------|------------|")
+
     for day in range(1, 26):
         with open("../input/{0}/{1}.txt".format(year, day)) as f:
             input = f.read()
@@ -63,15 +67,18 @@ def benchmark():
                 result = func(input.strip())
                 run_time = datetime.now()-start
                 total_run_time += run_time
-                results.append((year, day, part, result, run_time))
+                if benchmark_mode:
+                    results.append((year, day, part, result, run_time))
+                else:
+                    print(clearLine(), end="")
+                    print(f"| {year:4} | {day:3} | {part:4} | {result:>18} | {format_duration(run_time):>10} |")
 
-    print(clearLine(), end="")
-    print("| Year | Day | Part | Output             | Run time   |")
-    print("|------|-----|------|--------------------|------------|")
-    results.sort(key=lambda i: i[4])
-    for r in results:
-        year, day, part, result, run_time = r
-        print(f"| {year:4} | {day:3} | {part:4} | {result:>18} | {format_duration(run_time):>10} |")
+    if benchmark_mode:
+        print(clearLine(), end="")
+        results.sort(key=lambda i: i[4])
+        for r in results:
+            year, day, part, result, run_time = r
+            print(f"| {year:4} | {day:3} | {part:4} | {result:>18} | {format_duration(run_time):>10} |")
     print(f"\nTotal run time: {format_duration(total_run_time)}")
 
 
