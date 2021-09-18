@@ -10,7 +10,7 @@ out 0
 out 1
 jnz 1 -2
 """
-        self.assertEqual(day25.part1(input.strip()), 0)
+        self.assertEqual(day25.part1_slower(input.strip()), 0)
 
 
 if __name__ == '__main__':

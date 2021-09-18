@@ -1,5 +1,9 @@
 
 def part1(input: str):
+    return sneaky_part1(input)
+
+
+def part1_slower(input: str):
     for a in range(1000):
         # 64 bytes ought to be enough for anyone
         if is_probably_zero_one_repeating(input.strip(), a=a, max_out=64):
@@ -99,3 +103,21 @@ def out(regs, args):
     else:
         value = int(tgt)
     return 1, value
+
+
+def sneaky_part1(input: str) -> int:
+    # it turns out the program repeats the binary representation of a+(cpy X c)*(cpy Y b), so all we have to do is find
+    # the first "a" where the binary representation of a+(X*Y) repeats 01.. (from the least significant bit)
+    lines = input.strip().splitlines()
+    t = int(lines[1][3:5]) * int(lines[2][3:7])
+    for a in range(1000):
+        b = bin(a+t)[2:]
+        if len(b) % 2 != 0:
+            continue
+        m = True
+        for i in range(len(b)-1, 0, -2):
+            if b[i] != '0' or b[i-1] != '1':
+                m = False
+        if m:
+            return a
+    raise Exception("No solution found")
