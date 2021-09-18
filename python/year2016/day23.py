@@ -1,0 +1,117 @@
+
+
+def part1(input: str):
+    return process(input.strip(), a=7)
+
+
+def part2(input: str):
+    return "not implemented"
+
+
+def process(input: str, a: int) -> int:
+    lines = input.strip().splitlines()
+
+    instructions = list()
+    for line in lines:
+        cmd = line[0:3]
+        vs = line[4:]
+        func, args = None, None
+        if cmd == "cpy":
+            src, tgt = vs.split(" ")
+            func = cpy
+            args = (src, tgt)
+        elif cmd == "inc":
+            func = inc
+            args = (vs)
+        elif cmd == "dec":
+            func = dec
+            args = (vs)
+        elif cmd == "jnz":
+            src, jmp = vs.split(" ")
+            func = jnz
+            args = (src, jmp)
+        elif cmd == "tgl":
+            func = tgl
+            args = vs
+
+        instructions.append((func, args))
+
+    regs = {'a': a, 'b': 0, 'c': 0, 'd': 0}
+
+    ptr = 0
+    l = len(instructions)
+    while ptr < l:
+        func, args = instructions[ptr]
+        #print(f"Executing {func}({args})")
+        ptr += func(regs, args, ptr, instructions)
+
+    return regs['a']
+
+
+def cpy(regs, args, ptr, instructions):
+    src, tgt = args
+    if tgt not in regs:
+        print(f"  invalid cpy ({args}), skipping")
+        return 1
+
+    if src in regs:
+        value = regs[src]
+    else:
+        value = int(src)
+    regs[tgt] = value
+    return 1
+
+
+def inc(regs, args, ptr, instructions):
+    regs[args[0]] += 1
+    return 1
+
+
+def dec(regs, args, ptr, instructions):
+    regs[args[0]] -= 1
+    return 1
+
+
+# jnz x y jumps to an instruction y away (positive means forward; negative means backward), but only if x is not zero.
+def jnz(regs, args, ptr, instructions):
+    src, jmp = args
+    if src in regs:
+        test = regs[src]
+    else:
+        test = int(src)
+    if test == 0:
+        return 1
+    if jmp in regs:
+        jmp = regs[jmp]
+    return int(jmp)
+
+
+def tgl(regs, args, ptr, instructions):
+    print(f"  tgl; regs: {regs}; args: {args}; ptr: {ptr}")
+    n = regs[args[0]]
+    t = ptr+n
+    if t < 0 or t >= len(instructions):
+        print(f"    t {t} < 0 or >= {len(instructions)}")
+        return 1
+    target = instructions[t]
+    print(f"    n: {n}; t: {t}; targeting: {target}")
+    func, fargs = target
+
+    # For one-argument instructions, inc becomes dec, and all other one-argument instructions become inc.
+    if func == dec or func == tgl:
+        print(f"    turning dec/tgl into inc")
+        instructions[t] = (inc, fargs)
+    elif func == inc:
+        print(f"    turning inc into dec")
+        instructions[t] = (dec, fargs)
+    # For two-argument instructions, jnz becomes cpy, and all other two-instructions become jnz.
+    elif func == jnz:
+        print(f"    turning jnz into cpy")
+        instructions[t] = (cpy, fargs)
+    elif func == cpy:
+        print(f"    turning cpy into jnz")
+        instructions[t] = (jnz, fargs)
+    else:
+        raise Exception(f"Unhandled instruction {target}")
+
+    return 1
