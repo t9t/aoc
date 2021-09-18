@@ -7,8 +7,8 @@ from datetime import timedelta
 
 
 def main(name, args):
-    if len(args) == 1 and (args[0] == "benchmark" or args[0] == "all"):
-        run_all(args[0] == "benchmark")
+    if len(args) == 1 and (args[0] == "benchmark" or args[0] == "all" or args[0] == "results"):
+        run_all(args[0])
         return
 
     if len(args) != 3:
@@ -40,15 +40,19 @@ def main(name, args):
     print("Result ({0}): {1}".format(format_duration(end-start), result))
 
 
-def run_all(benchmark_mode):
+def run_all(mode):
+    benchmark_mode = mode == "benchmark"
+    results_mode = mode == "results"
+
     year = 2016
     total = 49
     begin = datetime.now()
     total_run_time = timedelta()
     results = list()
 
-    print("| Year | Day | Part | Output             | Run time   |")
-    print("|------|-----|------|--------------------|------------|")
+    if not results_mode:
+        print("| Year | Day | Part | Output             | Run time   |")
+        print("|------|-----|------|--------------------|------------|")
 
     for day in range(1, 26):
         with open("../input/{0}/{1}.txt".format(year, day)) as f:
@@ -59,8 +63,9 @@ def run_all(benchmark_mode):
                 if day == 25 and part == 2:
                     # Day 25 only has 1 part
                     continue
-                print(f"{clearLine()}{(day-1)*2+part:2}/{total:2}; "
-                      f"{format_duration(datetime.now()-begin)}; day: {day}; part: {part}", end="")
+                if not results_mode:
+                    print(f"{clearLine()}{(day-1)*2+part:2}/{total:2}; "
+                          f"{format_duration(datetime.now()-begin)}; day: {day}; part: {part}", end="")
 
                 func = getattr(day_module, "part" + str(part))
                 start = datetime.now()
@@ -69,6 +74,8 @@ def run_all(benchmark_mode):
                 total_run_time += run_time
                 if benchmark_mode:
                     results.append((year, day, part, result, run_time))
+                elif results_mode:
+                    print(f"{year}-{day}-{part}: {result}")
                 else:
                     print(clearLine(), end="")
                     print(f"| {year:4} | {day:3} | {part:4} | {result:>18} | {format_duration(run_time):>10} |")
@@ -79,7 +86,9 @@ def run_all(benchmark_mode):
         for r in results:
             year, day, part, result, run_time = r
             print(f"| {year:4} | {day:3} | {part:4} | {result:>18} | {format_duration(run_time):>10} |")
-    print(f"\nTotal run time: {format_duration(total_run_time)}")
+
+    if not results_mode:
+        print(f"\nTotal run time: {format_duration(total_run_time)}")
 
 
 def format_duration(d: timedelta) -> str:
