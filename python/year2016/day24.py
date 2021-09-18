@@ -3,6 +3,14 @@ from collections import deque
 
 
 def part1(input: str):
+    return find_shortest_route_visting_all(input, return_to_zero=False)
+
+
+def part2(input: str):
+    return find_shortest_route_visting_all(input, return_to_zero=True)
+
+
+def find_shortest_route_visting_all(input: str, return_to_zero: bool) -> int:
     lines = input.strip().splitlines()
     lines = [line[1:len(line)-1] for line in lines[1:len(lines)-1]]
     locations = dict()
@@ -18,15 +26,13 @@ def part1(input: str):
     shortest = None
     for perm in permutations(pois):
         route = ('0',) + perm
+        if return_to_zero:
+            route += ('0',)
         length = calculate_path(route, lines, locations, cache)
         if shortest is None or length < shortest:
             shortest = length
 
     return shortest
-
-
-def part2(input: str):
-    return "not implemented"
 
 
 def calculate_path(route: tuple, lines: list, locations: dict, cache: dict) -> int:

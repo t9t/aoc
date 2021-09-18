@@ -15,14 +15,14 @@ class Test_Day24(unittest.TestCase):
         self.assertEqual(day24.part1(input.strip()), 14)
 
     def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "B": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day24.part2(input), expected)
+        input = """
+###########
+#0.1.....2#
+#.#######.#
+#4.......3#
+###########
+"""
+        self.assertEqual(day24.part2(input.strip()), 20)
 
 
 if __name__ == '__main__':
