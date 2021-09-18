@@ -1,5 +1,4 @@
 
-
 def part1(input: str):
     # https://www.youtube.com/watch?v=uCsD3ZGzMgE
     # The Josephus Problem - Numberphile

@@ -1,7 +1,5 @@
 import re
 
-import multiprocessing as mp
-
 regex_discs = r"Disc #(?:\d) has (\d+) positions; at time=0, it is at position (\d)\."
 
 

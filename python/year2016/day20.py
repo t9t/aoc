@@ -1,7 +1,4 @@
 
-from collections import deque
-
-
 def part1(input: str):
     ranges = list()
     for line in input.strip().splitlines():

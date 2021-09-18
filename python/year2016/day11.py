@@ -1,11 +1,8 @@
-
 import re
-from enum import Enum
 
 from itertools import combinations
 from itertools import chain
 from collections import deque
-from collections import Counter
 
 
 def part1(input: str) -> int:

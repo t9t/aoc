@@ -1,5 +1,4 @@
 
-
 def part1(input: str):
     return process(input.strip(), a=7)
 
