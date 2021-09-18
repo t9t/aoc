@@ -5,7 +5,8 @@ def part1(input: str):
 
 
 def part2(input: str):
-    return "not implemented"
+    # return process(input.strip(), a=12) -> ~400 sec on my machine
+    return sneaky_part2(input.strip())
 
 
 def process(input: str, a: int) -> int:
@@ -42,7 +43,6 @@ def process(input: str, a: int) -> int:
     l = len(instructions)
     while ptr < l:
         func, args = instructions[ptr]
-        #print(f"Executing {func}({args})")
         ptr += func(regs, args, ptr, instructions)
 
     return regs['a']
@@ -51,7 +51,6 @@ def process(input: str, a: int) -> int:
 def cpy(regs, args, ptr, instructions):
     src, tgt = args
     if tgt not in regs:
-        print(f"  invalid cpy ({args}), skipping")
         return 1
 
     if src in regs:
@@ -87,31 +86,43 @@ def jnz(regs, args, ptr, instructions):
 
 
 def tgl(regs, args, ptr, instructions):
-    print(f"  tgl; regs: {regs}; args: {args}; ptr: {ptr}")
     n = regs[args[0]]
     t = ptr+n
     if t < 0 or t >= len(instructions):
-        print(f"    t {t} < 0 or >= {len(instructions)}")
         return 1
     target = instructions[t]
-    print(f"    n: {n}; t: {t}; targeting: {target}")
     func, fargs = target
 
     # For one-argument instructions, inc becomes dec, and all other one-argument instructions become inc.
     if func == dec or func == tgl:
-        print(f"    turning dec/tgl into inc")
         instructions[t] = (inc, fargs)
     elif func == inc:
-        print(f"    turning inc into dec")
         instructions[t] = (dec, fargs)
     # For two-argument instructions, jnz becomes cpy, and all other two-instructions become jnz.
     elif func == jnz:
-        print(f"    turning jnz into cpy")
         instructions[t] = (cpy, fargs)
     elif func == cpy:
-        print(f"    turning cpy into jnz")
         instructions[t] = (jnz, fargs)
     else:
         raise Exception(f"Unhandled instruction {target}")
 
     return 1
+
+
+def sneaky_part2(input: str) -> int:
+    # It looks like the pattern is 12 factorial, and then adding the product of the pair of 2-digit cpy and jnz instructions
+    cpy, jnz = None, None
+    for i, line in enumerate(lines := input.strip().splitlines()):
+        if line.startswith("cpy ") and len(line) == 8:
+            cpy = int(line[3:6])
+            if i+1 < len(lines) and lines[i+1].startswith("jnz ") and len(lines[i+1]) == 8:
+                jnz = int(lines[i+1][3:6])
+    if not cpy or not jnz:
+        raise Exception("Assumption violated, no 2-digit cpy+jnz pair found")
+
+    # I know about math.factorial, but let's do SOME work ourselves shall we
+    f, c = 11, 12
+    while f > 1:
+        c *= f
+        f -= 1
+    return c + (cpy*jnz)

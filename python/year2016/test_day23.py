@@ -16,16 +16,6 @@ dec a
         """
         self.assertEqual(day23.process(input.strip(), a=0), 3)
 
-    def test_part2(self):
-        cases = {
-            "A": "not implemented",
-            "B": "not implemented",
-            "C": "not implemented",
-        }
-        for [input, expected] in cases.items():
-            with self.subTest(input):
-                self.assertEqual(day23.part2(input), expected)
-
 
 if __name__ == '__main__':
     unittest.main()
