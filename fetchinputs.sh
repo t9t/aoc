@@ -7,7 +7,7 @@ read -s SESH
 
 INPUTDIR="./input"
 
-for year in {2015..2020}; do
+for year in {2015..2021}; do
   YEARDIR="${INPUTDIR}/${year}"
   mkdir -p "${YEARDIR}"
   for day in {1..25}; do
