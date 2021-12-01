@@ -1,17 +1,11 @@
 import Foundation
 
-func day1part1() -> Int {
-    let items = [
-        199,
-        200,
-        208,
-        210,
-        200,
-        207,
-        240,
-        269,
-        260,
-        263]
+func day1part1(_ input: String) -> Int {
+    let lines = input.split(separator: "\n")
+    var items = Array<Int>()
+    for line in lines {
+        items.append(Int(line)!)
+    }
 
     var n = 0
     var prev = Int.max
