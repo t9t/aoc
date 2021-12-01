@@ -4,7 +4,7 @@ let inputDir = getInputDir()
 let inputFile = getInputDir() + "/2021/1.txt"
 let input = try String(contentsOfFile: inputFile)
 
-print(day1part1(input))
+print(day1part2(input))
 
 func getInputDir() -> String {
     // When running in AppCode it uses a .build/debug/ directory as working directory, so "../input" does not work

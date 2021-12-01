@@ -10,4 +10,9 @@ final class day1Tests: XCTestCase {
         let n = day1part1(input)
         XCTAssertEqual(n, 7)
     }
+
+    func testPart2() throws {
+        let n = day1part2(input)
+        XCTAssertEqual(n, 5)
+    }
 }
