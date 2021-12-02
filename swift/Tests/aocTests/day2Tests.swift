@@ -20,6 +20,6 @@ final class day2Tests: XCTestCase {
 
     func testPart2() throws {
         let n = Day2(input).part2()
-        XCTAssertEqual(n, 5)
+        XCTAssertEqual(n, 900)
     }
 }

@@ -32,6 +32,27 @@ class Day2 {
     }
 
     func part2() -> Int {
-        return 0
+        let lines = input.split(separator: "\n")
+
+        var x = 0, depth = 0, aim = 0
+        for line in lines {
+            let parts = line.split(separator: " ")
+            let direction = parts[0]
+            let amount = Int(parts[1])!
+
+            switch direction {
+            case "forward":
+                x += amount
+                depth += (aim * amount)
+            case "down":
+                aim += amount
+            case "up":
+                aim -= amount
+            default:
+                break
+            }
+        }
+
+        return x * depth
     }
 }
