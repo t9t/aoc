@@ -1,30 +1,24 @@
 import Foundation
 
 class Day2 {
-    let input: String
+    let inputLines: Array<Substring>
 
     init(_ input: String) {
-        self.input = input
+        inputLines = input.split(separator: "\n")
     }
 
     func part1() -> Int {
-        let lines = input.split(separator: "\n")
-
         var x = 0, depth = 0
-        for line in lines {
+        for line in inputLines {
             let parts = line.split(separator: " ")
-            let direction = parts[0]
-            let amount = Int(parts[1])!
+            let direction = parts[0], amount = Int(parts[1])!
 
-            switch direction {
-            case "forward":
+            if direction == "forward" {
                 x += amount
-            case "down":
+            } else if direction == "down" {
                 depth += amount
-            case "up":
+            } else if direction == "up" {
                 depth -= amount
-            default:
-                break
             }
         }
 
@@ -32,24 +26,18 @@ class Day2 {
     }
 
     func part2() -> Int {
-        let lines = input.split(separator: "\n")
-
         var x = 0, depth = 0, aim = 0
-        for line in lines {
+        for line in inputLines {
             let parts = line.split(separator: " ")
-            let direction = parts[0]
-            let amount = Int(parts[1])!
+            let direction = parts[0], amount = Int(parts[1])!
 
-            switch direction {
-            case "forward":
+            if direction == "forward" {
                 x += amount
                 depth += (aim * amount)
-            case "down":
+            } else if direction == "down" {
                 aim += amount
-            case "up":
+            } else if direction == "up" {
                 aim -= amount
-            default:
-                break
             }
         }
 
