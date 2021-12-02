@@ -7,11 +7,27 @@ read -s SESH
 
 INPUTDIR="./input"
 
-for year in {2015..2021}; do
+fetch() {
+  year="${1}"
+  day="${2}"
   YEARDIR="${INPUTDIR}/${year}"
   mkdir -p "${YEARDIR}"
+  echo "Fetching year ${year}; day ${day}"
+  curl -f -o "${YEARDIR}/${day}.txt" -H"Cookie: session=${SESH}" "https://adventofcode.com/${year}/day/${day}/input" 
+}
+
+if [[ $# -eq 2 ]]; then
+  fetch "${1}" "${2}"
+  exit 0
+fi
+
+if [[ $# -ne 0 ]]; then
+  echo 'Usage: ./fetchinputs.sh [year day]; either specify both or neither'
+  exit 1
+fi
+
+for year in {2015..2021}; do
   for day in {1..25}; do
-    echo "Fetching year ${year}; day ${day}"
-    curl -f -o "${YEARDIR}/${day}.txt" -H"Cookie: session=${SESH}" "https://adventofcode.com/${year}/day/${day}/input" 
+    fetch "${year}" "${day}"
   done
 done
