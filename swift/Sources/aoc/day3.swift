@@ -30,6 +30,29 @@ class Day3 {
     }
 
     func part2() -> Int {
-        return 1337
+        let oxygen = findRating(mostCommon: true)
+        let co2 = findRating(mostCommon: false)
+        return oxygen * co2
+    }
+
+    private func findRating(mostCommon: Bool) -> Int {
+        let len = inputLines[0].count
+        var linesLeft = inputLines
+        for i in 0...len - 1 {
+            var withOnes = Array<Substring>(), withZeroes = Array<Substring>()
+            for line in linesLeft {
+                let c: Character = line[line.index(line.startIndex, offsetBy: i)]
+                if c == "0" {
+                    withZeroes.append(line)
+                } else {
+                    withOnes.append(line)
+                }
+            }
+            linesLeft = ((withOnes.count >= withZeroes.count) == mostCommon) ? withOnes : withZeroes
+            if linesLeft.count == 1 {
+                break
+            }
+        }
+        return Int(linesLeft[0], radix: 2)!
     }
 }
