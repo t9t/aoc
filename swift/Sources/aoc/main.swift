@@ -1,10 +1,10 @@
 import Foundation
 
 let inputDir = getInputDir()
-let inputFile = getInputDir() + "/2021/3.txt"
+let inputFile = getInputDir() + "/2021/4.txt"
 let input = try String(contentsOfFile: inputFile)
 
-print(Day3(input).part2())
+print(try Day4(input).part1())
 
 func getInputDir() -> String {
     // When running in AppCode it uses a .build/debug/ directory as working directory, so "../input" does not work
