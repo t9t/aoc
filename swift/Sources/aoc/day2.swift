@@ -1,6 +1,6 @@
 import Foundation
 
-class Day2 {
+class Day2: Day {
     let inputLines: Array<Substring>
 
     init(_ input: String) {

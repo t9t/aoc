@@ -1,6 +1,6 @@
 import Foundation
 
-class Day1 {
+class Day1: Day {
     let items: Array<Int>
 
     init(_ input: String) {

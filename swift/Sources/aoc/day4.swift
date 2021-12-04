@@ -1,6 +1,6 @@
 import Foundation
 
-class Day4 {
+class Day4: Day {
     typealias Card = Array<Array<(Int, Bool)>>
 
     let numbers: Array<Int>

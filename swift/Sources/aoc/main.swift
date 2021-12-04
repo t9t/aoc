@@ -1,16 +1,35 @@
 import Foundation
 
-let inputDir = getInputDir()
-let inputFile = getInputDir() + "/2021/4.txt"
-let input = try String(contentsOfFile: inputFile)
-
-print(try Day4(input).part2())
-
-func getInputDir() -> String {
-    // When running in AppCode it uses a .build/debug/ directory as working directory, so "../input" does not work
-    if let inputDir = ProcessInfo.processInfo.environment["INPUT_DIR"] {
-        return inputDir
-    }
-    // Assuming aoc/swift directory here
-    return "../input"
+protocol Day {
+    func part1() throws -> Int
+    func part2() throws -> Int
 }
+
+let days: [Int: (String) -> Day] = [
+    1: Day1.init,
+    2: Day2.init,
+    3: Day3.init,
+    4: Day4.init,
+]
+
+print(CommandLine.arguments)
+
+if CommandLine.arguments.count != 3 {
+    print("invalid arguments, provide day & part")
+    exit(1)
+}
+
+let dayNum = Int(CommandLine.arguments[1])!
+let part = Int(CommandLine.arguments[2])!
+
+if part != 1 && part != 2 {
+    print("invalid part \(part), has to be 1 or 2")
+    exit(1)
+}
+
+print("Running day \(dayNum) part \(part)")
+
+let input = try String(contentsOfFile: "../input/2021/\(dayNum).txt")
+let day = days[dayNum]!(input)
+
+print(try (part == 1 ? day.part1 : day.part2)())
