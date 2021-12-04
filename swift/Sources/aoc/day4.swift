@@ -1,29 +1,28 @@
 import Foundation
 
 class Day4 {
+    typealias Card = Array<Array<(Int, Bool)>>
+
     let numbers: Array<Int>
-    var cards: Array<Array<Array<(Int, Bool)>>>
+    var cards: Array<Card>
 
     init(_ input: String) {
         let lines = input.split(separator: "\n", omittingEmptySubsequences: false)
         numbers = lines[0].split(separator: ",").map {
             Int($0)!
         }
-        cards = Array<Array<Array<(Int, Bool)>>>()
-        var card = Array<Array<(Int, Bool)>>()
-        for line in lines[2...] {
+        cards = Array<Card>()
+        var card = Card()
+        for line in lines.dropFirst(2) {
             if line.isEmpty {
                 cards.append(card)
-                card = Array<Array<(Int, Bool)>>()
+                card = Card()
                 continue
             }
 
-            var row = Array<(Int, Bool)>()
-            let nums = line.split(separator: " ")
-            for num in nums {
-                row.append((Int(num.trimmingCharacters(in: .whitespaces))!, false))
-            }
-            card.append(row)
+            card.append(line.split(separator: " ").map {
+                (Int($0.trimmingCharacters(in: .whitespaces))!, false)
+            })
         }
         if !card.isEmpty {
             cards.append(card)
@@ -33,10 +32,8 @@ class Day4 {
     func part1() throws -> Int {
         for num in numbers {
             mark(num)
-            for card in cards {
-                if wins(card) {
-                    return unmarkedSum(card) * num
-                }
+            for card in cards.filter { isWinning($0) } {
+                return num * (card.reduce(0, { sum, row in sum + (row.filter({ !$0.1 }).reduce(0, { $0 + $1.0 })) }))
             }
         }
         throw NoWinnerFound()
@@ -47,59 +44,27 @@ class Day4 {
     }
 
     func mark(_ num: Int) {
-        for c in 0...cards.count - 1 {
-            let card: Array<Array<(Int, Bool)>> = cards[c]
-            for r in 0...card.count - 1 {
-                let row: Array<(Int, Bool)> = card[r]
-                for i in 0...row.count - 1 {
-                    let n = row[i]
-                    if n.0 == num {
-                        cards[c][r][i] = (n.0, true)
+        for (c, card) in cards.enumerated() {
+            for (r, row) in card.enumerated() {
+                for (i, (n, _)) in row.enumerated() {
+                    if (n == num) {
+                        cards[c][r][i] = (n, true)
                     }
                 }
             }
         }
     }
 
-    func wins(_ card: Array<Array<(Int, Bool)>>) -> Bool {
-        for row in card {
-            var allHit = true
-            for num in row {
-                if !num.1 {
-                    allHit = false
-                    break
-                }
-            }
-            if allHit {
-                return true
-            }
+    func isWinning(_ card: Array<Array<(Int, Bool)>>) -> Bool {
+        if let _ = card.firstIndex(where: { row in row.map { $0.1 }.reduce(true, { $0 && $1 }) }) {
+            return true
         }
 
-        for i in 0...card[0].count - 1 {
-            var allHit = true
-            for row in card {
-                if !row[i].1 {
-                    allHit = false
-                    break
-                }
-            }
-            if allHit {
-                return true
-            }
+        if let _ = (0...card[0].count - 1).firstIndex(where: { i in card.map { $0[i].1 }.reduce(true, { $0 && $1 }) }) {
+            return true
         }
+
         return false
-    }
-
-    func unmarkedSum(_ card: Array<Array<(Int, Bool)>>) -> Int {
-        var sum = 0
-        for row in card {
-            for (n, m) in row {
-                if !m {
-                    sum += n
-                }
-            }
-        }
-        return sum
     }
 
     class NoWinnerFound: Error {
