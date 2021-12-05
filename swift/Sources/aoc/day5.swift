@@ -14,9 +14,7 @@ class Day5: Day {
             let segment = LineSegment(
                     from: Point(x: Int(from[0])!, y: Int(from[1])!),
                     to: Point(x: Int(to[0])!, y: Int(to[1])!))
-            if segment.from.x == segment.to.x || segment.from.y == segment.to.y {
-                segments.append(segment)
-            }
+            segments.append(segment)
         }
         lineSegments = segments
     }
@@ -59,8 +57,53 @@ class Day5: Day {
     }
 
     func part2() -> Int {
-        return 1337
+        var grid: [Point: Int] = [:]
+
+        func increment(x: Int, y: Int) {
+            let point = Point(x: x, y: y)
+            if let curr = grid[point] {
+                grid[point] = curr + 1
+            } else {
+                grid[point] = 1
+            }
+        }
+
+        for segment in lineSegments {
+            if segment.from.x == segment.to.x { // Horizontal
+                let fromY = min(segment.from.y, segment.to.y)
+                let toY = max(segment.from.y, segment.to.y)
+                for y in fromY...toY {
+                    increment(x: segment.from.x, y: y)
+                }
+            } else if segment.from.y == segment.to.y { // Vertical
+                let fromX = min(segment.from.x, segment.to.x)
+                let toX = max(segment.from.x, segment.to.x)
+                for x in fromX...toX {
+                    increment(x: x, y: segment.from.y)
+                }
+            } else { // Diagonal
+                var dx = segment.to.x - segment.from.x
+                var dy = segment.to.y - segment.from.y
+                let steps = abs(dx)
+                dx = dx > 0 ? 1 : -1
+                dy = dy > 0 ? 1 : -1
+
+                for step in 0...steps {
+                    let zxx = segment.from.x + (dx * step)
+                    let zy = segment.from.y + (dy * step)
+                    increment(x: zxx, y: zy)
+                }
+            }
+        }
+        var count = 0
+        for (_, val) in grid {
+            if val >= 2 {
+                count += 1
+            }
+        }
+        return count
     }
+
 
     struct Point: Hashable, Equatable {
         let x: Int, y: Int
