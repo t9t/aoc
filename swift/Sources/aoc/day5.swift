@@ -32,9 +32,9 @@ class Day5: Day {
                 incrementAll(segment.points())
             }
         }
-        if false {
-            printGrid()
-        }
+        #if false
+        printGrid()
+        #endif
         return countAtLeastTwoOverlaps()
     }
 
