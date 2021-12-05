@@ -96,33 +96,19 @@ class Day5: Day {
         }
 
         func points() -> Array<Point> {
-            var points = Array<Point>()
-            if (from.x == to.x) { // Horizontal
-                let minY = min(from.y, to.y), maxY = max(from.y, to.y)
-                for y in minY...maxY {
-                    points.append(Point(x: from.x, y: y))
-                }
-                return points
-            }
-            if (from.y == to.y) { // Vertical
-                let minX = min(from.x, to.x), maxX = max(from.x, to.x)
-                for x in minX...maxX {
-                    points.append(Point(x: x, y: from.y))
-                }
-                return points
-            }
-            // Diagonal
-            var dx = to.x - from.x
-            var dy = to.y - from.y
-            let steps = abs(dx)
-            dx = dx > 0 ? 1 : -1
-            dy = dy > 0 ? 1 : -1
+            let totalDx = to.x - from.x
+            let totalDy = to.y - from.y
 
-            for step in 0...steps {
-                let x = from.x + (dx * step)
-                let y = from.y + (dy * step)
+            let dx = totalDx == 0 ? 0 : (totalDx < 0 ? -1 : 1)
+            let dy = totalDy == 0 ? 0 : (totalDy < 0 ? -1 : 1)
+
+            var points = Array<Point>()
+            var x = from.x - dx, y = from.y - dy
+            repeat {
+                x += dx
+                y += dy
                 points.append(Point(x: x, y: y))
-            }
+            } while x != to.x || y != to.y
             return points
         }
     }

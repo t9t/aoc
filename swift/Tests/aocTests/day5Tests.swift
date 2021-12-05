@@ -38,10 +38,10 @@ final class day5Tests: XCTestCase {
 
     func test_LineSegment_points_horizontal_rightToLeft() throws {
         testLineSegmentPoints(from: Day5.Point(x: 4, y: 2), to: Day5.Point(x: 1, y: 2), expected: [
-            Day5.Point(x: 1, y: 2),
-            Day5.Point(x: 2, y: 2),
-            Day5.Point(x: 3, y: 2),
             Day5.Point(x: 4, y: 2),
+            Day5.Point(x: 3, y: 2),
+            Day5.Point(x: 2, y: 2),
+            Day5.Point(x: 1, y: 2),
         ])
     }
 
@@ -56,10 +56,10 @@ final class day5Tests: XCTestCase {
 
     func test_LineSegment_points_vertical_bottomToTop() throws {
         testLineSegmentPoints(from: Day5.Point(x: 2, y: 4), to: Day5.Point(x: 2, y: 1), expected: [
-            Day5.Point(x: 2, y: 1),
-            Day5.Point(x: 2, y: 2),
-            Day5.Point(x: 2, y: 3),
             Day5.Point(x: 2, y: 4),
+            Day5.Point(x: 2, y: 3),
+            Day5.Point(x: 2, y: 2),
+            Day5.Point(x: 2, y: 1),
         ])
     }
 
