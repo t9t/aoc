@@ -13,6 +13,6 @@ final class day6Tests: XCTestCase {
 
     func testPart2() throws {
         let n = Day6(input).part2()
-        XCTAssertEqual(n, 1337)
+        XCTAssertEqual(n, 26984457539)
     }
 }
