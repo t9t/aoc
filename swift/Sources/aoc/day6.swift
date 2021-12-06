@@ -1,37 +1,35 @@
 import Foundation
 
 class Day6: Day {
-    let inputFishes: Array<Int>
+    let inputFishes: [Int: Int]
 
     init(_ input: String) {
-        inputFishes = input
+        var map: [Int: Int] = [:]
+
+        for i in 0...9 {
+            map[i] = 0
+        }
+
+        input
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .split(separator: ",")
-                .map {
-                    Int($0.trimmingCharacters(in: .whitespaces))!
-                }
+                .map { Int($0.trimmingCharacters(in: .whitespaces))! }
+                .forEach { map[$0] = map[$0]! + 1 }
+
+        inputFishes = map
     }
 
     func part1() -> Int {
-        var fishes = inputFishes
-        for _ in 1...80 {
-            var newFishes = Array<Int>()
-            for fish in fishes {
-                if fish == 0 {
-                    newFishes.append(6) // Existing fish reset
-                    newFishes.append(8) // New fish created
-                    continue
-                }
-                newFishes.append(fish - 1)
-            }
-            fishes = newFishes
-        }
-        return fishes.count
+        evolution(80)
     }
 
     func part2() -> Int {
-        var fishes = fishMap()
-        for _ in 1...256 {
+        evolution(256)
+    }
+
+    private func evolution(_ days: Int) -> Int {
+        var fishes = inputFishes
+        for _ in 1...days {
             let currentZeroes = fishes[0]!
             let newSixes = currentZeroes
             let newEights = currentZeroes
@@ -54,7 +52,7 @@ class Day6: Day {
         return total
     }
 
-    private func fishMap() -> [Int: Int] {
+    private func fishMap(_ inputFishes: [Int]) -> [Int: Int] {
         var map: [Int: Int] = [:]
 
         for i in 0...9 {
