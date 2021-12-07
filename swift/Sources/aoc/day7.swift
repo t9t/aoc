@@ -18,24 +18,22 @@ class Day7: Day {
     }
 
     func part1() -> Int {
-        var minFuel = Int.max
-        for pos in minPos...maxPos {
-            let fuel = calculateFuelForPos(pos)
-            print("pos", pos, "fuel", fuel)
-            minFuel = min(minFuel, fuel)
-        }
-        return minFuel
+        determineMinFuel { $0 }
     }
 
     func part2() -> Int {
-        return 1337
+        determineMinFuel { $0 * ($0 + 1) / 2 }
     }
 
-    private func calculateFuelForPos(_ target: Int) -> Int {
-        var fuel = 0
-        for pos in inputPositions {
-            fuel += abs(target - pos)
+    private func determineMinFuel(_ fuelForPosFunc: (Int) -> Int) -> Int {
+        var minFuel = Int.max
+        for target in minPos...maxPos {
+            var fuel = 0
+            for pos in inputPositions {
+                fuel += fuelForPosFunc(abs(target - pos))
+            }
+            minFuel = min(minFuel, fuel)
         }
-        return fuel
+        return minFuel
     }
 }
