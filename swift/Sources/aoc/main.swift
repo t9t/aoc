@@ -12,6 +12,7 @@ let days: [Int: (String) -> Day] = [
     4: Day4.init,
     5: Day5.init,
     6: Day6.init,
+    7: Day7.init,
 ]
 
 print(CommandLine.arguments)
