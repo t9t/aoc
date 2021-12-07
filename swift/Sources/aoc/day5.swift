@@ -1,8 +1,8 @@
 import Foundation
 
 class Day5: Day {
-    let lineSegments: Array<LineSegment>
-    var grid: [Point: Int] = [:]
+    private let lineSegments: Array<LineSegment>
+    private var grid: [Point: Int] = [:]
 
     init(_ input: String) {
         lineSegments = input.split(separator: "\n")
@@ -25,7 +25,7 @@ class Day5: Day {
         drawLinesReturningCount(includeDiagonals: true)
     }
 
-    func drawLinesReturningCount(includeDiagonals: Bool) -> Int {
+    private func drawLinesReturningCount(includeDiagonals: Bool) -> Int {
         for segment in lineSegments {
             let diagonal = segment.isDiagonal()
             if !diagonal || (diagonal && includeDiagonals) {
@@ -38,7 +38,7 @@ class Day5: Day {
         return countAtLeastTwoOverlaps()
     }
 
-    func countAtLeastTwoOverlaps() -> Int {
+    private func countAtLeastTwoOverlaps() -> Int {
         var count = 0
         for (_, val) in grid {
             if val >= 2 {
@@ -48,13 +48,13 @@ class Day5: Day {
         return count
     }
 
-    func incrementAll(_ points: [Point]) {
+    private func incrementAll(_ points: [Point]) {
         for point in points {
             increment(point)
         }
     }
 
-    func increment(_ point: Point) {
+    private func increment(_ point: Point) {
         if let curr = grid[point] {
             grid[point] = curr + 1
         } else {
@@ -63,7 +63,7 @@ class Day5: Day {
     }
 
 
-    func printGrid() {
+    private func printGrid() {
         var minX = Int.max, maxX = Int.min, minY = Int.max, maxY = Int.min
         for (key, _) in grid {
             minX = min(key.x, minX)
@@ -83,19 +83,19 @@ class Day5: Day {
         }
     }
 
-    struct Point: Hashable, Equatable {
+    internal struct Point: Hashable, Equatable {
         let x: Int, y: Int
     }
 
-    struct LineSegment {
+    internal struct LineSegment {
         let from: Point
         let to: Point
 
-        func isDiagonal() -> Bool {
+        internal func isDiagonal() -> Bool {
             from.x != to.x && from.y != to.y
         }
 
-        func points() -> Array<Point> {
+        internal func points() -> Array<Point> {
             let totalDx = to.x - from.x
             let totalDy = to.y - from.y
 

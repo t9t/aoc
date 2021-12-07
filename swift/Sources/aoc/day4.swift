@@ -1,10 +1,10 @@
 import Foundation
 
 class Day4: Day {
-    typealias Card = Array<Array<(Int, Bool)>>
+    private typealias Card = Array<Array<(Int, Bool)>>
 
-    let numbers: Array<Int>
-    let inputCards: Array<Card>
+    private let numbers: Array<Int>
+    private let inputCards: Array<Card>
 
     init(_ input: String) {
         let lines = input.split(separator: "\n", omittingEmptySubsequences: false)
@@ -56,11 +56,11 @@ class Day4: Day {
         throw NoWinnerFound()
     }
 
-    func sumUnmarked(_ card: Card) -> Int {
+    private func sumUnmarked(_ card: Card) -> Int {
         card.reduce(0, { sum, row in sum + (row.filter({ !$0.1 }).reduce(0, { $0 + $1.0 })) })
     }
 
-    func mark(_ inCards: Array<Card>, _ num: Int) -> Array<Card> {
+    private func mark(_ inCards: Array<Card>, _ num: Int) -> Array<Card> {
         var outCards = inCards
         for (c, card) in outCards.enumerated() {
             for (r, row) in card.enumerated() {
@@ -74,7 +74,7 @@ class Day4: Day {
         return outCards
     }
 
-    func isWinning(_ card: Array<Array<(Int, Bool)>>) -> Bool {
+    private func isWinning(_ card: Array<Array<(Int, Bool)>>) -> Bool {
         if let _ = card.firstIndex(where: { row in row.map { $0.1 }.reduce(true, { $0 && $1 }) }) {
             return true
         }

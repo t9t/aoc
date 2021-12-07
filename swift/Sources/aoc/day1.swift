@@ -1,7 +1,7 @@
 import Foundation
 
 class Day1: Day {
-    let items: Array<Int>
+    private let items: Array<Int>
 
     init(_ input: String) {
         items = Day1.parseInput(input)
@@ -32,7 +32,7 @@ class Day1: Day {
         return n
     }
 
-    static func parseInput(_ input: String) -> Array<Int> {
+    private static func parseInput(_ input: String) -> Array<Int> {
         let lines = input.split(separator: "\n")
         var items = Array<Int>()
         for line in lines {

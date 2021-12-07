@@ -1,7 +1,7 @@
 import Foundation
 
 class Day6: Day {
-    let inputFishes: [Int: Int]
+    private let inputFishes: [Int: Int]
 
     init(_ input: String) {
         var map: [Int: Int] = [:]

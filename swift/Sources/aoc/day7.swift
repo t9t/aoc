@@ -1,8 +1,8 @@
 import Foundation
 
 class Day7: Day {
-    let inputPositions: Array<Int>
-    let minPos: Int, maxPos: Int
+    private let inputPositions: Array<Int>
+    private let minPos: Int, maxPos: Int
 
     init(_ input: String) {
         inputPositions = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: ",").map {
