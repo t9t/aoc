@@ -35,4 +35,29 @@ print("Running day \(dayNum) part \(part)")
 let input = try String(contentsOfFile: "../input/2021/\(dayNum).txt")
 let day = days[dayNum]!(input)
 
-print(try (part == 1 ? day.part1 : day.part2)())
+let start = Date()
+let output = try (part == 1 ? day.part1 : day.part2)()
+let took = start.timeIntervalSinceNow
+
+print(output)
+print("Took \(formatInterval(took))")
+
+private func formatInterval(_ intervalInput: TimeInterval) -> String {
+    let interval = abs(intervalInput)
+    let totalSeconds = Int(interval)
+
+    var out = Array<String>()
+    let minutes = totalSeconds / 60
+    if minutes > 0 {
+        out.append("\(minutes)m")
+    }
+    let seconds = totalSeconds % 60
+    if seconds > 0 {
+        out.append("\(seconds)s")
+    }
+    let ms = Int(interval.truncatingRemainder(dividingBy: 1) * 1000)
+    if ms > 0 {
+        out.append("\(ms)ms")
+    }
+    return out.joined(separator: " ")
+}
