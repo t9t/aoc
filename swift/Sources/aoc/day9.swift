@@ -69,34 +69,23 @@ class Day9: Day {
         next.append(point)
         let maxY = rows.count - 1, maxX = rows[0].count - 1
 
+        func maybeAppend(x: Int, y: Int) {
+            if x >= 0 && x <= maxX && y >= 0 && y <= maxY && rows[y][x] != 9 {
+                let point = Point(x: x, y: y)
+                if basinMap[point] == nil {
+                    next.append(point)
+                }
+            }
+        }
+
         while !next.isEmpty {
             let current = next.popLast()!
-            if basinMap[current] != nil {
-                continue
-            }
             basinMap[current] = basinNumber
-
             let x = current.x, y = current.y
-            if x > 0 && rows[y][x - 1] != 9 {
-                // Left
-                next.append(Point(x: x - 1, y: y))
-            }
-            if x < maxX && rows[y][x + 1] != 9 {
-                // Right
-                next.append(Point(x: x + 1, y: y))
-            }
-            if y > 0 && rows[y - 1][x] != 9 {
-                // Above
-                next.append(Point(x: x, y: y - 1))
-            }
-            if y < maxY && rows[y + 1][x] != 9 {
-                // Below
-                next.append(Point(x: x, y: y + 1))
-            }
-
-            if next.isEmpty {
-                break
-            }
+            maybeAppend(x: x - 1, y: y) // Left
+            maybeAppend(x: x + 1, y: y) // Right
+            maybeAppend(x: x, y: y - 1) // Above
+            maybeAppend(x: x, y: y + 1) // Below
         }
         return basinMap
     }
