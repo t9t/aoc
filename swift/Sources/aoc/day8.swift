@@ -1,7 +1,7 @@
 import Foundation
 
 class Day8: Day {
-    let notes: Array<(Array<String>, Array<String>)>
+    private let notes: Array<(Array<String>, Array<String>)>
 
     init(_ input: String) {
         notes = input.split(separator: "\n").map { Day8.parseLine($0) }

@@ -1,7 +1,7 @@
 import Foundation
 
 class TemplateDay: Day {
-    let inputLines: Array<Substring>
+    private let inputLines: Array<Substring>
 
     init(_ input: String) {
         inputLines = input.split(separator: "\n")
