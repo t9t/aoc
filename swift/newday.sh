@@ -23,7 +23,7 @@ gsed -i "s/TemplateDay/Day${DAY}/" "${TESTS_FILE}"
 gsed -i "s/TemplateDay/Day${DAY}/" "${TESTS_FILE}"
 gsed -i "s/templateTests/day${DAY}Tests/" "${TESTS_FILE}"
 
-gsed -i "s/\/\*newday\*\/]/    ${DAY}: Day${DAY}.init,\n\/\*newday\*\/]/" "${MAIN_FILE}"
+gsed -i "s/\/\*newday\*\/]/        ${DAY}: Day${DAY}.init,\n\/\*newday\*\/]/" "${MAIN_FILE}"
 
 
 git add "${SOURCE_FILE}" "${TESTS_FILE}" "${MAIN_FILE}"

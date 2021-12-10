@@ -5,18 +5,24 @@ protocol Day {
     func part2() throws -> Int
 }
 
-let days: [Int: (String) -> Day] = [
-    1: Day1.init,
-    2: Day2.init,
-    3: Day3.init,
-    4: Day4.init,
-    5: Day5.init,
-    6: Day6.init,
-    7: Day7.init,
-    8: Day8.init,
-    9: Day9.init,
-    10: Day10.init,
+internal class Days {
+    private static let days: [Int: (String) -> Day] = [
+        1: Day1.init,
+        2: Day2.init,
+        3: Day3.init,
+        4: Day4.init,
+        5: Day5.init,
+        6: Day6.init,
+        7: Day7.init,
+        8: Day8.init,
+        9: Day9.init,
+        10: Day10.init,
 /*newday*/]
+
+    static func get(num: Int, input: String) -> Day {
+        days[num]!(input)
+    }
+}
 
 print(CommandLine.arguments)
 
@@ -36,7 +42,7 @@ if part != 1 && part != 2 {
 print("Running day \(dayNum) part \(part)")
 
 let input = try String(contentsOfFile: "../input/2021/\(dayNum).txt")
-let day = days[dayNum]!(input)
+let day = Days.get(num: dayNum, input: input)
 
 let start = Date()
 let output = try (part == 1 ? day.part1 : day.part2)()
