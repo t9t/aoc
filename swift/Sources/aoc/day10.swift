@@ -8,11 +8,17 @@ class Day10: Day {
     }
 
     func part1() -> Int {
-        return inputLines.map({ Day10.determineSyntaxErrorScore($0) }).reduce(0, +)
+        inputLines.map({ Day10.determineSyntaxErrorScore($0) }).reduce(0, +)
     }
 
     func part2() -> Int {
-        return 1337
+        let scores = inputLines
+                .filter({ Day10.determineSyntaxErrorScore($0) == 0 })
+                .map({ Day10.findCompletionString($0) })
+                .map({ Day10.calculateScore($0) })
+                .sorted()
+
+        return scores[scores.startIndex.advanced(by: scores.count / 2)]
     }
 
     private static let matchesMap: [Character: Character] = ["(": ")", "[": "]", "{": "}", "<": ">"]
@@ -30,5 +36,38 @@ class Day10: Day {
             }
         }
         return 0
+    }
+
+    internal static func findCompletionString<S: StringProtocol>(_ line: S) -> String {
+        var expectedClosingBraces = Array<Character>()
+        var completionString = ""
+        for c in line {
+            if let closing = matchesMap[c] {
+                expectedClosingBraces.append(closing)
+            } else {
+                while true {
+                    let expected = expectedClosingBraces.popLast()
+                    if expected == nil || c == expected {
+                        break
+                    }
+                    completionString += String(expected!)
+                }
+            }
+        }
+        for c in expectedClosingBraces.reversed() {
+            completionString += String(c)
+        }
+        return completionString
+    }
+
+    private static let completionStringScoreTable: [Character: Int] = [")": 1, "]": 2, "}": 3, ">": 4]
+
+    internal static func calculateScore(_ completionString: String) -> Int {
+        var score = 0
+        for c in completionString {
+            score *= 5
+            score += completionStringScoreTable[c]!
+        }
+        return score
     }
 }

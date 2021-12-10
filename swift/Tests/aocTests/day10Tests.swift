@@ -24,7 +24,7 @@ final class day10Tests: XCTestCase {
 
     func testPart2() throws {
         let n = Day10(input).part2()
-        XCTAssertEqual(n, 1337)
+        XCTAssertEqual(n, 288957)
     }
 
     func testDetermineSyntaxErrorScore() throws {
@@ -36,13 +36,46 @@ final class day10Tests: XCTestCase {
             "<([{}])>": 0,
             "[<>({}){}[([])<>]]": 0,
             "(((((((((())))))))))": 0,
-
             "(]": 57,
             "{()()()>": 25137,
             "(((()))}": 1197,
         ]
         for (testCase, expected) in cases {
             let actual = Day10.determineSyntaxErrorScore(testCase)
+            XCTAssertEqual(actual, expected)
+        }
+    }
+
+    func testFindCompletionString() throws {
+        let cases = [
+            "[]": "",
+            "[()(){}(({<<>>}))]": "",
+            "[": "]",
+            "[()": "]",
+            "[(){]": "}",
+            "[](){<>": "}",
+            "[({(<(())[]>[[{[]{<()<>>": "}}]])})]",
+            "[(()[<>])]({[<{<<[]>>(": ")}>]})",
+            "(((({<>}<{<{<>}{[]{[]{}": "}}>}>))))",
+            "{<[[]]>}<{[{[{[]{()[[[]": "]]}}]}]}>",
+            "<{([{{}}[<[[[<>{}]]]>[]]": "])}>",
+        ]
+        for (testCase, expected) in cases {
+            let actual = Day10.findCompletionString(testCase)
+            XCTAssertEqual(actual, expected)
+        }
+    }
+
+    func testCalculateScore() throws {
+        let cases = [
+            "}}]])})]": 288957,
+            ")}>]})": 5566,
+            "}}>}>))))": 1480781,
+            "]]}}]}]}>": 995444,
+            "])}>": 294,
+        ]
+        for (testCase, expected) in cases {
+            let actual = Day10.calculateScore(testCase)
             XCTAssertEqual(actual, expected)
         }
     }
