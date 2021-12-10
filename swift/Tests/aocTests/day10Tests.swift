@@ -46,22 +46,22 @@ final class day10Tests: XCTestCase {
         }
     }
 
-    func testFindCompletionString() throws {
+    func testFindCompletionStringX() throws {
         let cases = [
-            "[]": "",
-            "[()(){}(({<<>>}))]": "",
-            "[": "]",
-            "[()": "]",
-            "[(){]": "}",
-            "[](){<>": "}",
-            "[({(<(())[]>[[{[]{<()<>>": "}}]])})]",
-            "[(()[<>])]({[<{<<[]>>(": ")}>]})",
-            "(((({<>}<{<{<>}{[]{[]{}": "}}>}>))))",
-            "{<[[]]>}<{[{[{[]{()[[[]": "]]}}]}]}>",
-            "<{([{{}}[<[[[<>{}]]]>[]]": "])}>",
+            "[]": Day10.MatchingResult.Complete,
+            "[()(){}(({<<>>}))]": Day10.MatchingResult.Complete,
+            "[": Day10.MatchingResult.Incomplete(completionString: "]"),
+            "[()": Day10.MatchingResult.Incomplete(completionString: "]"),
+            "[(){]": Day10.MatchingResult.Corrupted(firstInvalidCharacter: "]"),
+            "[](){<>": Day10.MatchingResult.Incomplete(completionString: "}"),
+            "[({(<(())[]>[[{[]{<()<>>": Day10.MatchingResult.Incomplete(completionString: "}}]])})]"),
+            "[(()[<>])]({[<{<<[]>>(": Day10.MatchingResult.Incomplete(completionString: ")}>]})"),
+            "(((({<>}<{<{<>}{[]{[]{}": Day10.MatchingResult.Incomplete(completionString: "}}>}>))))"),
+            "{<[[]]>}<{[{[{[]{()[[[]": Day10.MatchingResult.Incomplete(completionString: "]]}}]}]}>"),
+            "<{([{{}}[<[[[<>{}]]]>[]]": Day10.MatchingResult.Incomplete(completionString: "])}>"),
         ]
         for (testCase, expected) in cases {
-            let actual = Day10.findCompletionString(testCase)
+            let actual = Day10.matchBraces(testCase)
             XCTAssertEqual(actual, expected)
         }
     }
