@@ -1,0 +1,29 @@
+import XCTest
+import class Foundation.Bundle
+
+@testable import aoc
+
+final class day11Tests: XCTestCase {
+    private let input = """
+                        5483143223
+                        2745854711
+                        5264556173
+                        6141336146
+                        6357385478
+                        4167524645
+                        2176841721
+                        6882881134
+                        4846848554
+                        5283751526
+                        """
+
+    func testPart1() throws {
+        let n = Day11(input).part1()
+        XCTAssertEqual(n, 1656)
+    }
+
+    func testPart2() throws {
+        let n = Day11(input).part2()
+        XCTAssertEqual(n, 1337)
+    }
+}
