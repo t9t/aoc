@@ -7,7 +7,7 @@ class Day11: Day {
         octopuses = input
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .split(separator: "\n")
-                .map({ line in line.map({ Octopus(energyLevel: Int(String($0))!, hasFlashed: false) }) })
+                .map({ line in line.map({ Octopus(energyLevel: Int(String($0))!) }) })
     }
 
     func part1() throws -> Int {
@@ -26,26 +26,23 @@ class Day11: Day {
             var allFlashed = true
             for row in octopuses {
                 for octopus in row {
-                    if octopus.energyLevel > 9 {
-                        octopus.energyLevel = 1
-                    } else {
-                        octopus.energyLevel += 1
-                    }
-                    if !octopus.hasFlashed {
+                    if octopus.energyLevel > 0 {
                         allFlashed = false
+                        octopus.energyLevel += 1
+                    } else if octopus.energyLevel < 0 {
+                        octopus.energyLevel = 1
                     }
-                    octopus.hasFlashed = false
                 }
             }
             if !findTotalFlashes && allFlashed {
-                return step-1
+                return step - 1
             }
 
             while true {
                 var anyFlashed = false
                 outer: for (y, row) in octopuses.enumerated() {
                     for (x, octopus) in row.enumerated() {
-                        if octopus.energyLevel > 9 && !octopus.hasFlashed {
+                        if octopus.energyLevel > 9 {
                             totalFlashes += 1
                             anyFlashed = true
                             for dy in max(0, y - 1)...min(y + 1, maxY) {
@@ -55,7 +52,7 @@ class Day11: Day {
                                     }
                                 }
                             }
-                            octopus.hasFlashed = true
+                            octopus.energyLevel = Int.min
                         }
                     }
                 }
@@ -72,11 +69,9 @@ class Day11: Day {
 
     private class Octopus: CustomStringConvertible {
         var energyLevel: Int
-        var hasFlashed: Bool
 
-        init(energyLevel: Int, hasFlashed: Bool) {
+        init(energyLevel: Int) {
             self.energyLevel = energyLevel
-            self.hasFlashed = hasFlashed
         }
 
         var description: String {
