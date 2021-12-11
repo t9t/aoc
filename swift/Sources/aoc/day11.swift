@@ -29,7 +29,7 @@ class Day11: Day {
                     if octopus.energyLevel > 0 {
                         allFlashed = false
                         octopus.energyLevel += 1
-                    } else if octopus.energyLevel < 0 {
+                    } else if octopus.energyLevel <= 0 {
                         octopus.energyLevel = 1
                     }
                 }
@@ -47,12 +47,13 @@ class Day11: Day {
                             anyFlashed = true
                             for dy in max(0, y - 1)...min(y + 1, maxY) {
                                 for dx in max(0, x - 1)...min(x + 1, maxX) {
-                                    if dx != x || dy != y {
-                                        octopuses[dy][dx].energyLevel += 1
+                                    let other = octopuses[dy][dx]
+                                    if (dx != x || dy != y) && other.energyLevel > 0 {
+                                        other.energyLevel += 1
                                     }
                                 }
                             }
-                            octopus.energyLevel = Int.min
+                            octopus.energyLevel = 0
                         }
                     }
                 }
