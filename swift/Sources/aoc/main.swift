@@ -18,6 +18,7 @@ internal class Days {
         9: Day9.init,
         10: Day10.init,
         11: Day11.init,
+        12: Day12.init,
 /*newday*/]
 
     static func get(num: Int, input: String) -> Day {
