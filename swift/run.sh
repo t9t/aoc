@@ -1,3 +1,3 @@
 #!/bin/bash
 
-swift run aoc $*
+swift run -Xswiftc -O aoc $*
