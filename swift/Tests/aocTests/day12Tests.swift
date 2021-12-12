@@ -63,8 +63,18 @@ final class day12Tests: XCTestCase {
         XCTAssertEqual(n, 226)
     }
 
-    func testPart2() throws {
-        let n = Day12(input).part2()
-        XCTAssertEqual(n, 1337)
+    func testPart2_Small() throws {
+        let n = Day12(inputSmall).part2()
+        XCTAssertEqual(n, 36)
+    }
+
+    func testPart2_SlightlyLarger() throws {
+        let n = Day12(inputSlightlyLarger).part2()
+        XCTAssertEqual(n, 103)
+    }
+
+    func testPart2_EvenLarger() throws {
+        let n = Day12(inputEvenLarger).part2()
+        XCTAssertEqual(n, 3509)
     }
 }
