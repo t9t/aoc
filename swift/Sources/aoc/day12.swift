@@ -15,41 +15,20 @@ class Day12: Day {
     }
 
     func part1() -> Int {
-        let pathsToEnd = findPathsToEnd(start: "start", pathSoFar: ["start"])
-        return pathsToEnd.count
-    }
-
-    private var foundPaths = 0
-    func part2() -> Int {
         foundPaths = 0
-        findPathsToEnd2(start: "start", pathSoFar: ["start"], hasSmallTwice: false)
+        findPathsToEnd(start: "start", pathSoFar: ["start"], allowSmallTwice: false, hasSmallTwice: false)
         return foundPaths
     }
 
+    private var foundPaths = 0
 
-    private func findPathsToEnd(start: String, pathSoFar: Array<String>) -> Array<Array<String>> {
-        if start == "end" {
-            return [pathSoFar]
-        }
-
-        var out = Array<Array<String>>()
-        for (from, to) in connections {
-            if from != start || (pathSoFar.contains(to) && isSmall(to)) {
-                continue
-            }
-
-            var nextPath = pathSoFar
-            nextPath.append(to)
-
-            let further = findPathsToEnd(start: to, pathSoFar: nextPath)
-            if !further.isEmpty {
-                out.appendAll(further)
-            }
-        }
-        return out
+    func part2() -> Int {
+        foundPaths = 0
+        findPathsToEnd(start: "start", pathSoFar: ["start"], allowSmallTwice: true, hasSmallTwice: false)
+        return foundPaths
     }
 
-    private func findPathsToEnd2(start: String, pathSoFar: Array<String>, hasSmallTwice: Bool) {
+    private func findPathsToEnd(start: String, pathSoFar: Array<String>, allowSmallTwice: Bool, hasSmallTwice: Bool) {
         if start == "end" {
             foundPaths += 1
             return
@@ -61,17 +40,21 @@ class Day12: Day {
             }
             var hasSmallTwice = hasSmallTwice
             if isSmall(to) && pathSoFar.contains(to) {
-                if hasSmallTwice {
-                    continue
+                if allowSmallTwice {
+                    if hasSmallTwice {
+                        continue
+                    } else {
+                        hasSmallTwice = true
+                    }
                 } else {
-                    hasSmallTwice = true
+                    continue
                 }
             }
 
             var nextPath = pathSoFar
             nextPath.append(to)
 
-            findPathsToEnd2(start: to, pathSoFar: nextPath, hasSmallTwice: hasSmallTwice)
+            findPathsToEnd(start: to, pathSoFar: nextPath, allowSmallTwice: allowSmallTwice, hasSmallTwice: hasSmallTwice)
         }
     }
 
