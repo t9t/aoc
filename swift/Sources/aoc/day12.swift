@@ -20,8 +20,7 @@ class Day12: Day {
     }
 
     func part2() -> Int {
-        let visitCounts = ["start": 1]
-        let pathsToEnd = findPathsToEnd2(start: "start", pathSoFar: ["start"], visitCounts: visitCounts)
+        let pathsToEnd = findPathsToEnd2(start: "start", pathSoFar: ["start"], hasSmallTwice: false)
         return pathsToEnd.count
     }
 
@@ -47,21 +46,9 @@ class Day12: Day {
         return out
     }
 
-    private func findPathsToEnd2(start: String, pathSoFar: Array<String>, visitCounts: [String: Int]) -> Array<Array<String>> {
+    private func findPathsToEnd2(start: String, pathSoFar: Array<String>, hasSmallTwice: Bool) -> Array<Array<String>> {
         if start == "end" {
             return [pathSoFar]
-        }
-
-        var n = 0
-        for (k,v) in visitCounts {
-            if isSmall(k) {
-                if v >= 2 {
-                    n += 1
-                }
-            }
-        }
-        if n > 1 {
-            return []
         }
 
         var out = Array<Array<String>>()
@@ -69,24 +56,19 @@ class Day12: Day {
             if to == "start" || from != start {
                 continue
             }
-            if isSmall(to) {
-                if let visitCount = visitCounts[to] {
-                    if visitCount >= 2 {
-                        continue
-                    }
+            var hasSmallTwice = hasSmallTwice
+            if isSmall(to) && pathSoFar.contains(to) {
+                if hasSmallTwice {
+                    continue
+                } else {
+                    hasSmallTwice = true
                 }
             }
 
             var nextPath = pathSoFar
             nextPath.append(to)
-            var visitCounts2 = visitCounts
-            if visitCounts2[to] == nil {
-                visitCounts2[to] = 1
-            } else {
-                visitCounts2[to] = visitCounts2[to]! + 1
-            }
 
-            let further = findPathsToEnd2(start: to, pathSoFar: nextPath, visitCounts: visitCounts2)
+            let further = findPathsToEnd2(start: to, pathSoFar: nextPath, hasSmallTwice: hasSmallTwice)
             if !further.isEmpty {
                 out.appendAll(further)
             }
