@@ -15,25 +15,19 @@ class Day12: Day {
     }
 
     func part1() -> Int {
-        foundPaths = 0
         findPathsToEnd(start: "start", pathSoFar: ["start"], allowSmallTwice: false, hasSmallTwice: false)
-        return foundPaths
     }
-
-    private var foundPaths = 0
 
     func part2() -> Int {
-        foundPaths = 0
         findPathsToEnd(start: "start", pathSoFar: ["start"], allowSmallTwice: true, hasSmallTwice: false)
-        return foundPaths
     }
 
-    private func findPathsToEnd(start: String, pathSoFar: Array<String>, allowSmallTwice: Bool, hasSmallTwice: Bool) {
+    private func findPathsToEnd(start: String, pathSoFar: Array<String>, allowSmallTwice: Bool, hasSmallTwice: Bool) -> Int {
         if start == "end" {
-            foundPaths += 1
-            return
+            return 1
         }
 
+        var foundPaths = 0
         for (from, to) in connections {
             if to == "start" || from != start {
                 continue
@@ -54,19 +48,12 @@ class Day12: Day {
             var nextPath = pathSoFar
             nextPath.append(to)
 
-            findPathsToEnd(start: to, pathSoFar: nextPath, allowSmallTwice: allowSmallTwice, hasSmallTwice: hasSmallTwice)
+            foundPaths += findPathsToEnd(start: to, pathSoFar: nextPath, allowSmallTwice: allowSmallTwice, hasSmallTwice: hasSmallTwice)
         }
+        return foundPaths
     }
 
     private func isSmall(_ s: String) -> Bool {
         s.lowercased() == s
-    }
-}
-
-extension Array {
-    mutating func appendAll(_ other: Array) {
-        for e in other {
-            self.append(e)
-        }
     }
 }
