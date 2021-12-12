@@ -32,7 +32,7 @@ class Day12: Day {
 
         var out = Array<Array<String>>()
         for (from, to) in connections {
-            if from != start || (pathSoFar.contains(to) && !isBig(to)) {
+            if from != start || (pathSoFar.contains(to) && isSmall(to)) {
                 continue
             }
 
@@ -54,7 +54,7 @@ class Day12: Day {
 
         var n = 0
         for (k,v) in visitCounts {
-            if !isBig(k) {
+            if isSmall(k) {
                 if v >= 2 {
                     n += 1
                 }
@@ -69,7 +69,7 @@ class Day12: Day {
             if to == "start" || from != start {
                 continue
             }
-            if !isBig(to) {
+            if isSmall(to) {
                 if let visitCount = visitCounts[to] {
                     if visitCount >= 2 {
                         continue
@@ -94,8 +94,8 @@ class Day12: Day {
         return out
     }
 
-    private func isBig(_ s: String) -> Bool {
-        s.uppercased() == s
+    private func isSmall(_ s: String) -> Bool {
+        s.lowercased() == s
     }
 }
 
