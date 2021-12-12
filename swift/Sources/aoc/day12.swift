@@ -19,10 +19,13 @@ class Day12: Day {
         return pathsToEnd.count
     }
 
+    private var foundPaths = 0
     func part2() -> Int {
-        let pathsToEnd = findPathsToEnd2(start: "start", pathSoFar: ["start"], hasSmallTwice: false)
-        return pathsToEnd.count
+        foundPaths = 0
+        findPathsToEnd2(start: "start", pathSoFar: ["start"], hasSmallTwice: false)
+        return foundPaths
     }
+
 
     private func findPathsToEnd(start: String, pathSoFar: Array<String>) -> Array<Array<String>> {
         if start == "end" {
@@ -46,13 +49,13 @@ class Day12: Day {
         return out
     }
 
-    private func findPathsToEnd2(start: String, pathSoFar: Array<String>, hasSmallTwice: Bool) -> Array<Array<String>> {
+    private func findPathsToEnd2(start: String, pathSoFar: Array<String>, hasSmallTwice: Bool) {
         if start == "end" {
-            return [pathSoFar]
+            foundPaths += 1
+            return
         }
 
-        var out = Array<Array<String>>()
-        outer: for (from, to) in connections {
+        for (from, to) in connections {
             if to == "start" || from != start {
                 continue
             }
@@ -68,12 +71,8 @@ class Day12: Day {
             var nextPath = pathSoFar
             nextPath.append(to)
 
-            let further = findPathsToEnd2(start: to, pathSoFar: nextPath, hasSmallTwice: hasSmallTwice)
-            if !further.isEmpty {
-                out.appendAll(further)
-            }
+            findPathsToEnd2(start: to, pathSoFar: nextPath, hasSmallTwice: hasSmallTwice)
         }
-        return out
     }
 
     private func isSmall(_ s: String) -> Bool {
