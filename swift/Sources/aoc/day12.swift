@@ -22,30 +22,7 @@ class Day12: Day {
     func part2() -> Int {
         let visitCounts = ["start": 1]
         let pathsToEnd = findPathsToEnd2(start: "start", pathSoFar: ["start"], visitCounts: visitCounts)
-        var asdf = Array<Array<String>>()
-        for path in pathsToEnd {
-            var bla: [String: Int] = [:]
-            for n in path {
-                if isBig(n) {
-                    continue
-                }
-                if let x = bla[n] {
-                    bla[n] = x + 1
-                } else {
-                    bla[n] = 1
-                }
-            }
-            var z = 0
-            for (_, v) in bla {
-                if v >= 2 {
-                    z += 1
-                }
-            }
-            if z <= 1 {
-                asdf.append(path)
-            }
-        }
-        return asdf.count
+        return pathsToEnd.count
     }
 
     private func findPathsToEnd(start: String, pathSoFar: Array<String>) -> Array<Array<String>> {
@@ -73,6 +50,18 @@ class Day12: Day {
     private func findPathsToEnd2(start: String, pathSoFar: Array<String>, visitCounts: [String: Int]) -> Array<Array<String>> {
         if start == "end" {
             return [pathSoFar]
+        }
+
+        var n = 0
+        for (k,v) in visitCounts {
+            if !isBig(k) {
+                if v >= 2 {
+                    n += 1
+                }
+            }
+        }
+        if n > 1 {
+            return []
         }
 
         var out = Array<Array<String>>()
