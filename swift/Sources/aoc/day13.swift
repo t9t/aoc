@@ -28,14 +28,21 @@ class Day13: Day {
     func part1() -> Int {
         let folded = fold(grid: inputGrid, fold: folds[0])
         #if false
-        printGrid(folded)
+        printGrid(folded, colorized: false)
         #endif
 
         return countOn(folded)
     }
 
     func part2() -> Int {
-        return 1337
+        var grid = inputGrid
+        for fold in folds {
+            grid = self.fold(grid: grid, fold: fold)
+        }
+        #if true
+        printGrid(grid, colorized: true)
+        #endif
+        return -1
     }
 
     private func fold(grid: Grid, fold: Fold) -> Grid {
@@ -82,12 +89,14 @@ class Day13: Day {
         grid.map({ $0.filter({ $0 }).count }).reduce(0, +)
     }
 
-    private func printGrid(_ grid: Grid) {
+    private func printGrid(_ grid: Grid, colorized: Bool) {
+        // print("\u{001b}[7m\u{001b}[38;5;\(basinMap[Point(x: x, y: y)]! % 256)m\(n)", terminator: "")
+        print("\u{001b}[0m")
         for row in grid {
             for dot in row {
-                print(dot ? "#" : ".", terminator: "")
+                print(colorized ? (dot ? "\u{001b}[7m\u{001b}[38;5;9m#" : "\u{001b}[0m ") : (dot ? "#" : "."), terminator: "")
             }
-            print("")
+            print("\u{001b}[0m")
         }
     }
 
