@@ -39,9 +39,17 @@ class Day13: Day {
         for fold in folds {
             grid = self.fold(grid: grid, fold: fold)
         }
-        #if true
+        #if false
         printGrid(grid, colorized: true)
         #endif
+
+        let code = splitLetterGrids(grid: grid).map(toString)
+                .map({ letters[$0] })
+                .map({ $0 == nil ? "?" : $0! })
+                .map(String.init)
+                .joined()
+        print(code)
+
         return -1
     }
 
@@ -89,12 +97,40 @@ class Day13: Day {
         grid.map({ $0.filter({ $0 }).count }).reduce(0, +)
     }
 
+    private func splitLetterGrids(grid: Grid) -> Array<Grid> {
+        let letterCount = grid[0].count / 5
+        var out = Array<Grid>()
+        for i in 0...letterCount - 1 {
+            let startX = i * 5
+            var letterGrid = Grid()
+            for row in grid {
+                letterGrid.append(Array<Bool>(row[startX...startX + 4]))
+            }
+            out.append(letterGrid)
+        }
+        return out
+    }
+
+    private func toString(grid: Grid) -> String {
+        grid.map({ row in row.map({ $0 ? "#" : "." }).joined() }).joined(separator: "\n")
+    }
+
+    private let letters: [String: Character] = [
+        // TODO: need more inputs for more letters
+        "###..\n#..#.\n###..\n#..#.\n#..#.\n###..": "B",
+        ".##..\n#..#.\n#....\n#....\n#..#.\n.##..": "C",
+        "####.\n#....\n###..\n#....\n#....\n#....": "F",
+        ".##..\n#..#.\n#....\n#.##.\n#..#.\n.###.": "G",
+        "#..#.\n#.#..\n##...\n#.#..\n#.#..\n#..#.": "K",
+        "####.\n...#.\n..#..\n.#...\n#....\n####.": "Z",
+        "n#####\n#...#\n#...#\n#...#\n#####\n.....\n.....": "0", // Test case
+    ]
+
     private func printGrid(_ grid: Grid, colorized: Bool) {
-        // print("\u{001b}[7m\u{001b}[38;5;\(basinMap[Point(x: x, y: y)]! % 256)m\(n)", terminator: "")
         print("\u{001b}[0m")
         for row in grid {
-            for dot in row {
-                print(colorized ? (dot ? "\u{001b}[7m\u{001b}[38;5;9m#" : "\u{001b}[0m ") : (dot ? "#" : "."), terminator: "")
+            for on in row {
+                print(colorized ? (on ? "\u{001b}[0m\u{001b}[7m#" : "\u{001b}[0m\u{001b}[30m.") : (on ? "#" : "."), terminator: "")
             }
             print("\u{001b}[0m")
         }
