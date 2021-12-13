@@ -30,10 +30,10 @@ final class integrationTests: XCTestCase {
                 .split(separator: "\n")
                 .map({ $0.components(separatedBy: ": ") })
                 .map({ ($0[0].split(separator: "-"), $0[1]) })
-                .map({ Result(year: Int($0.0[0])!, day: Int($0.0[1])!, part: Int($0.0[2])!, result: Int($0.1)!) })
+                .map({ Result(year: Int($0.0[0])!, day: Int($0.0[1])!, part: Int($0.0[2])!, result: $0.1) })
     }
 
     private struct Result {
-        let year: Int, day: Int, part: Int, result: Int
+        let year: Int, day: Int, part: Int, result: String
     }
 }

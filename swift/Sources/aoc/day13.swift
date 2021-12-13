@@ -1,6 +1,6 @@
 import Foundation
 
-class Day13: Day {
+class Day13: StringDay {
     private typealias Grid = Array<Array<Bool>>
 
     private let inputGrid: Grid
@@ -25,16 +25,16 @@ class Day13: Day {
                 .map({ $0.0 ? Fold.AlongX(x: $0.1) : Fold.AlongY(y: $0.1) })
     }
 
-    func part1() -> Int {
+    func part1() -> String {
         let folded = fold(grid: inputGrid, fold: folds[0])
         #if false
         printGrid(folded, colorized: false)
         #endif
 
-        return countOn(folded)
+        return String(countOn(folded))
     }
 
-    func part2() -> Int {
+    func part2() -> String {
         var grid = inputGrid
         for fold in folds {
             grid = self.fold(grid: grid, fold: fold)
@@ -43,14 +43,11 @@ class Day13: Day {
         printGrid(grid, colorized: true)
         #endif
 
-        let code = splitLetterGrids(grid: grid).map(toString)
+        return splitLetterGrids(grid: grid).map(toString)
                 .map({ letters[$0] })
                 .map({ $0 == nil ? "?" : $0! })
                 .map(String.init)
                 .joined()
-        print(code)
-
-        return -1
     }
 
     private func fold(grid: Grid, fold: Fold) -> Grid {

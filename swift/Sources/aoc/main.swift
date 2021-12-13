@@ -5,24 +5,51 @@ protocol Day {
     func part2() throws -> Int
 }
 
+protocol StringDay {
+    func part1() throws -> String
+    func part2() throws -> String
+}
+
+class Wrapped: StringDay {
+    private let intDay: Day
+
+    init(_ intDay: Day) {
+        self.intDay = intDay
+    }
+
+    func part1() throws -> String {
+        String(try intDay.part1())
+    }
+
+    func part2() throws -> String {
+        String(try intDay.part2())
+    }
+}
+
+func stringWrapped(_ day: @escaping (String) -> Day) -> (String) -> StringDay {
+    {
+        Wrapped(day($0))
+    }
+}
+
 internal class Days {
-    private static let days: [Int: (String) -> Day] = [
-        1: Day1.init,
-        2: Day2.init,
-        3: Day3.init,
-        4: Day4.init,
-        5: Day5.init,
-        6: Day6.init,
-        7: Day7.init,
-        8: Day8.init,
-        9: Day9.init,
-        10: Day10.init,
-        11: Day11.init,
-        12: Day12.init,
+    private static let days: [Int: (String) -> StringDay] = [
+        1: stringWrapped(Day1.init),
+        2: stringWrapped(Day2.init),
+        3: stringWrapped(Day3.init),
+        4: stringWrapped(Day4.init),
+        5: stringWrapped(Day5.init),
+        6: stringWrapped(Day6.init),
+        7: stringWrapped(Day7.init),
+        8: stringWrapped(Day8.init),
+        9: stringWrapped(Day9.init),
+        10: stringWrapped(Day10.init),
+        11: stringWrapped(Day11.init),
+        12: stringWrapped(Day12.init),
         13: Day13.init,
 /*newday*/]
 
-    static func get(num: Int, input: String) -> Day {
+    static func get(num: Int, input: String) -> StringDay {
         days[num]!(input)
     }
 }
