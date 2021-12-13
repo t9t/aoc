@@ -6,34 +6,35 @@ import class Foundation.Bundle
 final class integrationTests: XCTestCase {
     func test2021() throws {
         let results = try loadResults()
-        for result in results {
-            if result.year != 2021 {
-                XCTFail("Year \(result.year) is not 2021")
-                continue
-            }
-            if result.part != 1 && result.part != 2 {
-                XCTFail("Part \(result.part) is not 1 or 2")
-                continue
-            }
+        for dayNum in Days.getAllDayNumbers() {
+            for part in 1...2 {
+                let id = ResultId(year: 2021, day: dayNum, part: part)
+                if let result = results[id] {
+                    let input = try String(contentsOfFile: "../input/2021/\(dayNum).txt")
+                    let day = Days.get(num: dayNum, input: input)
 
-            let input = try String(contentsOfFile: "../input/2021/\(result.day).txt")
-            let day = Days.get(num: result.day, input: input)
-
-            let output = try (result.part == 1 ? day.part1 : day.part2)()
-            XCTAssertEqual(result.result, output, "\(result)")
+                    let output = try (part == 1 ? day.part1 : day.part2)()
+                    XCTAssertEqual(result, output, "\(id)")
+                } else {
+                    XCTFail("No result for day \(dayNum) part \(part)")
+                }
+            }
         }
     }
 
-    private func loadResults() throws -> Array<Result> {
-        try String(contentsOfFile: "../input/2021/results.txt")
+    private func loadResults() throws -> [ResultId: String] {
+        var results: [ResultId: String] = [:]
+        for line in try String(contentsOfFile: "../input/2021/results.txt")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
-                .split(separator: "\n")
-                .map({ $0.components(separatedBy: ": ") })
-                .map({ ($0[0].split(separator: "-"), $0[1]) })
-                .map({ Result(year: Int($0.0[0])!, day: Int($0.0[1])!, part: Int($0.0[2])!, result: $0.1) })
+                .split(separator: "\n") {
+            let idAndResult = line.components(separatedBy: ": ")
+            let idParts = idAndResult[0].split(separator: "-")
+            results[ResultId(year: Int(idParts[0])!, day: Int(idParts[1])!, part: Int(idParts[2])!)] = idAndResult[1]
+        }
+        return results
     }
 
-    private struct Result {
-        let year: Int, day: Int, part: Int, result: String
+    private struct ResultId: Hashable {
+        let year: Int, day: Int, part: Int
     }
 }

@@ -52,6 +52,10 @@ internal class Days {
     static func get(num: Int, input: String) -> StringDay {
         days[num]!(input)
     }
+
+    static func getAllDayNumbers() -> Array<Int> {
+        days.keys.sorted()
+    }
 }
 
 print(CommandLine.arguments)
