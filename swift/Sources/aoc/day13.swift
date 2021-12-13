@@ -43,7 +43,8 @@ class Day13: StringDay {
         printGrid(grid, colorized: true)
         #endif
 
-        return splitLetterGrids(grid: grid).map(toString)
+        return splitLetterGrids(grid: grid)
+                .map(toString)
                 .map({ letters[$0] })
                 .map({ $0 == nil ? "?" : $0! })
                 .map(String.init)
@@ -120,7 +121,7 @@ class Day13: StringDay {
         ".##..\n#..#.\n#....\n#.##.\n#..#.\n.###.": "G",
         "#..#.\n#.#..\n##...\n#.#..\n#.#..\n#..#.": "K",
         "####.\n...#.\n..#..\n.#...\n#....\n####.": "Z",
-        "n#####\n#...#\n#...#\n#...#\n#####\n.....\n.....": "0", // Test case
+        "#####\n#...#\n#...#\n#...#\n#####\n.....\n.....": "0", // Test case
     ]
 
     private func printGrid(_ grid: Grid, colorized: Bool) {
