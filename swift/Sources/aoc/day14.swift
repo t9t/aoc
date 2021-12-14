@@ -30,8 +30,12 @@ class Day14: Day {
     }
 
     private func runInsertionProcess(steps: Int) -> Int {
-        var pairs = buildPairMap()
+        var elementCounts = [Character: Int]()
+        // Assumption: for every element there is a rule with that element appearing "left"
+        pairInsertionRules.forEach({ elementCounts[$0.key.left] = 0 })
+        polymerTemplate.forEach({ elementCounts[$0] = elementCounts[$0]! + 1 })
 
+        var pairs = buildPairMap()
         for _ in 1...steps {
             var newPairs = pairs
             for (pair, count) in pairs {
@@ -41,20 +45,9 @@ class Day14: Day {
                 newPairs[pair] = newPairs[pair]! - count
                 newPairs[newPairLeft] = newPairs[newPairLeft]! + count
                 newPairs[newPairRight] = newPairs[newPairRight]! + count
+                elementCounts[insertion] = elementCounts[insertion]! + count
             }
             pairs = newPairs
-        }
-
-        var elementCounts = [Character: Int]()
-        // Since we're counting only left characters, the last character of the template isn't counted; need to add it explicitly
-        elementCounts[charAt(polymerTemplate, polymerTemplate.count - 1)] = 1
-        for (pair, pairCount) in pairs {
-            let c = pair.left
-            if let elementCount = elementCounts[c] {
-                elementCounts[c] = elementCount + pairCount
-            } else {
-                elementCounts[c] = pairCount
-            }
         }
 
         return elementCounts.values.max()! - elementCounts.values.min()!
@@ -62,10 +55,8 @@ class Day14: Day {
 
     private func buildPairMap() -> [Pair: Int] {
         var pairs = [Pair: Int]()
-        for (pair, _) in pairInsertionRules {
-            // Assumption: there exists a rule for every conceivable pair
-            pairs[pair] = 0
-        }
+        // Assumption: there exists a rule for every conceivable pair
+        pairInsertionRules.forEach({ pairs[$0.key] = 0 })
         for i in 0...polymerTemplate.count - 2 {
             let pair = Pair(left: charAt(polymerTemplate, i), right: charAt(polymerTemplate, i + 1))
             pairs[pair] = pairs[pair]! + 1
