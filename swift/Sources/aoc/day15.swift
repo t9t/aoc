@@ -45,7 +45,7 @@ class Day15: Day {
         let start = Point(x: 0, y: 0)
         let goal = Point(x: grid[0].count - 1, y: grid.count - 1)
 
-        var openSet = Set([start])
+        var openSet = [h(start): Set([start])]
         var cameFrom = [Point: Point]()
 
         var gScore = [start: 0]
@@ -61,17 +61,16 @@ class Day15: Day {
             return totalPath.reversed()
         }
 
-        func findPointWithLowestFScoreValue() -> Point {
+        func findPointWithLowestFScoreValue() -> (Int, Point) {
             var lowestScore = Int.max
-            var lowest: Point? = nil
-            for point in openSet {
-                let level = fScore[point] ?? Int.max
-                if level <= lowestScore {
-                    lowestScore = level
-                    lowest = point
+            var lowestPoint : Point?
+            for (score, set) in openSet {
+                if score < lowestScore && !set.isEmpty {
+                    lowestScore = score
+                    lowestPoint = set.first
                 }
             }
-            return lowest!
+            return (lowestScore, lowestPoint!)
         }
 
         func neighbors(_ point: Point) -> Array<Point> {
@@ -91,22 +90,46 @@ class Day15: Day {
             return out
         }
 
-        while !openSet.isEmpty {
-            let current = findPointWithLowestFScoreValue()
+        func removeFromOpenSet(_ fScore: Int, _ current: Point) {
+            openSet[fScore]?.remove(current)
+        }
+
+        func ensureInOpenSet(previousFScore: Int?, newFScore: Int, point: Point) {
+            if previousFScore != nil {
+                openSet[previousFScore!]?.remove(point)
+            }
+            if openSet[newFScore] != nil {
+                openSet[newFScore]?.insert(point)
+            } else {
+                openSet[newFScore] = Set([point])
+            }
+        }
+
+        func isOpenSetNotEmpty() -> Bool {
+            for (_, set) in openSet {
+                if !set.isEmpty {
+                    return true
+                }
+            }
+            return false
+        }
+
+        while isOpenSetNotEmpty() {
+            let (lowestFScore, current) = findPointWithLowestFScoreValue()
             if current == goal {
                 return reconstructPath(current)
             }
 
-            openSet.remove(current)
+            removeFromOpenSet(lowestFScore, current)
             for neighbor in neighbors(current) {
                 let tentativeGScore = gScore[current]! + d(current, neighbor)
                 if tentativeGScore < (gScore[neighbor] ?? Int.max) {
                     cameFrom[neighbor] = current
                     gScore[neighbor] = tentativeGScore
-                    fScore[neighbor] = tentativeGScore + h(neighbor)
-                    if !openSet.contains(neighbor) {
-                        openSet.insert(neighbor)
-                    }
+                    let currentNeighborFScore = fScore[neighbor]
+                    let newNeighborFScore = tentativeGScore + h(neighbor)
+                    fScore[neighbor] = newNeighborFScore
+                    ensureInOpenSet(previousFScore: currentNeighborFScore, newFScore: newNeighborFScore, point: neighbor)
                 }
             }
         }
@@ -143,8 +166,6 @@ class Day15: Day {
                 if highlights.contains(Point(x: x, y: y)) {
                     color = 7
                 }
-
-                // \u001b[7m
 
                 print("\u{001b}[\(color)m\(n)", terminator: "")
             }
