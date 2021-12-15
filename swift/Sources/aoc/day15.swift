@@ -10,21 +10,32 @@ class Day15: Day {
     }
 
     func part1() throws -> Int {
-        let path = try aStar()
+        let path = try aStar(inputGrid)
         #if false
         printGrid(inputGrid, highlights: Set(path))
         #endif
-        return path.filter({ $0.x != 0 || $0.y != 0 }).map({ inputGrid[$0.y][$0.x] }).reduce(0, +)
+        return totalRiskLevel(inputGrid, path)
     }
 
-    func part2() -> Int {
-        return 1337
+    func part2() throws -> Int {
+        let grid = enlargeGrid(inputGrid)
+        let path = try aStar(grid)
+
+        #if false
+        printGrid(grid, highlights: Set(path))
+        #endif
+
+        return totalRiskLevel(grid, path)
+    }
+
+    private func totalRiskLevel(_ grid: Grid, _ path: Array<Point>) -> Int {
+        path.filter({ $0.x != 0 || $0.y != 0 }).map({ grid[$0.y][$0.x] }).reduce(0, +)
     }
 
     /// Borrowed from https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
-    private func aStar() throws -> Array<Point> {
+    private func aStar(_ grid: Grid) throws -> Array<Point> {
         func h(_ point: Point) -> Int {
-            inputGrid[point.y][point.x]
+            grid[point.y][point.x]
         }
 
         func d(_ current: Point, _ neighbor: Point) -> Int {
@@ -32,13 +43,13 @@ class Day15: Day {
         }
 
         let start = Point(x: 0, y: 0)
-        let goal = Point(x: inputGrid[0].count - 1, y: inputGrid.count - 1)
+        let goal = Point(x: grid[0].count - 1, y: grid.count - 1)
 
         var openSet = Set([start])
         var cameFrom = [Point: Point]()
 
         var gScore = [start: 0]
-        var fScore = [start : h(start)]
+        var fScore = [start: h(start)]
 
         func reconstructPath(_ current: Point) -> Array<Point> {
             var current = current
@@ -61,6 +72,23 @@ class Day15: Day {
                 }
             }
             return lowest!
+        }
+
+        func neighbors(_ point: Point) -> Array<Point> {
+            var out = Array<Point>()
+            if point.x > 0 {
+                out.append(Point(x: point.x - 1, y: point.y))
+            }
+            if point.x < goal.x {
+                out.append(Point(x: point.x + 1, y: point.y))
+            }
+            if point.y > 0 {
+                out.append(Point(x: point.x, y: point.y - 1))
+            }
+            if point.y < goal.y {
+                out.append(Point(x: point.x, y: point.y + 1))
+            }
+            return out
         }
 
         while !openSet.isEmpty {
@@ -86,20 +114,25 @@ class Day15: Day {
         throw NoPathFound()
     }
 
-    private func neighbors(_ point: Point) -> Array<Point> {
-        var out = Array<Point>()
-        if point.x > 0 {
-            out.append(Point(x: point.x - 1, y: point.y))
+    private func enlargeGrid(_ inputGrid: Grid) -> Grid {
+        var out = Grid()
+
+        for gridY in 0...4 {
+            for row in inputGrid {
+                var newRow = Array<Int>()
+                for gridX in 0...4 {
+                    for n in row {
+                        var newN = n + gridX + gridY
+                        if newN > 9 {
+                            newN -= 9
+                        }
+                        newRow.append(newN)
+                    }
+                }
+                out.append(newRow)
+            }
         }
-        if point.x < inputGrid[0].count - 1 {
-            out.append(Point(x: point.x + 1, y: point.y))
-        }
-        if point.y > 0 {
-            out.append(Point(x: point.x, y: point.y - 1))
-        }
-        if point.y < inputGrid.count - 1 {
-            out.append(Point(x: point.x, y: point.y + 1))
-        }
+
         return out
     }
 
