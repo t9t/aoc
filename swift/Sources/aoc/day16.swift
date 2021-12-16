@@ -26,12 +26,10 @@ class Day16: Day {
     }
 
     private func readVersionOfOnePacket(_ buf: Buffer) -> Int {
-        let header = buf.advance(by: 6)
-        let (binVersion, typeId) = header.splice(3)
+        var versionNumbersSum = binToInt(buf.advance(by: 3))
+        let typeId = binToInt(buf.advance(by: 3))
 
-        var versionNumbersSum = binToInt(binVersion)
-
-        if typeId == "100" /* 4, literal value */ {
+        if typeId == 4 /* literal value */ {
             var prefix = "1"
             while prefix != "0" {
                 prefix = buf.advance(by: 1)
@@ -70,37 +68,26 @@ class Day16: Day {
         hex.map(Day16.hexCharToBin).joined()
     }
 
-    private class Buffer: CustomStringConvertible {
+    private class Buffer {
         private var remaining: String
 
         init(_ remaining: String) {
             self.remaining = remaining
         }
 
-        var description: String {
-            "Buffer(remaining: \(remaining))"
-        }
-
         func advance(by: Int) -> String {
-            let (ret, rest) = remaining.splice(by)
-            remaining = rest
-            return ret
+            let value = String(remaining[...remaining.index(remaining.startIndex, offsetBy: by - 1)])
+            remaining = String(remaining[remaining.index(remaining.startIndex, offsetBy: by)...])
+            return value
         }
 
         func hasMore() -> Bool {
-            if remaining.isEmpty {
-                return false
+            for c in remaining {
+                if c != "0" {
+                    return true
+                }
             }
-            if remaining == String(repeating: "0", count: remaining.count) {
-                return false
-            }
-            return true
+            return false
         }
-    }
-}
-
-private extension String {
-    func splice(_ firstTo: Int) -> (String, String) {
-        (String(self[...self.index(startIndex, offsetBy: firstTo - 1)]), String(self[self.index(startIndex, offsetBy: firstTo)...]))
     }
 }
