@@ -101,7 +101,7 @@ class Day8: Day {
     }
 }
 
-extension String {
+private extension String {
     func at(_ i: Int) -> Character {
         self[self.index(startIndex, offsetBy: i)]
     }

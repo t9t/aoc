@@ -49,6 +49,7 @@ internal class Days {
         13: Day13.init,
         14: stringWrapped(Day14.init),
         15: stringWrapped(Day15.init),
+        16: stringWrapped(Day16.init),
 /*newday*/]
 
     static func get(num: Int, input: String) -> StringDay {
