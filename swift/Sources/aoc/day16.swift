@@ -8,26 +8,20 @@ class Day16: Day {
     }
 
     func part1() -> Int {
-        readAllVersionNumbersSum(Day16.allHexToBin(input))
+        readInputPacketVersionSumAndValue().0
     }
-
 
     func part2() -> Int {
+        readInputPacketVersionSumAndValue().1
+    }
+
+    private func readInputPacketVersionSumAndValue() -> (Int, Int) {
         let buf = Buffer(Day16.allHexToBin(input))
         // Assumption: outer packet is always an operator packet
-        return readPacketVersionAndValue(buf).1
+        return readPacketVersionSumAndValue(buf)
     }
 
-    private func readAllVersionNumbersSum(_ bin: String) -> Int {
-        let buf = Buffer(bin)
-        var versionNumbersSum = 0
-        while buf.hasMore() {
-            versionNumbersSum += readPacketVersionAndValue(buf).0
-        }
-        return versionNumbersSum
-    }
-
-    private func readPacketVersionAndValue(_ buf: Buffer) -> (Int, Int) {
+    private func readPacketVersionSumAndValue(_ buf: Buffer) -> (Int, Int) {
         let version = binToInt(buf.advance(by: 3))
         let typeId = binToInt(buf.advance(by: 3))
 
@@ -46,19 +40,16 @@ class Day16: Day {
         let lengthTypeId = buf.advance(by: 1)
         if lengthTypeId == "0" {
             let totalLengthInBits = binToInt(buf.advance(by: 15))
-            let subPackets = buf.advance(by: totalLengthInBits)
-
-            let subBuf = Buffer(subPackets)
+            let subBuf = Buffer(buf.advance(by: totalLengthInBits))
             while subBuf.hasMore() {
-                let (subVersion, subValue) = readPacketVersionAndValue(subBuf)
+                let (subVersion, subValue) = readPacketVersionSumAndValue(subBuf)
                 versionNumbersSum += subVersion
                 subValues.append(subValue)
             }
         } else {
             let numberOfSubPackets = binToInt(buf.advance(by: 11))
-
             for _ in 1...numberOfSubPackets {
-                let (subVersion, subValue) = readPacketVersionAndValue(buf)
+                let (subVersion, subValue) = readPacketVersionSumAndValue(buf)
                 versionNumbersSum += subVersion
                 subValues.append(subValue)
             }
@@ -88,27 +79,18 @@ class Day16: Day {
         Int(bin, radix: 2)!
     }
 
-    private static func hexCharToBin(_ char: Character) -> String {
-        let s = String(Int(String(char), radix: 16)!, radix: 2)
-        if s.count < 4 {
-            return String(repeating: "0", count: 4 - s.count) + s
-        }
-        return s
-    }
-
     internal static func allHexToBin(_ hex: String) -> String {
-        hex.map(Day16.hexCharToBin).joined()
+        hex.map({ char in
+            let s = String(Int(String(char), radix: 16)!, radix: 2)
+            return s.count < 4 ? String(repeating: "0", count: 4 - s.count) + s : s
+        }).joined()
     }
 
-    private class Buffer: CustomStringConvertible {
+    private class Buffer {
         private var remaining: String
 
         init(_ remaining: String) {
             self.remaining = remaining
-        }
-
-        var description: String {
-            "Buffer(remaining: \(remaining))"
         }
 
         func advance(by: Int) -> String {
