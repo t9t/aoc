@@ -14,11 +14,20 @@ class Day17: Day {
     }
 
     func part1() -> Int {
+        simulateVectors().0
+    }
+
+    func part2() -> Int {
+        simulateVectors().1
+    }
+
+    private func simulateVectors() -> (Int, Int) {
         var finalPoints = Array<(Int, Int)>()
         var finalMaxHeight = 0
+        var totalHits = 0
 
-        for vx in 1...targetArea.0.1 - 1 {
-            for vy in 1...1000 {
+        for vx in 1...targetArea.0.1 {
+            for vy in (targetArea.1.0 - 1)...1000 {
                 var vector = (vx, vy)
                 var position = (0, 0)
                 var points = Array<(Int, Int)>()
@@ -30,6 +39,7 @@ class Day17: Day {
                     points.append(position)
 
                     if isInTargetArea(newX, newY) {
+                        totalHits += 1
                         let maxHeight = points.map({ $0.1 }).max()!
                         if maxHeight > finalMaxHeight {
                             finalMaxHeight = maxHeight
@@ -53,11 +63,7 @@ class Day17: Day {
         #if false
         printGrid(points: finalPoints)
         #endif
-        return finalMaxHeight
-    }
-
-    func part2() -> Int {
-        return 1337
+        return (finalMaxHeight, totalHits)
     }
 
     private func isInTargetArea(_ x: Int, _ y: Int) -> Bool {
