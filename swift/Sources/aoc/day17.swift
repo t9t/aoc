@@ -23,38 +23,35 @@ class Day17: Day {
 
     private func simulateVectors() -> (Int, Int) {
         var finalPoints = Array<(Int, Int)>()
-        var finalMaxHeight = 0
+        var maxestY = 0
         var totalHits = 0
 
-        for vx in 1...targetArea.0.1 {
+        for startVx in 1...targetArea.0.1 {
             // TODO: for my answer, the max vy was 147, but how to determine it up front?
-            for vy in (targetArea.1.0 - 1)...200 {
-                var vector = (vx, vy)
-                var position = (0, 0)
+            for startVy in (targetArea.1.0 - 1)...200 {
+                var vx = startVx, vy = startVy
+                var x = 0, y = 0, maxY = 0
                 var points = Array<(Int, Int)>()
 
                 while true {
-                    let newX = position.0 + vector.0
-                    let newY = position.1 + vector.1
-                    position = (newX, newY)
-                    points.append(position)
+                    x += vx
+                    y += vy
+                    maxY = max(maxY, y)
+                    points.append((x, y))
 
-                    if isInTargetArea(newX, newY) {
+                    if isInTargetArea(x, y) {
                         totalHits += 1
-                        let maxHeight = points.map({ $0.1 }).max()!
-                        if maxHeight > finalMaxHeight {
-                            finalMaxHeight = maxHeight
+                        if maxY > maxestY {
+                            maxestY = maxY
                             finalPoints = points
                         }
                         break
                     }
 
-                    let newDx = max(0, vector.0 - 1)
-                    let newDy = vector.1 - 1
+                    vx = max(0, vx - 1)
+                    vy -= 1
 
-                    vector = (newDx, newDy)
-
-                    if newX > targetArea.0.1 || (vector.0 == 0 && newX < targetArea.0.0) || newY < targetArea.1.0 {
+                    if x > targetArea.0.1 || (vx == 0 && x < targetArea.0.0) || y < targetArea.1.0 {
                         break
                     }
                 }
@@ -64,7 +61,7 @@ class Day17: Day {
         #if false
         printGrid(points: finalPoints)
         #endif
-        return (finalMaxHeight, totalHits)
+        return (maxestY, totalHits)
     }
 
     private func isInTargetArea(_ x: Int, _ y: Int) -> Bool {
