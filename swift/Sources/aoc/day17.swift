@@ -27,7 +27,8 @@ class Day17: Day {
         var totalHits = 0
 
         for vx in 1...targetArea.0.1 {
-            for vy in (targetArea.1.0 - 1)...1000 {
+            // TODO: for my answer, the max vy was 147, but how to determine it up front?
+            for vy in (targetArea.1.0 - 1)...200 {
                 var vector = (vx, vy)
                 var position = (0, 0)
                 var points = Array<(Int, Int)>()
