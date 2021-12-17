@@ -27,8 +27,8 @@ class Day17: Day {
         var totalHits = 0
 
         for startVx in 1...targetArea.0.1 {
-            // TODO: for my answer, the max vy was 147, but how to determine it up front?
-            for startVy in (targetArea.1.0 - 1)...200 {
+            // Is the maximum startVy correct here?
+            for startVy in (targetArea.1.0 - 1)...abs(targetArea.1.0) {
                 var vx = startVx, vy = startVy
                 var x = 0, y = 0, maxY = 0
                 var points = Array<(Int, Int)>()
