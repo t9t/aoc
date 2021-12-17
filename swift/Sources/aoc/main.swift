@@ -62,8 +62,6 @@ internal class Days {
     }
 }
 
-print(CommandLine.arguments)
-
 if CommandLine.arguments.count != 3 {
     print("invalid arguments, provide day & part")
     exit(1)
@@ -79,7 +77,7 @@ if part != 1 && part != 2 {
 
 print("Running day \(dayNum) part \(part)")
 
-let input = try String(contentsOfFile: "../input/2021/\(dayNum).txt")
+let input = try getInput(year: 2021, day: dayNum)
 let day = Days.get(num: dayNum, input: input)
 
 let start = Date()
@@ -107,4 +105,36 @@ private func formatInterval(_ intervalInput: TimeInterval) -> String {
         out.append("\(ms)ms")
     }
     return out.joined(separator: " ")
+}
+
+private func getInput(year: Int, day: Int) throws -> String {
+    let filename = "../input/\(year)/\(day).txt"
+    do {
+        return try String(contentsOfFile: filename)
+    } catch {
+        print("Input file not readable, downloading input file")
+        let sesh = String(cString: getpass("Session cookie value: "))
+        let downloadedInput = downloadInput(year: year, day: day, sessionCookie: sesh)
+        try downloadedInput.write(toFile: filename, atomically: true, encoding: String.Encoding.utf8)
+        return downloadedInput
+    }
+}
+
+private func downloadInput(year: Int, day: Int, sessionCookie: String) -> String {
+    let semaphore = DispatchSemaphore(value: 0)
+    var req = URLRequest(url: URL(string: "https://adventofcode.com/\(year)/day/\(day)/input")!)
+    req.setValue("session=\(sessionCookie)", forHTTPHeaderField: "Cookie")
+
+    var input = ""
+    URLSession.shared.dataTask(with: req) { (data, response: URLResponse?, error) in
+        let status = (response as? HTTPURLResponse)?.statusCode
+        if status == 200 {
+            input = String(data: data!, encoding: .utf8)!
+        } else {
+            fatalError("Invalid status \(status.map(String.init) ?? "?") fetching input")
+        }
+        semaphore.signal()
+    }.resume()
+    _ = semaphore.wait(timeout: DispatchTime.distantFuture)
+    return input
 }
