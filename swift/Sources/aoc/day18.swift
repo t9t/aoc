@@ -38,18 +38,18 @@ class Day18: Day {
         var bc = 0
         for (i, t) in within.enumerated() {
             switch t {
-            case let .Char(c):
-                if c == "," && bc == 0 {
+            case .Open:
+                bc += 1
+            case .Close:
+                bc -= 1
+            case .Comma:
+                if bc == 0 {
                     let left = within[...within.index(within.startIndex, offsetBy: i - 1)]
                     let right = within[within.index(within.startIndex, offsetBy: i + 1)...]
 
                     let leftMagnitude = determineMagnitude(Array<Token>(left))
                     let rightMagnitude = determineMagnitude(Array<Token>(right))
                     return 3 * leftMagnitude + 2 * rightMagnitude
-                } else if c == "[" {
-                    bc += 1
-                } else if c == "]" {
-                    bc -= 1
                 }
             case .Number(_):
                 break
@@ -65,14 +65,12 @@ class Day18: Day {
         var lastRegNum: Int? = nil
         for (i, t) in s.enumerated() {
             switch t {
-            case let .Char(c):
-                if c == "[" {
-                    depth += 1
-                } else if c == "]" {
-                    depth -= 1
-                } else {
-                    continue
-                }
+            case .Open:
+                depth += 1
+            case .Close:
+                depth -= 1
+            case .Comma:
+                continue
             case let .Number(number):
                 if depth >= 5 {
                     let leftNum = number
@@ -138,7 +136,7 @@ class Day18: Day {
                 let suffix = s[s.index(s.startIndex, offsetBy: i)...]
                 let left = number / 2
                 let right = (number / 2) + (number % 2)
-                let newNumber = [Token.Char(c: "["), Token.Number(n: left), Token.Char(c: ","), Token.Number(n: right), Token.Char(c: "]")]
+                let newNumber = [Token.Open, Token.Number(n: left), Token.Comma, Token.Number(n: right), Token.Close]
                 return (prefix + newNumber + suffix, true)
             default:
                 continue
@@ -167,7 +165,7 @@ class Day18: Day {
     }
 
     internal static func add(_ left: Array<Token>, _ right: Array<Token>) -> Array<Token> {
-        [Token.Char(c: "[")] + left + [Token.Char(c: ",")] + right + [Token.Char(c: "]")]
+        [Token.Open] + left + [Token.Comma] + right + [Token.Close]
     }
 
     internal static func addAndReduce(_ left: Array<Token>, _ right: Array<Token>) -> Array<Token> {
@@ -187,19 +185,19 @@ class Day18: Day {
         var buf = ""
         for c in s {
             if c == "[" {
-                out.append(Token.Char(c: c))
+                out.append(Token.Open)
             } else if c == "]" {
                 if buf != "" {
                     out.append(Token.Number(n: Int(buf)!))
                 }
                 buf = ""
-                out.append(Token.Char(c: c))
+                out.append(Token.Close)
             } else if c == "," {
                 if buf != "" {
                     out.append(Token.Number(n: Int(buf)!))
                 }
                 buf = ""
-                out.append(Token.Char(c: c))
+                out.append(Token.Comma)
             } else {
                 buf.append(c)
             }
@@ -208,7 +206,9 @@ class Day18: Day {
     }
 
     internal enum Token {
-        case Char(c: Character)
+        case Open
+        case Close
+        case Comma
         case Number(n: Int)
     }
 }

@@ -139,8 +139,12 @@ final class day18Tests: XCTestCase {
     private func toString(_ num: Array<Day18.Token>) -> String {
         num.map({ t in
             switch t {
-            case let .Char(c):
-                return String(c)
+            case .Open:
+                return "["
+            case .Close:
+                return "]"
+            case .Comma:
+                return ","
             case let .Number(n):
                 return String(n)
             }
