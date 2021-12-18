@@ -1,14 +1,11 @@
 import Foundation
 
 class Day18: Day {
-    private let inputNumbers: Array<Number>
-    private let inputLines: Array<Array<String>>
     private let input: Array<Array<Token>>
 
     init(_ input: String) throws {
-        inputNumbers = try input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map({ try Day18.parseNumber($0) })
-        inputLines = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init).map(Day18.tokenize)
-        self.input = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init).map(Day18.tokenize).map(Day18.fromStrings)
+        self.input = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init)
+                .map(Day18.tokenize).map(Day18.fromStrings)
     }
 
     func part1() -> Int {
@@ -27,29 +24,6 @@ class Day18: Day {
             }
         }
         return largestMagnitude
-    }
-
-    internal static func parseNumber<S: StringProtocol>(_ s: S) throws -> Number {
-        if s.count == 1 {
-            return RegularNumber(value: Int(s)!)
-        }
-
-        let within = s[s.index(after: s.startIndex)...s.index(s.endIndex, offsetBy: -2)]
-        var bc = 0
-        for (i, c) in within.enumerated() {
-            if c == "," && bc == 0 {
-                let left = within[...within.index(within.startIndex, offsetBy: i - 1)]
-                let right = within[within.index(within.startIndex, offsetBy: i + 1)...]
-
-                return PairNumber(left: try parseNumber(left), right: try parseNumber(right))
-            } else if c == "[" {
-                bc += 1
-            } else if c == "]" {
-                bc -= 1
-            }
-        }
-
-        throw InvalidNumberString(number: String(s))
     }
 
     internal static func determineMagnitude(_ s: Array<String>) -> Int {
@@ -76,7 +50,7 @@ class Day18: Day {
 
                     //return PairNumber(left: try parseNumber(left), right: try parseNumber(right))
                     let leftMagnitude = determineMagnitude(Array<Token>(left))
-                    let rightMagnitude =  determineMagnitude(Array<Token>(right))
+                    let rightMagnitude = determineMagnitude(Array<Token>(right))
                     return 3 * leftMagnitude + 2 * rightMagnitude
                 } else if c == "[" {
                     bc += 1
@@ -237,18 +211,6 @@ class Day18: Day {
         return sum
     }
 
-    internal static func magnitude(_ num: Array<Token>) -> Int {
-        magnitude(toStrings(num))
-    }
-
-    internal static func magnitude(_ num: Array<String>) -> Int {
-        do {
-            return (try parseNumber(num.joined()) as? PairNumber)!.magnitude()
-        } catch {
-            fatalError("\(error)")
-        }
-    }
-
     internal static func tokenize(_ s: String) -> Array<String> {
         var out = Array<String>()
         var buf = ""
@@ -272,86 +234,6 @@ class Day18: Day {
             }
         }
         return out
-    }
-
-    internal class Number: Equatable {
-        func equalTo(rhs: Number) -> Bool {
-            false
-        }
-
-        func magnitude() -> Int {
-            fatalError("magnitude() called on base Number")
-        }
-
-        static func ==(lhs: Number, rhs: Number) -> Bool {
-            lhs.equalTo(rhs: rhs)
-        }
-
-        static func +(lhs: Number, rhs: Number) -> Number {
-            PairNumber(left: lhs, right: rhs)
-        }
-    }
-
-    internal class RegularNumber: Number, CustomStringConvertible {
-        let value: Int
-
-        init(value: Int) {
-            self.value = value
-            super.init()
-        }
-
-        var description: String {
-            "\(value)"
-        }
-
-        override func magnitude() -> Int {
-            value
-        }
-
-        override func equalTo(rhs: Number) -> Bool {
-            if let reg = rhs as? RegularNumber {
-                return reg == self
-            }
-            return false
-        }
-
-        static func ==(lhs: RegularNumber, rhs: RegularNumber) -> Bool {
-            lhs.value == rhs.value
-        }
-    }
-
-    internal class PairNumber: Number, CustomStringConvertible {
-        let left: Number
-        let right: Number
-
-        init(left: Number, right: Number) {
-            self.left = left
-            self.right = right
-            super.init()
-        }
-
-        var description: String {
-            "[\(left),\(right)]"
-        }
-
-        override func magnitude() -> Int {
-            3 * left.magnitude() + 2 * right.magnitude()
-        }
-
-        override func equalTo(rhs: Number) -> Bool {
-            if let reg = rhs as? PairNumber {
-                return reg == self
-            }
-            return false
-        }
-
-        static func ==(lhs: PairNumber, rhs: PairNumber) -> Bool {
-            lhs.left.equalTo(rhs: rhs.left) && lhs.right.equalTo(rhs: rhs.right)
-        }
-    }
-
-    private struct InvalidNumberString: Error {
-        let number: String
     }
 
     internal enum Token {
