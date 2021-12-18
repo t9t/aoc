@@ -3,21 +3,23 @@ import Foundation
 class Day18: Day {
     private let inputNumbers: Array<Number>
     private let inputLines: Array<Array<String>>
+    private let input: Array<Array<Token>>
 
     init(_ input: String) throws {
         inputNumbers = try input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map({ try Day18.parseNumber($0) })
         inputLines = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init).map(Day18.tokenize)
+        self.input = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init).map(Day18.tokenize).map(Day18.fromStrings)
     }
 
     func part1() -> Int {
-        Day18.magnitude(Day18.sum(inputLines))
+        Day18.magnitude(Day18.sum(input))
     }
 
     func part2() -> Int {
         var largestMagnitude = 0
-        for line1 in inputLines {
-            for line2 in inputLines {
-                if line1 == line2 {
+        for (i, line1) in input.enumerated() {
+            for (j, line2) in input.enumerated() {
+                if i == j {
                     continue
                 }
                 largestMagnitude = max(largestMagnitude, Day18.magnitude(Day18.addAndReduce(line1, line2)))
@@ -51,91 +53,116 @@ class Day18: Day {
     }
 
     static func explodeOnceIfNecessary(_ num: Array<String>) -> Array<String> {
+        toStrings(explodeOnceIfNecessary(fromStrings(num)).0)
+    }
+
+    static func explodeOnceIfNecessary(_ num: Array<Token>) -> (Array<Token>, Bool) {
         let s = num
         var depth = 0
         var lastRegNumPos: Int? = nil
         var lastRegNum: Int? = nil
-        for (i, c) in s.enumerated() {
-            if c == "[" {
-                depth += 1
-            } else if c == "]" {
-                depth -= 1
-            } else if c != "," {
+        for (i, t) in s.enumerated() {
+            switch t {
+            case let .Char(c):
+                if c == "[" {
+                    depth += 1
+                } else if c == "]" {
+                    depth -= 1
+                } else {
+                    continue
+                }
+            case let .Number(number):
                 if depth >= 5 {
-                    let leftNum = Int(String(c))!
-                    let prefix: Array<String>
+                    let leftNum = number
+                    let prefix: Array<Token>
                     if lastRegNum != nil {
                         let leftSum = lastRegNum! + leftNum
-                        let beforeLastRegNum = s[s.startIndex...s.index(s.startIndex, offsetBy: lastRegNumPos! - 1)]
-                        let afterLastRegNum = s[s.index(s.startIndex, offsetBy: lastRegNumPos! + 1)...s.index(s.startIndex, offsetBy: i - 2)]
-                        prefix = beforeLastRegNum + [String(leftSum)] + afterLastRegNum
+                        let beforeLastRegNum = Array<Token>(s[s.startIndex...s.index(s.startIndex, offsetBy: lastRegNumPos! - 1)])
+                        let afterLastRegNum = Array<Token>(s[s.index(s.startIndex, offsetBy: lastRegNumPos! + 1)...s.index(s.startIndex, offsetBy: i - 2)])
+                        prefix = beforeLastRegNum + [Token.Number(n: leftSum)] + afterLastRegNum
                     } else {
-                        prefix = Array<String>(s[...s.index(s.startIndex, offsetBy: i - 2)])
+                        prefix = Array<Token>(s[...s.index(s.startIndex, offsetBy: i - 2)])
                     }
-                    let rightNum = Int(String(s[s.index(s.startIndex, offsetBy: i + 2)]))!
-                    let rest = s[s.index(s.startIndex, offsetBy: i + 4)...]
+                    let element: Token = s[s.index(s.startIndex, offsetBy: i + 2)]
+                    if case .Number(let rightNum) = element {
+                        let rest = s[s.index(s.startIndex, offsetBy: i + 4)...]
 
-                    var nextRegNumPos: Int? = nil
-                    var nextRegNum: Int? = nil
-                    for (j, c2) in rest.enumerated() {
-                        if c2 != "[" && c2 != "]" && c2 != "," {
-                            nextRegNum = Int(String(c2))!
-                            nextRegNumPos = j
-                            break
+                        var nextRegNumPos: Int? = nil
+                        var nextRegNum: Int? = nil
+                        forRest: for (j, c2) in rest.enumerated() {
+                            switch c2 {
+                            case let .Number(n):
+                                nextRegNum = n
+                                nextRegNumPos = j
+                                break forRest
+                            default:
+                                continue
+                            }
                         }
-                    }
-                    let suffix: Array<String>
-                    if nextRegNum == nil {
-                        suffix = Array<String>(rest)
+                        let suffix: Array<Token>
+                        if nextRegNum == nil {
+                            suffix = Array<Token>(rest)
+                        } else {
+                            let rightSum = nextRegNum! + rightNum
+                            let beforeNextRegNum = rest[rest.startIndex...rest.index(rest.startIndex, offsetBy: nextRegNumPos! - 1)]
+                            let afterNextRegNum = rest[rest.index(rest.startIndex, offsetBy: nextRegNumPos! + 1)...]
+                            suffix = beforeNextRegNum + [Token.Number(n: rightSum)] + afterNextRegNum
+                        }
+                        let newNumStr = prefix + [Token.Number(n: 0)] + suffix
+                        return (newNumStr, true)
                     } else {
-                        let rightSum = nextRegNum! + rightNum
-                        let beforeNextRegNum = rest[rest.startIndex...rest.index(rest.startIndex, offsetBy: nextRegNumPos! - 1)]
-                        let afterNextRegNum = rest[rest.index(rest.startIndex, offsetBy: nextRegNumPos! + 1)...]
-                        suffix = beforeNextRegNum + [String(rightSum)] + afterNextRegNum
+                        fatalError()
                     }
-                    let newNumStr = prefix + ["0"] + suffix
-                    return newNumStr
                 } else {
                     lastRegNumPos = i
-                    lastRegNum = Int(String(c))!
+                    lastRegNum = number
                 }
             }
         }
-        return num
+        return (num, false)
     }
 
     static func splitOnceIfNecessary(_ num: Array<String>) -> Array<String> {
+        toStrings(splitOnceIfNecessary(fromStrings(num)).0)
+    }
+
+    static func splitOnceIfNecessary(_ num: Array<Token>) -> (Array<Token>, Bool) {
         let s = num
         for i in 1...s.count - 1 {
             let c1 = s[s.index(s.startIndex, offsetBy: i - 1)]
-            if c1 == "[" || c1 == "]" || c1 == "," {
+            switch c1 {
+            case let .Number(number):
+                if number < 10 {
+                    continue
+                }
+                let prefix = s[s.startIndex...s.index(s.startIndex, offsetBy: i - 2)]
+                let suffix = s[s.index(s.startIndex, offsetBy: i)...]
+                let left = number / 2
+                let right = (number / 2) + (number % 2)
+                let newNumber = [Token.Char(c: "["), Token.Number(n: left), Token.Char(c: ","), Token.Number(n: right), Token.Char(c: "]")]
+                return (prefix + newNumber + suffix, true)
+            default:
                 continue
             }
-            let number = Int(String(c1))!
-            if number < 10 {
-                continue
-            }
-            let prefix = s[s.startIndex...s.index(s.startIndex, offsetBy: i - 2)]
-            let suffix = s[s.index(s.startIndex, offsetBy: i)...]
-            let left = number / 2
-            let right = (number / 2) + (number % 2)
-            let newNumber = ["[", String(left), ",", String(right), "]"]
-            return prefix + newNumber + suffix
         }
-        return num
+        return (num, false)
     }
 
     internal static func reduce(_ s: Array<String>) -> Array<String> {
+        toStrings(reduce(fromStrings(s)))
+    }
+
+    internal static func reduce(_ s: Array<Token>) -> Array<Token> {
         var out = s
         while true {
-            let exploded = explodeOnceIfNecessary(out)
-            if exploded != out {
+            let (exploded, didExplode) = explodeOnceIfNecessary(out)
+            if didExplode {
                 out = exploded
                 continue
             }
 
-            let split = splitOnceIfNecessary(out)
-            if split != out {
+            let (split, didSplit) = splitOnceIfNecessary(out)
+            if didSplit {
                 out = split
             } else {
                 break
@@ -145,19 +172,35 @@ class Day18: Day {
     }
 
     internal static func add(_ left: Array<String>, _ right: Array<String>) -> Array<String> {
-        ["["] + left + [","] + right + ["]"]
+        toStrings(add(fromStrings(left), fromStrings(right)))
+    }
+
+    internal static func add(_ left: Array<Token>, _ right: Array<Token>) -> Array<Token> {
+        [Token.Char(c: "[")] + left + [Token.Char(c: ",")] + right + [Token.Char(c: "]")]
     }
 
     internal static func addAndReduce(_ left: Array<String>, _ right: Array<String>) -> Array<String> {
+        toStrings(addAndReduce(fromStrings(left), fromStrings(right)))
+    }
+
+    internal static func addAndReduce(_ left: Array<Token>, _ right: Array<Token>) -> Array<Token> {
         reduce(add(left, right))
     }
 
     internal static func sum(_ numbers: Array<Array<String>>) -> Array<String> {
+        toStrings(sum(numbers.map(Day18.fromStrings)))
+    }
+
+    internal static func sum(_ numbers: Array<Array<Token>>) -> Array<Token> {
         var sum = numbers[0]
         for i in 1...numbers.count - 1 {
             sum = addAndReduce(sum, numbers[i])
         }
         return sum
+    }
+
+    internal static func magnitude(_ num: Array<Token>) -> Int {
+        magnitude(toStrings(num))
     }
 
     internal static func magnitude(_ num: Array<String>) -> Int {
@@ -271,5 +314,35 @@ class Day18: Day {
 
     private struct InvalidNumberString: Error {
         let number: String
+    }
+
+    internal enum Token {
+        case Char(c: Character)
+        case Number(n: Int)
+    }
+
+    internal static func toString(_ num: Array<Token>) -> String {
+        toStrings(num).joined()
+    }
+
+    internal static func toStrings(_ num: Array<Token>) -> Array<String> {
+        num.map({ t in
+            switch t {
+            case let .Char(c):
+                return String(c)
+            case let .Number(n):
+                return String(n)
+            }
+        })
+    }
+
+    internal static func fromStrings(_ num: Array<String>) -> Array<Token> {
+        num.map({ s in
+            if s == "[" || s == "]" || s == "," {
+                return Token.Char(c: s.first!)
+            } else {
+                return Token.Number(n: Int(s)!)
+            }
+        })
     }
 }
