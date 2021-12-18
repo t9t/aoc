@@ -232,12 +232,17 @@ class Day18: Day {
     internal static func sum(_ numbers: Array<String>) -> String {
         var sum = numbers[0]
         for i in 1...numbers.count - 1 {
-            let other = numbers[i]
-            let nextSum = addAndReduce(sum, numbers[i])
-            //print("  \(sum)\n+ \(other)\n= \(nextSum)\n")
-            sum = nextSum
+            sum = addAndReduce(sum, numbers[i])
         }
         return sum
+    }
+
+    internal static func magnitude(_ num: String) -> Int {
+        do {
+            return (try parseNumber(num) as? PairNumber)!.magnitude()
+        } catch {
+            fatalError("\(error)")
+        }
     }
 
     internal static func tokenize(_ s: String) -> Array<String> {
@@ -270,6 +275,10 @@ class Day18: Day {
             false
         }
 
+        func magnitude() -> Int {
+            fatalError("magnitude() called on base Number")
+        }
+
         static func ==(lhs: Number, rhs: Number) -> Bool {
             lhs.equalTo(rhs: rhs)
         }
@@ -289,6 +298,10 @@ class Day18: Day {
 
         var description: String {
             "\(value)"
+        }
+
+        override func magnitude() -> Int {
+            value
         }
 
         override func equalTo(rhs: Number) -> Bool {
@@ -315,6 +328,10 @@ class Day18: Day {
 
         var description: String {
             "[\(left),\(right)]"
+        }
+
+        override func magnitude() -> Int {
+            3*left.magnitude() + 2*right.magnitude()
         }
 
         override func equalTo(rhs: Number) -> Bool {
