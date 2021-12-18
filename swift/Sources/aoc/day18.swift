@@ -2,16 +2,15 @@ import Foundation
 
 class Day18: Day {
     private let inputNumbers: Array<Number>
+    private let inputLines: Array<String>
 
     init(_ input: String) throws {
         inputNumbers = try input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map({ try Day18.parseNumber($0) })
+        inputLines = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init)
     }
 
     func part1() -> Int {
-        for n in inputNumbers {
-            print(n)
-        }
-        return 42
+        Day18.magnitude(Day18.sum(inputLines))
     }
 
     func part2() -> Int {
@@ -331,7 +330,7 @@ class Day18: Day {
         }
 
         override func magnitude() -> Int {
-            3*left.magnitude() + 2*right.magnitude()
+            3 * left.magnitude() + 2 * right.magnitude()
         }
 
         override func equalTo(rhs: Number) -> Bool {
