@@ -12,7 +12,7 @@ class Day18: Day {
     }
 
     func part1() -> Int {
-        Day18.magnitude(Day18.sum(input))
+        Day18.determineMagnitude(Day18.sum(input))
     }
 
     func part2() -> Int {
@@ -22,8 +22,8 @@ class Day18: Day {
                 if i == j {
                     continue
                 }
-                largestMagnitude = max(largestMagnitude, Day18.magnitude(Day18.addAndReduce(line1, line2)))
-                largestMagnitude = max(largestMagnitude, Day18.magnitude(Day18.addAndReduce(line2, line1)))
+                largestMagnitude = max(largestMagnitude, Day18.determineMagnitude(Day18.addAndReduce(line1, line2)))
+                largestMagnitude = max(largestMagnitude, Day18.determineMagnitude(Day18.addAndReduce(line2, line1)))
             }
         }
         return largestMagnitude
@@ -50,6 +50,44 @@ class Day18: Day {
         }
 
         throw InvalidNumberString(number: String(s))
+    }
+
+    internal static func determineMagnitude(_ s: Array<String>) -> Int {
+        determineMagnitude(fromStrings(s))
+    }
+
+    internal static func determineMagnitude(_ s: Array<Token>) -> Int {
+        if s.count == 1 {
+            if case .Number(let n) = s.first! {
+                return n
+            } else {
+                fatalError()
+            }
+        }
+
+        let within = s[s.index(after: s.startIndex)...s.index(s.endIndex, offsetBy: -2)]
+        var bc = 0
+        for (i, t) in within.enumerated() {
+            switch t {
+            case let .Char(c):
+                if c == "," && bc == 0 {
+                    let left = within[...within.index(within.startIndex, offsetBy: i - 1)]
+                    let right = within[within.index(within.startIndex, offsetBy: i + 1)...]
+
+                    //return PairNumber(left: try parseNumber(left), right: try parseNumber(right))
+                    let leftMagnitude = determineMagnitude(Array<Token>(left))
+                    let rightMagnitude =  determineMagnitude(Array<Token>(right))
+                    return 3 * leftMagnitude + 2 * rightMagnitude
+                } else if c == "[" {
+                    bc += 1
+                } else if c == "]" {
+                    bc -= 1
+                }
+            case .Number(_):
+                break
+            }
+        }
+        fatalError()
     }
 
     static func explodeOnceIfNecessary(_ num: Array<String>) -> Array<String> {

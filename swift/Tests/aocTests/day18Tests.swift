@@ -156,6 +156,24 @@ final class day18Tests: XCTestCase {
             XCTAssertEqual(Day18.magnitude(Day18.tokenize(input)), expected)
         }
     }
+
+    func testDetermineMagnitude() throws {
+        let testCases: Array<(String, Int)> = [
+            ("[9,1]", 29),
+            ("[1,9]", 21),
+            ("[[9,1],[1,9]]", 129),
+            ("[[1,2],[[3,4],5]]", 143),
+            ("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]", 1384),
+            ("[[[[1,1],[2,2]],[3,3]],[4,4]]", 445),
+            ("[[[[3,0],[5,3]],[4,4]],[5,5]]", 791),
+            ("[[[[5,0],[7,4]],[5,5]],[6,6]]", 1137),
+            ("[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]", 3488),
+        ]
+        for (input, expected) in testCases {
+            XCTAssertEqual(Day18.determineMagnitude(Day18.tokenize(input)), expected)
+        }
+    }
+
     private func num(_ value: Int) -> Day18.RegularNumber {
         Day18.RegularNumber(value: value)
     }
