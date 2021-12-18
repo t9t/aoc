@@ -14,7 +14,17 @@ class Day18: Day {
     }
 
     func part2() -> Int {
-        return 1337
+        var largestMagnitude = 0
+        for line1 in inputLines {
+            for line2 in inputLines {
+                if line1 == line2 {
+                    continue
+                }
+                largestMagnitude = max(largestMagnitude, Day18.magnitude(Day18.addAndReduce(line1, line2)))
+                largestMagnitude = max(largestMagnitude, Day18.magnitude(Day18.addAndReduce(line2, line1)))
+            }
+        }
+        return largestMagnitude
     }
 
     internal static func parseNumber<S: StringProtocol>(_ s: S) throws -> Number {
