@@ -4,8 +4,7 @@ class Day18: Day {
     private let input: Array<Array<Token>>
 
     init(_ input: String) throws {
-        self.input = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init)
-                .map(Day18.tokenize).map(Day18.fromStrings)
+        self.input = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init).map(Day18.tokenize)
     }
 
     func part1() -> Int {
@@ -26,10 +25,6 @@ class Day18: Day {
         return largestMagnitude
     }
 
-    internal static func determineMagnitude(_ s: Array<String>) -> Int {
-        determineMagnitude(fromStrings(s))
-    }
-
     internal static func determineMagnitude(_ s: Array<Token>) -> Int {
         if s.count == 1 {
             if case .Number(let n) = s.first! {
@@ -48,7 +43,6 @@ class Day18: Day {
                     let left = within[...within.index(within.startIndex, offsetBy: i - 1)]
                     let right = within[within.index(within.startIndex, offsetBy: i + 1)...]
 
-                    //return PairNumber(left: try parseNumber(left), right: try parseNumber(right))
                     let leftMagnitude = determineMagnitude(Array<Token>(left))
                     let rightMagnitude = determineMagnitude(Array<Token>(right))
                     return 3 * leftMagnitude + 2 * rightMagnitude
@@ -62,10 +56,6 @@ class Day18: Day {
             }
         }
         fatalError()
-    }
-
-    static func explodeOnceIfNecessary(_ num: Array<String>) -> Array<String> {
-        toStrings(explodeOnceIfNecessary(fromStrings(num)).0)
     }
 
     static func explodeOnceIfNecessary(_ num: Array<Token>) -> (Array<Token>, Bool) {
@@ -134,10 +124,6 @@ class Day18: Day {
         return (num, false)
     }
 
-    static func splitOnceIfNecessary(_ num: Array<String>) -> Array<String> {
-        toStrings(splitOnceIfNecessary(fromStrings(num)).0)
-    }
-
     static func splitOnceIfNecessary(_ num: Array<Token>) -> (Array<Token>, Bool) {
         let s = num
         for i in 1...s.count - 1 {
@@ -160,10 +146,6 @@ class Day18: Day {
         return (num, false)
     }
 
-    internal static func reduce(_ s: Array<String>) -> Array<String> {
-        toStrings(reduce(fromStrings(s)))
-    }
-
     internal static func reduce(_ s: Array<Token>) -> Array<Token> {
         var out = s
         while true {
@@ -183,24 +165,12 @@ class Day18: Day {
         return out
     }
 
-    internal static func add(_ left: Array<String>, _ right: Array<String>) -> Array<String> {
-        toStrings(add(fromStrings(left), fromStrings(right)))
-    }
-
     internal static func add(_ left: Array<Token>, _ right: Array<Token>) -> Array<Token> {
         [Token.Char(c: "[")] + left + [Token.Char(c: ",")] + right + [Token.Char(c: "]")]
     }
 
-    internal static func addAndReduce(_ left: Array<String>, _ right: Array<String>) -> Array<String> {
-        toStrings(addAndReduce(fromStrings(left), fromStrings(right)))
-    }
-
     internal static func addAndReduce(_ left: Array<Token>, _ right: Array<Token>) -> Array<Token> {
         reduce(add(left, right))
-    }
-
-    internal static func sum(_ numbers: Array<Array<String>>) -> Array<String> {
-        toStrings(sum(numbers.map(Day18.fromStrings)))
     }
 
     internal static func sum(_ numbers: Array<Array<Token>>) -> Array<Token> {
@@ -211,24 +181,24 @@ class Day18: Day {
         return sum
     }
 
-    internal static func tokenize(_ s: String) -> Array<String> {
-        var out = Array<String>()
+    internal static func tokenize(_ s: String) -> Array<Token> {
+        var out = Array<Token>()
         var buf = ""
         for c in s {
             if c == "[" {
-                out.append(String(c))
+                out.append(Token.Char(c: c))
             } else if c == "]" {
                 if buf != "" {
-                    out.append(buf)
+                    out.append(Token.Number(n: Int(buf)!))
                 }
                 buf = ""
-                out.append(String(c))
+                out.append(Token.Char(c: c))
             } else if c == "," {
                 if buf != "" {
-                    out.append(buf)
+                    out.append(Token.Number(n: Int(buf)!))
                 }
                 buf = ""
-                out.append(String(c))
+                out.append(Token.Char(c: c))
             } else {
                 buf.append(c)
             }
@@ -239,30 +209,5 @@ class Day18: Day {
     internal enum Token {
         case Char(c: Character)
         case Number(n: Int)
-    }
-
-    internal static func toString(_ num: Array<Token>) -> String {
-        toStrings(num).joined()
-    }
-
-    internal static func toStrings(_ num: Array<Token>) -> Array<String> {
-        num.map({ t in
-            switch t {
-            case let .Char(c):
-                return String(c)
-            case let .Number(n):
-                return String(n)
-            }
-        })
-    }
-
-    internal static func fromStrings(_ num: Array<String>) -> Array<Token> {
-        num.map({ s in
-            if s == "[" || s == "]" || s == "," {
-                return Token.Char(c: s.first!)
-            } else {
-                return Token.Number(n: Int(s)!)
-            }
-        })
     }
 }

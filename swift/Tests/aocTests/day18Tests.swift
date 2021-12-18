@@ -33,7 +33,7 @@ final class day18Tests: XCTestCase {
             ("[[[[4,3],4],4],[7,[[8,4],9]]]", "[1,1]", "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"),
         ]
         for (l, r, expected) in testCases {
-            XCTAssertEqual(Day18.add(Day18.tokenize(l), Day18.tokenize(r)).joined(), expected)
+            XCTAssertEqual(toString(Day18.add(Day18.tokenize(l), Day18.tokenize(r))), expected)
         }
     }
 
@@ -41,27 +41,27 @@ final class day18Tests: XCTestCase {
         let left = "[[[[4,3],4],4],[7,[[8,4],9]]]"
         let right = "[1,1]"
         let expected = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
-        XCTAssertEqual(Day18.addAndReduce(Day18.tokenize(left), Day18.tokenize(right)).joined(), expected)
+        XCTAssertEqual(toString(Day18.addAndReduce(Day18.tokenize(left), Day18.tokenize(right))), expected)
     }
 
     func testAddAndReduce2() throws {
         let left = "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]"
         let right = "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]"
         let expected = "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]"
-        XCTAssertEqual(Day18.addAndReduce(Day18.tokenize(left), Day18.tokenize(right)).joined(), expected)
+        XCTAssertEqual(toString(Day18.addAndReduce(Day18.tokenize(left), Day18.tokenize(right))), expected)
     }
 
     func testAddAndReduce3() throws {
         let left = "[[[[7,7],[7,7]],[[8,7],[8,7]]],[[[7,0],[7,7]],9]]"
         let right = "[[[[4,2],2],6],[8,7]]"
         let expected = "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]"
-        XCTAssertEqual(Day18.addAndReduce(Day18.tokenize(left), Day18.tokenize(right)).joined(), expected)
+        XCTAssertEqual(toString(Day18.addAndReduce(Day18.tokenize(left), Day18.tokenize(right))), expected)
     }
 
     func testSum1() throws {
         let input = ["[1,1]","[2,2]","[3,3]","[4,4]","[5,5]","[6,6]"]
         let expected = "[[[[5,0],[7,4]],[5,5]],[6,6]]"
-        XCTAssertEqual(Day18.sum(input.map(Day18.tokenize)).joined(), expected)
+        XCTAssertEqual(toString(Day18.sum(input.map(Day18.tokenize))), expected)
     }
 
     func testSum2() throws {
@@ -76,7 +76,7 @@ final class day18Tests: XCTestCase {
                      "[[[5,[7,4]],7],1]",
                      "[[[[4,2],2],6],[8,7]]"]
         let expected = "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]"
-        XCTAssertEqual(Day18.sum(input.map(Day18.tokenize)).joined(), expected)
+        XCTAssertEqual(toString(Day18.sum(input.map(Day18.tokenize))), expected)
     }
 
     func testExplodeOnceIfNecessary() throws {
@@ -89,7 +89,9 @@ final class day18Tests: XCTestCase {
             ("[4,2]", "[4,2]"), // Exploding not necessary
         ]
         for (input, expected) in testCases {
-            XCTAssertEqual(Day18.explodeOnceIfNecessary(Day18.tokenize(input)).joined(), expected)
+            let result = Day18.explodeOnceIfNecessary(Day18.tokenize(input))
+            XCTAssertEqual(result.1, input != expected)
+            XCTAssertEqual(toString(result.0), expected)
         }
     }
 
@@ -105,14 +107,16 @@ final class day18Tests: XCTestCase {
             ("[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,9],[[11,9],[11,0]]]]", "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,9],[[[5,6],9],[11,0]]]]"),
         ]
         for (input, expected) in testCases {
-            XCTAssertEqual(Day18.splitOnceIfNecessary(Day18.tokenize(input)).joined(), expected)
+            let result = Day18.splitOnceIfNecessary(Day18.tokenize(input))
+            XCTAssertEqual(result.1, input != expected)
+            XCTAssertEqual(toString(result.0), expected)
         }
     }
 
     func testReduce() throws {
         let input = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
         let expected = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
-        XCTAssertEqual(Day18.reduce(Day18.tokenize(input)).joined(), expected)
+        XCTAssertEqual(toString(Day18.reduce(Day18.tokenize(input))), expected)
     }
 
     func testDetermineMagnitude() throws {
@@ -130,5 +134,16 @@ final class day18Tests: XCTestCase {
         for (input, expected) in testCases {
             XCTAssertEqual(Day18.determineMagnitude(Day18.tokenize(input)), expected)
         }
+    }
+
+    private func toString(_ num: Array<Day18.Token>) -> String {
+        num.map({ t in
+            switch t {
+            case let .Char(c):
+                return String(c)
+            case let .Number(n):
+                return String(n)
+            }
+        }).joined()
     }
 }
