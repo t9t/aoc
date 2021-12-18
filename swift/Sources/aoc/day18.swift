@@ -57,8 +57,8 @@ class Day18: Day {
                     let prefix: String
                     if lastRegNum != nil {
                         let leftSum = lastRegNum! + leftNum
-                        let beforeLastRegNum = s[s.startIndex...s.index(s.startIndex, offsetBy: lastRegNumPos!-1)]
-                        let afterLastRegNum = s[s.index(s.startIndex, offsetBy: lastRegNumPos! + 1)...s.index(s.startIndex, offsetBy: i-2)]
+                        let beforeLastRegNum = s[s.startIndex...s.index(s.startIndex, offsetBy: lastRegNumPos! - 1)]
+                        let afterLastRegNum = s[s.index(s.startIndex, offsetBy: lastRegNumPos! + 1)...s.index(s.startIndex, offsetBy: i - 2)]
                         prefix = beforeLastRegNum + String(leftSum) + afterLastRegNum
                     } else {
                         prefix = String(s[...s.index(s.startIndex, offsetBy: i - 2)])
@@ -80,7 +80,7 @@ class Day18: Day {
                         suffix = String(rest)
                     } else {
                         let rightSum = nextRegNum! + rightNum
-                        let beforeNextRegNum = rest[rest.startIndex...rest.index(rest.startIndex, offsetBy: nextRegNumPos!-1)]
+                        let beforeNextRegNum = rest[rest.startIndex...rest.index(rest.startIndex, offsetBy: nextRegNumPos! - 1)]
                         let afterNextRegNum = rest[rest.index(rest.startIndex, offsetBy: nextRegNumPos! + 1)...]
                         suffix = beforeNextRegNum + String(rightSum) + afterNextRegNum
 
@@ -99,6 +99,29 @@ class Day18: Day {
         }
 
         return PairNumber(left: RegularNumber(value: 4), right: RegularNumber(value: 2))
+    }
+
+    static func splitOnceIfNecessary(_ num: PairNumber) -> PairNumber {
+        let s = "\(num)"
+        for i in 1...s.count - 1 {
+            let c1 = s[s.index(s.startIndex, offsetBy: i - 1)]
+            let c2 = s[s.index(s.startIndex, offsetBy: i)]
+            if c1 == "[" || c1 == "]" || c1 == "," || c2 == "[" || c2 == "]" || c2 == "," {
+                continue
+            }
+            let number = Int(String(c1) + String(c2))!
+            let prefix = s[s.startIndex...s.index(s.startIndex, offsetBy: i - 2)]
+            let suffix = s[s.index(s.startIndex, offsetBy: i + 1)...]
+            let left = number / 2
+            let right = (number / 2) + (number % 2)
+            do {
+                let ret = prefix + "[" + String(left) + "," + String(right) + "]" + suffix
+                return (try parseNumber(ret) as? PairNumber)!
+            } catch {
+                fatalError("\(error)")
+            }
+        }
+        return num
     }
 
     internal class Number: Equatable {
