@@ -2,11 +2,11 @@ import Foundation
 
 class Day18: Day {
     private let inputNumbers: Array<Number>
-    private let inputLines: Array<String>
+    private let inputLines: Array<Array<String>>
 
     init(_ input: String) throws {
         inputNumbers = try input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map({ try Day18.parseNumber($0) })
-        inputLines = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init)
+        inputLines = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n").map(String.init).map(Day18.tokenize)
     }
 
     func part1() -> Int {
@@ -50,8 +50,8 @@ class Day18: Day {
         throw InvalidNumberString(number: String(s))
     }
 
-    static func explodeOnceIfNecessary(_ num: String) -> String {
-        let s = tokenize("\(num)")
+    static func explodeOnceIfNecessary(_ num: Array<String>) -> Array<String> {
+        let s = num
         var depth = 0
         var lastRegNumPos: Int? = nil
         var lastRegNum: Int? = nil
@@ -92,10 +92,9 @@ class Day18: Day {
                         let beforeNextRegNum = rest[rest.startIndex...rest.index(rest.startIndex, offsetBy: nextRegNumPos! - 1)]
                         let afterNextRegNum = rest[rest.index(rest.startIndex, offsetBy: nextRegNumPos! + 1)...]
                         suffix = beforeNextRegNum + [String(rightSum)] + afterNextRegNum
-
                     }
                     let newNumStr = prefix + ["0"] + suffix
-                    return newNumStr.joined()
+                    return newNumStr
                 } else {
                     lastRegNumPos = i
                     lastRegNum = Int(String(c))!
@@ -105,8 +104,8 @@ class Day18: Day {
         return num
     }
 
-    static func splitOnceIfNecessary(_ num: String) -> String {
-        let s = tokenize("\(num)")
+    static func splitOnceIfNecessary(_ num: Array<String>) -> Array<String> {
+        let s = num
         for i in 1...s.count - 1 {
             let c1 = s[s.index(s.startIndex, offsetBy: i - 1)]
             if c1 == "[" || c1 == "]" || c1 == "," {
@@ -121,12 +120,12 @@ class Day18: Day {
             let left = number / 2
             let right = (number / 2) + (number % 2)
             let newNumber = ["[", String(left), ",", String(right), "]"]
-            return (prefix + newNumber + suffix).joined()
+            return prefix + newNumber + suffix
         }
         return num
     }
 
-    internal static func reduce(_ s: String) -> String {
+    internal static func reduce(_ s: Array<String>) -> Array<String> {
         var out = s
         while true {
             let exploded = explodeOnceIfNecessary(out)
@@ -145,15 +144,15 @@ class Day18: Day {
         return out
     }
 
-    internal static func add(_ left: String, _ right: String) -> String {
-        "[" + left + "," + right + "]"
+    internal static func add(_ left: Array<String>, _ right: Array<String>) -> Array<String> {
+        ["["] + left + [","] + right + ["]"]
     }
 
-    internal static func addAndReduce(_ left: String, _ right: String) -> String {
+    internal static func addAndReduce(_ left: Array<String>, _ right: Array<String>) -> Array<String> {
         reduce(add(left, right))
     }
 
-    internal static func sum(_ numbers: Array<String>) -> String {
+    internal static func sum(_ numbers: Array<Array<String>>) -> Array<String> {
         var sum = numbers[0]
         for i in 1...numbers.count - 1 {
             sum = addAndReduce(sum, numbers[i])
@@ -161,9 +160,9 @@ class Day18: Day {
         return sum
     }
 
-    internal static func magnitude(_ num: String) -> Int {
+    internal static func magnitude(_ num: Array<String>) -> Int {
         do {
-            return (try parseNumber(num) as? PairNumber)!.magnitude()
+            return (try parseNumber(num.joined()) as? PairNumber)!.magnitude()
         } catch {
             fatalError("\(error)")
         }
