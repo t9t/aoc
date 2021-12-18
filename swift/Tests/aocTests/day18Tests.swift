@@ -59,14 +59,14 @@ final class day18Tests: XCTestCase {
             ("[[6,[5,[4,[3,2]]]],1]", "[[6,[5,[7,0]]],3]"),
             ("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]", "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]"),
             ("[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]", "[[3,[2,[8,0]]],[9,[5,[7,0]]]]"),
+            ("[4,2]", "[4,2]"), // Exploding not necessary
         ]
-        for (inputString, expected) in testCases {
-            let input = (try Day18.parseNumber(inputString) as? Day18.PairNumber)!
-            XCTAssertEqual(Day18.explodeOnceIfNecessary(input), try Day18.parseNumber(expected))
+        for (input, expected) in testCases {
+            XCTAssertEqual(Day18.explodeOnceIfNecessary(input), expected)
         }
     }
 
-    func testSplitOnceIfNecessary() throws {
+    func testSplitOnceIfNecessaryX() throws {
         let testCases: Array<(Day18.PairNumber, String)> = [
             (pair(10, 1), "[[5,5],1]"),
             (pair(11, 1), "[[5,6],1]"),
@@ -76,7 +76,22 @@ final class day18Tests: XCTestCase {
             (pair(1, pair(2, pair(pair(11, pair(3, 4)), 5))), "[1,[2,[[[5,6],[3,4]],5]]]"),
         ]
         for (input, expected) in testCases {
-            XCTAssertEqual(Day18.splitOnceIfNecessary(input), try Day18.parseNumber(expected))
+            XCTAssertEqual(Day18.splitOnceIfNecessaryX(input), try Day18.parseNumber(expected))
+        }
+    }
+
+    func testSplitOnceIfNecessary() throws {
+        let testCases: Array<(String, String)> = [
+            ("[10,1]", "[[5,5],1]"),
+            ("[11,1]", "[[5,6],1]"),
+            ("[12,1]", "[[6,6],1]"),
+            ("[1,11]", "[1,[5,6]]"),
+            ("[1,[2,[3,11]]]", "[1,[2,[3,[5,6]]]]"),
+            ("[1,[2,[[11,[3,4]],5]]]", "[1,[2,[[[5,6],[3,4]],5]]]"),
+            ("[4,2]", "[4,2]"), // Splitting unnecessary
+        ]
+        for (input, expected) in testCases {
+            XCTAssertEqual(Day18.splitOnceIfNecessary(input), expected)
         }
     }
 
