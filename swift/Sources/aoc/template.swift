@@ -4,7 +4,7 @@ class TemplateDay: Day {
     private let inputLines: Array<Substring>
 
     init(_ input: String) {
-        inputLines = input.split(separator: "\n")
+        inputLines = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n")
     }
 
     func part1() -> Int {

@@ -11,7 +11,7 @@ final class integrationTests: XCTestCase {
                 let id = ResultId(year: 2021, day: dayNum, part: part)
                 if let result = results[id] {
                     let input = try String(contentsOfFile: "../input/2021/\(dayNum).txt")
-                    let day = Days.get(num: dayNum, input: input)
+                    let day = try Days.get(num: dayNum, input: input)
 
                     let output = try (part == 1 ? day.part1 : day.part2)()
                     XCTAssertEqual(result, output, "\(id)")

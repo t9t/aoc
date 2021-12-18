@@ -26,14 +26,14 @@ class Wrapped: StringDay {
     }
 }
 
-func stringWrapped(_ day: @escaping (String) -> Day) -> (String) -> StringDay {
+func stringWrapped(_ day: @escaping (String) throws -> Day) -> (String) throws -> StringDay {
     {
-        Wrapped(day($0))
+        Wrapped(try day($0))
     }
 }
 
 internal class Days {
-    private static let days: [Int: (String) -> StringDay] = [
+    private static let days: [Int: (String) throws -> StringDay] = [
         1: stringWrapped(Day1.init),
         2: stringWrapped(Day2.init),
         3: stringWrapped(Day3.init),
@@ -51,10 +51,11 @@ internal class Days {
         15: stringWrapped(Day15.init),
         16: stringWrapped(Day16.init),
         17: stringWrapped(Day17.init),
+        18: stringWrapped(Day18.init),
 /*newday*/]
 
-    static func get(num: Int, input: String) -> StringDay {
-        days[num]!(input)
+    static func get(num: Int, input: String) throws -> StringDay {
+        try days[num]!(input)
     }
 
     static func getAllDayNumbers() -> Array<Int> {
@@ -78,7 +79,7 @@ if part != 1 && part != 2 {
 print("Running day \(dayNum) part \(part)")
 
 let input = try getInput(year: 2021, day: dayNum)
-let day = Days.get(num: dayNum, input: input)
+let day = try Days.get(num: dayNum, input: input)
 
 let start = Date()
 let output = try (part == 1 ? day.part1 : day.part2)()
