@@ -95,6 +95,12 @@ final class day18Tests: XCTestCase {
         }
     }
 
+    func testReduce() throws {
+        let input = "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"
+        let expected = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
+        XCTAssertEqual(Day18.reduce(input), expected)
+    }
+
     private func num(_ value: Int) -> Day18.RegularNumber {
         Day18.RegularNumber(value: value)
     }

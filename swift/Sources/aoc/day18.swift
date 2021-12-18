@@ -202,6 +202,25 @@ class Day18: Day {
         return num
     }
 
+    internal static func reduce(_ s: String) -> String {
+        var out = s
+        while true {
+            let exploded = explodeOnceIfNecessary(out)
+            if exploded != out {
+                out = exploded
+                continue
+            }
+
+            let split = splitOnceIfNecessary(out)
+            if split != out {
+                out = split
+            } else {
+                break
+            }
+        }
+        return out
+    }
+
     internal static func tokenize(_ s: String) -> Array<String> {
         var out = Array<String>()
         var buf = ""
