@@ -27,6 +27,17 @@ final class day18Tests: XCTestCase {
         XCTAssertEqual(n, 1337)
     }
 
+    func testAddition() throws {
+        let testCases: Array<(Day18.Number, Day18.Number, Day18.Number)> = [
+            (num(1), num(2), pair(1,2)),
+            (num(1), pair(num(2), num(3)), pair(1, pair(num(2), num(3)))),
+            (pair(1, 2), pair(pair(3, 4), 5), pair(pair(1, 2), pair(pair(3, 4), 5)))
+        ]
+        for (l, r, expected) in testCases {
+            XCTAssertEqual(l + r, expected)
+        }
+    }
+
     func testParseNumber() throws {
         let testCases: [String: Day18.Number] = [
             "[1,2]": pair(1, 2),

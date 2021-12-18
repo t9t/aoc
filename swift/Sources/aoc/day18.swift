@@ -20,7 +20,7 @@ class Day18: Day {
 
     internal static func parseNumber<S: StringProtocol>(_ s: S) throws -> Number {
         if s.count == 1 {
-            return Day18.RegularNumber(value: Int(s)!)
+            return RegularNumber(value: Int(s)!)
         }
 
         let within = s[s.index(after: s.startIndex)...s.index(s.endIndex, offsetBy: -2)]
@@ -30,7 +30,7 @@ class Day18: Day {
                 let left = within[...within.index(within.startIndex, offsetBy: i - 1)]
                 let right = within[within.index(within.startIndex, offsetBy: i + 1)...]
 
-                return Day18.PairNumber(left: try Day18.parseNumber(left), right: try Day18.parseNumber(right))
+                return PairNumber(left: try parseNumber(left), right: try parseNumber(right))
             } else if c == "[" {
                 bc += 1
             } else if c == "]" {
@@ -42,12 +42,16 @@ class Day18: Day {
     }
 
     internal class Number: Equatable {
-        func equalTo(rhs: Day18.Number) -> Bool {
+        func equalTo(rhs: Number) -> Bool {
             false
         }
 
-        static func ==(lhs: Day18.Number, rhs: Day18.Number) -> Bool {
+        static func ==(lhs: Number, rhs: Number) -> Bool {
             lhs.equalTo(rhs: rhs)
+        }
+
+        static func +(lhs: Number, rhs: Number) -> Number {
+            PairNumber(left: lhs, right: rhs)
         }
     }
 
@@ -70,7 +74,7 @@ class Day18: Day {
             return false
         }
 
-        static func ==(lhs: Day18.RegularNumber, rhs: Day18.RegularNumber) -> Bool {
+        static func ==(lhs: RegularNumber, rhs: RegularNumber) -> Bool {
             lhs.value == rhs.value
         }
     }
@@ -96,7 +100,7 @@ class Day18: Day {
             return false
         }
 
-        static func ==(lhs: Day18.PairNumber, rhs: Day18.PairNumber) -> Bool {
+        static func ==(lhs: PairNumber, rhs: PairNumber) -> Bool {
             lhs.left.equalTo(rhs: rhs.left) && lhs.right.equalTo(rhs: rhs.right)
         }
     }
