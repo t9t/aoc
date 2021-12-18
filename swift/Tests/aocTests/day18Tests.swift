@@ -27,7 +27,7 @@ final class day18Tests: XCTestCase {
         XCTAssertEqual(n, 1337)
     }
 
-    func testAddition() throws {
+    func testAdditionX() throws {
         let testCases: Array<(Day18.Number, Day18.Number, Day18.Number)> = [
             (num(1), num(2), pair(1,2)),
             (num(1), pair(num(2), num(3)), pair(1, pair(num(2), num(3)))),
@@ -35,6 +35,16 @@ final class day18Tests: XCTestCase {
         ]
         for (l, r, expected) in testCases {
             XCTAssertEqual(l + r, expected)
+        }
+    }
+
+    func testAddition() throws {
+        let testCases: Array<(String, String, String)> = [
+            ("[1,2]", "[3,4]", "[[1,2],[3,4]]"),
+            ("[[[[4,3],4],4],[7,[[8,4],9]]]", "[1,1]", "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"),
+        ]
+        for (l, r, expected) in testCases {
+            XCTAssertEqual(Day18.add(l, r), expected)
         }
     }
 

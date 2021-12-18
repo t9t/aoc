@@ -221,6 +221,10 @@ class Day18: Day {
         return out
     }
 
+    internal static func add(_ left: String, _ right: String) -> String {
+        "[" + left + "," + right + "]"
+    }
+
     internal static func tokenize(_ s: String) -> Array<String> {
         var out = Array<String>()
         var buf = ""
