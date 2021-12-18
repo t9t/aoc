@@ -225,6 +225,10 @@ class Day18: Day {
         "[" + left + "," + right + "]"
     }
 
+    internal static func addAndReduce(_ left: String, _ right: String) -> String {
+        reduce(add(left, right))
+    }
+
     internal static func tokenize(_ s: String) -> Array<String> {
         var out = Array<String>()
         var buf = ""

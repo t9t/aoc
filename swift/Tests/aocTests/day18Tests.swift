@@ -29,7 +29,7 @@ final class day18Tests: XCTestCase {
 
     func testAdditionX() throws {
         let testCases: Array<(Day18.Number, Day18.Number, Day18.Number)> = [
-            (num(1), num(2), pair(1,2)),
+            (num(1), num(2), pair(1, 2)),
             (num(1), pair(num(2), num(3)), pair(1, pair(num(2), num(3)))),
             (pair(1, 2), pair(pair(3, 4), 5), pair(pair(1, 2), pair(pair(3, 4), 5)))
         ]
@@ -46,6 +46,13 @@ final class day18Tests: XCTestCase {
         for (l, r, expected) in testCases {
             XCTAssertEqual(Day18.add(l, r), expected)
         }
+    }
+
+    func testAddAndReduce() throws {
+        let left = "[[[[4,3],4],4],[7,[[8,4],9]]]"
+        let right = "[1,1]"
+        let expected = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
+        XCTAssertEqual(Day18.addAndReduce(left, right), expected)
     }
 
     func testParseNumber() throws {
@@ -81,8 +88,8 @@ final class day18Tests: XCTestCase {
             (pair(10, 1), "[[5,5],1]"),
             (pair(11, 1), "[[5,6],1]"),
             (pair(12, 1), "[[6,6],1]"),
-            (pair(1,11), "[1,[5,6]]"),
-            (pair(1, pair(2, pair(3,11))), "[1,[2,[3,[5,6]]]]"),
+            (pair(1, 11), "[1,[5,6]]"),
+            (pair(1, pair(2, pair(3, 11))), "[1,[2,[3,[5,6]]]]"),
             (pair(1, pair(2, pair(pair(11, pair(3, 4)), 5))), "[1,[2,[[[5,6],[3,4]],5]]]"),
         ]
         for (input, expected) in testCases {
