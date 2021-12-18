@@ -76,15 +76,17 @@ class Day18: Day {
             case let .Number(number):
                 if depth >= 5 {
                     let leftNum = number
-                    let prefix: Array<Token>
+                    var out = Array<Token>()
                     if lastRegNum != nil {
-                        let leftSum = lastRegNum! + leftNum
-                        let beforeLastRegNum = Array<Token>(s[s.startIndex...s.index(s.startIndex, offsetBy: lastRegNumPos! - 1)])
-                        let afterLastRegNum = Array<Token>(s[s.index(s.startIndex, offsetBy: lastRegNumPos! + 1)...s.index(s.startIndex, offsetBy: i - 2)])
-                        prefix = beforeLastRegNum + [Token.Number(n: leftSum)] + afterLastRegNum
+                        out.appendAll(s[s.startIndex...s.index(s.startIndex, offsetBy: lastRegNumPos! - 1)])
+                        out.append(Token.Number(n: lastRegNum! + leftNum))
+                        out.appendAll(s[s.index(s.startIndex, offsetBy: lastRegNumPos! + 1)...s.index(s.startIndex, offsetBy: i - 2)])
                     } else {
-                        prefix = Array<Token>(s[...s.index(s.startIndex, offsetBy: i - 2)])
+                        out.appendAll(s[...s.index(s.startIndex, offsetBy: i - 2)])
                     }
+
+                    out.append(Token.Number(n: 0))
+
                     let element: Token = s[s.index(s.startIndex, offsetBy: i + 2)]
                     if case .Number(let rightNum) = element {
                         let rest = s[s.index(s.startIndex, offsetBy: i + 4)...]
@@ -101,17 +103,16 @@ class Day18: Day {
                                 continue
                             }
                         }
-                        let suffix: Array<Token>
+
                         if nextRegNum == nil {
-                            suffix = Array<Token>(rest)
+                            out.appendAll(rest)
                         } else {
-                            let rightSum = nextRegNum! + rightNum
-                            let beforeNextRegNum = rest[rest.startIndex...rest.index(rest.startIndex, offsetBy: nextRegNumPos! - 1)]
-                            let afterNextRegNum = rest[rest.index(rest.startIndex, offsetBy: nextRegNumPos! + 1)...]
-                            suffix = beforeNextRegNum + [Token.Number(n: rightSum)] + afterNextRegNum
+                            out.appendAll(rest[rest.startIndex...rest.index(rest.startIndex, offsetBy: nextRegNumPos! - 1)])
+                            out.append(Token.Number(n: nextRegNum! + rightNum))
+                            out.appendAll(rest[rest.index(rest.startIndex, offsetBy: nextRegNumPos! + 1)...])
                         }
-                        let newNumStr = prefix + [Token.Number(n: 0)] + suffix
-                        return (newNumStr, true)
+
+                        return (out, true)
                     } else {
                         fatalError()
                     }
@@ -209,5 +210,19 @@ class Day18: Day {
     internal enum Token {
         case Char(c: Character)
         case Number(n: Int)
+    }
+}
+
+extension Array {
+    mutating func appendAll(_ other: Array<Element>) {
+        for e in other {
+            self.append(e)
+        }
+    }
+
+    mutating func appendAll(_ other: ArraySlice<Element>) {
+        for e in other {
+            self.append(e)
+        }
     }
 }
