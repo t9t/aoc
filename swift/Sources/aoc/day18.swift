@@ -189,7 +189,7 @@ class Day18: Day {
                 continue
             }
             let number = Int(String(c1))!
-            if number < 9 {
+            if number < 10 {
                 continue
             }
             let prefix = s[s.startIndex...s.index(s.startIndex, offsetBy: i - 2)]
@@ -226,7 +226,18 @@ class Day18: Day {
     }
 
     internal static func addAndReduce(_ left: String, _ right: String) -> String {
-        reduce(add(left, right))
+        return reduce(add(left, right))
+    }
+
+    internal static func sum(_ numbers: Array<String>) -> String {
+        var sum = numbers[0]
+        for i in 1...numbers.count - 1 {
+            let other = numbers[i]
+            let nextSum = addAndReduce(sum, numbers[i])
+            //print("  \(sum)\n+ \(other)\n= \(nextSum)\n")
+            sum = nextSum
+        }
+        return sum
     }
 
     internal static func tokenize(_ s: String) -> Array<String> {

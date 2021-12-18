@@ -48,11 +48,46 @@ final class day18Tests: XCTestCase {
         }
     }
 
-    func testAddAndReduce() throws {
+    func testAddAndReduce1() throws {
         let left = "[[[[4,3],4],4],[7,[[8,4],9]]]"
         let right = "[1,1]"
         let expected = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"
         XCTAssertEqual(Day18.addAndReduce(left, right), expected)
+    }
+
+    func testAddAndReduce2() throws {
+        let left = "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]"
+        let right = "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]"
+        let expected = "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]"
+        XCTAssertEqual(Day18.addAndReduce(left, right), expected)
+    }
+
+    func testAddAndReduce3() throws {
+        let left = "[[[[7,7],[7,7]],[[8,7],[8,7]]],[[[7,0],[7,7]],9]]"
+        let right = "[[[[4,2],2],6],[8,7]]"
+        let expected = "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]"
+        XCTAssertEqual(Day18.addAndReduce(left, right), expected)
+    }
+
+    func testSum1() throws {
+        let input = ["[1,1]","[2,2]","[3,3]","[4,4]","[5,5]","[6,6]"]
+        let expected = "[[[[5,0],[7,4]],[5,5]],[6,6]]"
+        XCTAssertEqual(Day18.sum(input), expected)
+    }
+
+    func testSum2() throws {
+        let input = ["[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]",
+                     "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]",
+                     "[[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]",
+                     "[[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]",
+                     "[7,[5,[[3,8],[1,4]]]]",
+                     "[[2,[2,2]],[8,[8,1]]]",
+                     "[2,9]",
+                     "[1,[[[9,3],9],[[9,0],[0,7]]]]",
+                     "[[[5,[7,4]],7],1]",
+                     "[[[[4,2],2],6],[8,7]]"]
+        let expected = "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]"
+        XCTAssertEqual(Day18.sum(input), expected)
     }
 
     func testParseNumber() throws {
@@ -106,6 +141,7 @@ final class day18Tests: XCTestCase {
             ("[1,[2,[3,11]]]", "[1,[2,[3,[5,6]]]]"),
             ("[1,[2,[[11,[3,4]],5]]]", "[1,[2,[[[5,6],[3,4]],5]]]"),
             ("[4,2]", "[4,2]"), // Splitting unnecessary
+            ("[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,9],[[11,9],[11,0]]]]", "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,9],[[[5,6],9],[11,0]]]]"),
         ]
         for (input, expected) in testCases {
             XCTAssertEqual(Day18.splitOnceIfNecessary(input), expected)
