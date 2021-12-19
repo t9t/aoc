@@ -59,6 +59,14 @@ class Day19: Day {
     }
 
     func part1() -> Int {
+        doTheThing().0
+    }
+
+    func part2() -> Int {
+        doTheThing().1
+    }
+
+    func doTheThing() -> (Int, Int) {
         var beacons: Set<Position> = Set(inputPositions[0])
         var remaining = Array<Set<Position>>(inputPositions[1...])
         var locations: Set<Position> = Set([Position(x: 0, y: 0, z: 0)])
@@ -80,7 +88,10 @@ class Day19: Day {
                 }
             }
         }
-        return beacons.count
+
+        let maxDistance = locations.flatMap({ l in locations.map({ $0 - l }) }).map({ abs($0.x) + abs($0.y) + abs($0.z) }).max()!
+
+        return (beacons.count, maxDistance)
     }
 
     private func doScannersMatch(_ scanner1: Set<Position>, _ scanner2: Set<Position>) -> (Position, Orientation)? {
@@ -89,11 +100,11 @@ class Day19: Day {
             let offsets2 = makeOffsetTable(beacons)
 
             var result: Position? = nil
-            outer: for (x, xv) in offsets1 {
-                for (y, yv) in offsets2 {
+            outer: for (x, xof) in offsets1 {
+                for (y, yof) in offsets2 {
                     var count = 0
-                    for x in yv {
-                        if xv.contains(x) {
+                    for r in yof {
+                        if xof.contains(r) {
                             count += 1
                             if count >= 12 {
                                 break
@@ -136,10 +147,6 @@ class Day19: Day {
             ret.append((orient, arr))
         }
         return ret
-    }
-
-    func part2() -> Int {
-        return 1337
     }
 
     private struct Position: Equatable, Hashable, CustomStringConvertible {
