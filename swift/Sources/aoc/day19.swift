@@ -99,27 +99,18 @@ class Day19: Day {
         for (orientation, beacons) in allPossibleOrientations(scanner2) {
             let offsets2 = makeOffsetTable(beacons)
 
-            var result: Position? = nil
-            outer: for (x, xof) in offsets1 {
+            for (x, xof) in offsets1 {
                 for (y, yof) in offsets2 {
                     var count = 0
                     for r in yof {
                         if xof.contains(r) {
                             count += 1
                             if count >= 12 {
-                                break
+                                return (x - y, orientation)
                             }
                         }
                     }
-                    if count >= 12 {
-                        result = x - y
-                        break
-                    }
                 }
-            }
-
-            if result != nil {
-                return (result!, orientation)
             }
         }
         return nil
