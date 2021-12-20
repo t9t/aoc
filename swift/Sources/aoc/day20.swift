@@ -14,7 +14,7 @@ class Day20: Day {
     }
 
     func part1() -> Int {
-        let expanded = expand(inputImage, by: 5)
+        let expanded = expand(inputImage, by: 3)
         let enhancedOnce = enhance(expanded)
         let enhancedTwice = enhance(enhancedOnce)
 
@@ -33,7 +33,13 @@ class Day20: Day {
     }
 
     func part2() -> Int {
-        return 1337
+        var image = expand(inputImage, by: 5)
+
+        for _ in 1...50 {
+            image = enhance(image)
+        }
+
+        return countLitPixels(image)
     }
 
     private func expand(_ image: Image, by: Int) -> Image {
@@ -60,7 +66,7 @@ class Day20: Day {
         let currentInfinity = inputImage[0][0]
 
         var outputImage = Image()
-        let expansion = 5
+        let expansion = 1
         let maxY = inputImage.count - 1, maxX = inputImage[0].count - 1
         let newRowLength = inputImage[0].count + expansion
 
