@@ -14,10 +14,13 @@ class Day20: Day {
     }
 
     func part1() -> Int {
-        let enhancedOnce = enhance(inputImage)
+        let expanded = expand(inputImage, by: 5)
+        let enhancedOnce = enhance(expanded)
         let enhancedTwice = enhance(enhancedOnce)
 
         #if false
+        print("Expanded")
+        printImage(expanded)
         print("Input image")
         printImage(inputImage)
         print("Enhanced once")
@@ -33,10 +36,33 @@ class Day20: Day {
         return 1337
     }
 
+    private func expand(_ image: Image, by: Int) -> Image {
+        var out = Image()
+        for rowNum in -by...image.count - 1 + by {
+            var row = Array<Bool>()
+            for colNum in -by...image[0].count-1+by {
+                let pixel : Bool
+                if rowNum < 0 || colNum < 0 || rowNum > image.count-1 || colNum > image[0].count-1 {
+                    pixel = false
+                } else {
+                    pixel = inputImage[rowNum][colNum]
+                }
+                row.append(pixel)
+            }
+            out.append(row)
+        }
+        return out
+    }
+
     private func enhance(_ inputImage: Image) -> Image {
+        // This "works" because we expand the image by 5 each time, so new sections at the edges are always fully
+        // empty, simulating the situation for "infinity" (i.e. all image pixels which exist but are not in the array)
+        let currentInfinity = inputImage[0][0]
+
         var outputImage = Image()
+        let expansion = 5
         let maxY = inputImage.count - 1, maxX = inputImage[0].count - 1
-        let newRowLength = inputImage[0].count + 1
+        let newRowLength = inputImage[0].count + expansion
 
         func getNumberFor(x: Int, y: Int) -> Int {
             var bin = ""
@@ -44,7 +70,7 @@ class Day20: Day {
                 for dx in x - 1...x + 1 {
                     let pixel: Bool
                     if dy < 0 || dx < 0 || dy > maxY || dx > maxX {
-                        pixel = false
+                        pixel = currentInfinity
                     } else {
                         pixel = inputImage[dy][dx]
                     }
@@ -54,7 +80,7 @@ class Day20: Day {
             return Int(bin, radix: 2)!
         }
 
-        for rowNum in -1...inputImage.count + 1 {
+        for rowNum in -1...inputImage.count + expansion {
             var outputRow = Array<Bool>()
             for colNum in -1...newRowLength {
                 let num = getNumberFor(x: colNum, y: rowNum)
