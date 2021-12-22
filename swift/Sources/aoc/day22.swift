@@ -19,8 +19,21 @@ class Day22: Day {
     }
 
     func part1() -> Int {
+        func isEntirelyOutOfRange(_ r: Range) -> Bool {
+            let l = r.lowerBound
+            let u = r.upperBound
+            return l < -50 && u < -50 || l > 50 && u > 50
+        }
+
+        func isEntirelyOutOfRange(_ step: RebootStep) -> Bool {
+            isEntirelyOutOfRange(step.x) || isEntirelyOutOfRange(step.y) || isEntirelyOutOfRange(step.z)
+        }
+
         var onCubes = Set<Position>()
         for step in rebootSteps {
+            if isEntirelyOutOfRange(step) {
+                continue
+            }
             for x in step.x {
                 if x < -50 || x > 50 {
                      continue
