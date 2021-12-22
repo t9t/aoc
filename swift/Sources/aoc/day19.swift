@@ -63,6 +63,7 @@ class Day19: Day {
     }
 
     func part2() -> Int {
+        // TODO: speed up
         doTheThing().1
     }
 
