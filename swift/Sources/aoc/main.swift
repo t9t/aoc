@@ -105,9 +105,11 @@ private func formatInterval(_ intervalInput: TimeInterval) -> String {
     if seconds > 0 {
         out.append("\(seconds)s")
     }
-    let ms = Int(interval.truncatingRemainder(dividingBy: 1) * 1000)
-    if ms > 0 {
-        out.append("\(ms)ms")
+    let micros = Int(interval.truncatingRemainder(dividingBy: 1) * 1_000_000)
+    if micros > 1_000 {
+        out.append("\(micros/1_000)ms")
+    } else {
+        out.append("\(micros)μs")
     }
     return out.joined(separator: " ")
 }
