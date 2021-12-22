@@ -66,40 +66,25 @@ class Day22: Day {
         return onCubes.count
     }
 
-    private struct Bla: Hashable, Equatable {
-        let x0: Int, x1: Int, y0: Int, y1: Int, z0: Int, z1: Int
-    }
-
     func part2() -> Int {
-        var counts = [Cuboid: Int]()
+        var onCuboids = Array<Cuboid2>()
 
         for step in rebootSteps {
-            let cuboid = step.cuboid
-            var newCounts = counts
+            let cuboid = Cuboid2(x: step.cuboid.x, y: step.cuboid.y, z: step.cuboid.z, excluded: [])
+            var newOnCuboids = Array<Cuboid2>()
 
-            for (other, sign) in counts {
-                let lowerX = max(cuboid.x.lowerBound, other.x.lowerBound)
-                let upperX = min(cuboid.x.upperBound, other.x.upperBound)
-
-                let lowerY = max(cuboid.y.lowerBound, other.y.lowerBound)
-                let upperY = min(cuboid.y.upperBound, other.y.upperBound)
-
-                let lowerZ = max(cuboid.z.lowerBound, other.z.lowerBound)
-                let upperZ = min(cuboid.z.upperBound, other.z.upperBound)
-                if lowerX <= upperX && lowerY <= upperY && lowerZ <= upperZ {
-                    let intersection = Cuboid(x: lowerX...upperX, y: lowerY...upperY, z: lowerZ...upperZ)
-                    newCounts[intersection] = (newCounts[intersection] ?? 0) - sign
-                }
+            for other in onCuboids {
+                newOnCuboids.append(other.excluding(cuboid))
             }
 
             if step.state {
-                newCounts[cuboid] = (newCounts[cuboid] ?? 0) + 1
+                newOnCuboids.append(cuboid)
             }
 
-            counts = newCounts
+            onCuboids = newOnCuboids
         }
 
-        return counts.map({ (n, sgn) in (n.x.upperBound - n.x.lowerBound + 1) * (n.y.upperBound - n.y.lowerBound + 1) * (n.z.upperBound - n.z.lowerBound + 1) * sgn }).reduce(0, +)
+        return onCuboids.map({ $0.volume() }).reduce(0, +)
     }
 
     private struct RebootStep {
@@ -112,11 +97,39 @@ class Day22: Day {
 
     private struct Cuboid: Hashable, Equatable {
         let x: Range, y: Range, z: Range
+    }
 
-        func fullyInside(_ other: Cuboid) -> Bool {
-            x.lowerBound >= other.x.lowerBound && x.upperBound <= other.x.upperBound
-                    && y.lowerBound >= other.y.lowerBound && y.upperBound <= other.y.upperBound
-                    && z.lowerBound >= other.z.lowerBound && z.upperBound <= other.z.upperBound
+    private struct Cuboid2: Hashable, Equatable {
+        let x: Range, y: Range, z: Range
+        let excluded: Array<Cuboid2>
+
+        func volume() -> Int {
+            let total = (x.upperBound - x.lowerBound + 1) * (y.upperBound - y.lowerBound + 1) * (z.upperBound - z.lowerBound + 1)
+            let excludedVolume = excluded.map({ $0.volume() }).reduce(0, +)
+            return total - excludedVolume
+        }
+
+        func excluding(_ other: Cuboid2) -> Cuboid2 {
+            let lowerX = max(x.lowerBound, other.x.lowerBound)
+            let upperX = min(x.upperBound, other.x.upperBound)
+
+            let lowerY = max(y.lowerBound, other.y.lowerBound)
+            let upperY = min(y.upperBound, other.y.upperBound)
+
+            let lowerZ = max(z.lowerBound, other.z.lowerBound)
+            let upperZ = min(z.upperBound, other.z.upperBound)
+            if lowerX <= upperX && lowerY <= upperY && lowerZ <= upperZ {
+                let intersection = Cuboid2(x: lowerX...upperX, y: lowerY...upperY, z: lowerZ...upperZ, excluded: [])
+                var newExcluded = Array<Cuboid2>()
+                for e in excluded {
+                    newExcluded.append(e.excluding(intersection))
+                }
+                newExcluded.append(intersection)
+
+                return Cuboid2(x: x, y: y, z: z, excluded: newExcluded)
+            } else {
+                return self
+            }
         }
     }
 }
