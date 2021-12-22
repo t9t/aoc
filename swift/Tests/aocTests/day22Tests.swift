@@ -113,7 +113,7 @@ final class day22Tests: XCTestCase {
     }
 
     func testPart2() throws {
-        let n = Day22(input).part2()
-        XCTAssertEqual(n, 1337)
+        let n = Day22(largeInput).part2()
+        XCTAssertEqual(n, 2758514936282235)
     }
 }
