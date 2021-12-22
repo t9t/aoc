@@ -67,17 +67,15 @@ class Day22: Day {
     }
 
     func part2() -> Int {
-        var onCuboids = Array<Cuboid2>()
+        var onCuboids = Array<Cuboid>()
 
         for step in rebootSteps {
-            let cuboid = Cuboid2(x: step.cuboid.x, y: step.cuboid.y, z: step.cuboid.z, excluded: [])
-
             for (i, _) in onCuboids.enumerated() {
-                onCuboids[i].exclude(cuboid)
+                onCuboids[i].exclude(step.cuboid)
             }
 
             if step.state {
-                onCuboids.append(cuboid)
+                onCuboids.append(step.cuboid)
             }
         }
 
@@ -94,11 +92,13 @@ class Day22: Day {
 
     private struct Cuboid: Hashable, Equatable {
         let x: Range, y: Range, z: Range
-    }
+        var excluded: Array<Cuboid> = []
 
-    private struct Cuboid2: Hashable, Equatable {
-        let x: Range, y: Range, z: Range
-        var excluded: Array<Cuboid2>
+        init(x: Range, y: Range, z: Range) {
+            self.x = x
+            self.y = y
+            self.z = z
+        }
 
         func volume() -> Int {
             let total = (x.upperBound - x.lowerBound + 1) * (y.upperBound - y.lowerBound + 1) * (z.upperBound - z.lowerBound + 1)
@@ -106,7 +106,7 @@ class Day22: Day {
             return total - excludedVolume
         }
 
-        mutating func exclude(_ other: Cuboid2) {
+        mutating func exclude(_ other: Cuboid) {
             let lowerX = max(x.lowerBound, other.x.lowerBound)
             let upperX = min(x.upperBound, other.x.upperBound)
 
@@ -116,7 +116,7 @@ class Day22: Day {
             let lowerZ = max(z.lowerBound, other.z.lowerBound)
             let upperZ = min(z.upperBound, other.z.upperBound)
             if lowerX <= upperX && lowerY <= upperY && lowerZ <= upperZ {
-                let intersection = Cuboid2(x: lowerX...upperX, y: lowerY...upperY, z: lowerZ...upperZ, excluded: [])
+                let intersection = Cuboid(x: lowerX...upperX, y: lowerY...upperY, z: lowerZ...upperZ)
                 for (i, _) in excluded.enumerated() {
                     excluded[i].exclude(intersection)
                 }
