@@ -71,17 +71,14 @@ class Day22: Day {
 
         for step in rebootSteps {
             let cuboid = Cuboid2(x: step.cuboid.x, y: step.cuboid.y, z: step.cuboid.z, excluded: [])
-            var newOnCuboids = Array<Cuboid2>()
 
-            for other in onCuboids {
-                newOnCuboids.append(other.excluding(cuboid))
+            for (i, _) in onCuboids.enumerated() {
+                onCuboids[i].exclude(cuboid)
             }
 
             if step.state {
-                newOnCuboids.append(cuboid)
+                onCuboids.append(cuboid)
             }
-
-            onCuboids = newOnCuboids
         }
 
         return onCuboids.map({ $0.volume() }).reduce(0, +)
@@ -101,7 +98,7 @@ class Day22: Day {
 
     private struct Cuboid2: Hashable, Equatable {
         let x: Range, y: Range, z: Range
-        let excluded: Array<Cuboid2>
+        var excluded: Array<Cuboid2>
 
         func volume() -> Int {
             let total = (x.upperBound - x.lowerBound + 1) * (y.upperBound - y.lowerBound + 1) * (z.upperBound - z.lowerBound + 1)
@@ -109,7 +106,7 @@ class Day22: Day {
             return total - excludedVolume
         }
 
-        func excluding(_ other: Cuboid2) -> Cuboid2 {
+        mutating func exclude(_ other: Cuboid2) {
             let lowerX = max(x.lowerBound, other.x.lowerBound)
             let upperX = min(x.upperBound, other.x.upperBound)
 
@@ -120,15 +117,10 @@ class Day22: Day {
             let upperZ = min(z.upperBound, other.z.upperBound)
             if lowerX <= upperX && lowerY <= upperY && lowerZ <= upperZ {
                 let intersection = Cuboid2(x: lowerX...upperX, y: lowerY...upperY, z: lowerZ...upperZ, excluded: [])
-                var newExcluded = Array<Cuboid2>()
-                for e in excluded {
-                    newExcluded.append(e.excluding(intersection))
+                for (i, _) in excluded.enumerated() {
+                    excluded[i].exclude(intersection)
                 }
-                newExcluded.append(intersection)
-
-                return Cuboid2(x: x, y: y, z: z, excluded: newExcluded)
-            } else {
-                return self
+                excluded.append(intersection)
             }
         }
     }
