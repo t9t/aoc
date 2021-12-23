@@ -57,67 +57,59 @@ class Day21: Day {
     }
 
     func part2() -> Int {
-        // TODO: fix
-        let sp1 = startingPositions[1]!, sp2 = startingPositions[2]!
-        var wins1 = 0
-        var wins2 = 0
-        for turns in 2...21 {
-            wins1 += waysToWin(turns: turns, start: sp1) * waysToLose(turns: turns - 1, start: sp2)
-            wins2 += waysToWin(turns: turns, start: sp2) * waysToLose(turns: turns, start: sp1)
-        }
-        print("wins1", wins1)
-        print("wins2", wins2)
+        let initialState = GameState(player1: Player(position: startingPositions[1]!, score: 0), player2: Player(position: startingPositions[2]!, score: 0), player1Turn: true)
+        var cache = [GameState: (Int, Int)]()
+        let (wins1, wins2) = countWins(initialState, cache: &cache)
         return max(wins1, wins2)
     }
 
-    private let rolls = [6: 7, 5: 6, 7: 6, 4: 3, 8: 3, 3: 1, 9: 1]
-
-    private func backward(position: Int, roll: Int) -> Int {
-        ((position - roll + 9) % 10) + 1
-    }
-
-    private func waysToLose(turns: Int, start: Int) -> Int {
-        var n = 0
-        for score in 0...20 {
-            n += allWaysToReach(score: score, turns: turns, start: start)
+    private func countWins(_ state: GameState, cache: inout [GameState: (Int, Int)]) -> (Int, Int) {
+        if state.player1.score >= 21 {
+            return (1, 0)
+        } else if state.player2.score >= 21 {
+            return (0, 1)
+        } else if let outcome = cache[state] {
+            return outcome
         }
-        return n
-    }
 
-    private func waysToWin(turns: Int, start: Int) -> Int {
-        var ways = 0
-        for finalScore in 21...30 {
-            for prevScore in finalScore - 10...min(finalScore, 21)-1 {
-                let finalPos = finalScore - prevScore
-                for (roll, prob) in rolls {
-                    let pos = backward(position: finalPos, roll: roll)
-                    ways += waysToReach(score: prevScore, position: pos, turns: turns - 1, start: start) * prob
+        var totalWins1 = 0, totalWins2 = 0
+        for die1 in 1...3 {
+            for die2 in 1...3 {
+                for die3 in 1...3 {
+                    let totalRoll = die1 + die2 + die3
+                    var player1 = state.player1, player2 = state.player2
+                    let currentPlayer = state.player1Turn ? player1 : player2
+                    var newPosition = (currentPlayer.position + totalRoll) % 10
+                    if newPosition == 0 {
+                        newPosition = 10
+                    }
+                    let newScore = currentPlayer.score + newPosition
+                    let updatedPlayer = Player(position: newPosition, score: newScore)
+                    if state.player1Turn {
+                        player1 = updatedPlayer
+                    } else {
+                        player2 = updatedPlayer
+                    }
+
+                    let newState = GameState(player1: player1, player2: player2, player1Turn: !state.player1Turn)
+                    let (wins1, wins2) = countWins(newState, cache: &cache)
+                    totalWins1 += wins1
+                    totalWins2 += wins2
                 }
             }
         }
-        return ways
+
+        let ret = (totalWins1, totalWins2)
+        cache[state] = ret
+        return ret
     }
 
-    private func waysToReach(score: Int, position: Int, turns: Int, start: Int) -> Int {
-        if score == 0 && turns == 0 && position == start {
-            return 1
-        }
-        if score < 1 || turns == 0 {
-            return 0
-        }
-        var n = 0
-        for (roll, prob) in rolls {
-            let pos = backward(position: position, roll: roll)
-            n += waysToReach(score: score - position, position: pos, turns: turns - 1, start: start) * prob
-        }
-        return n
+    private struct Player: Hashable, Equatable {
+        let position: Int, score: Int
     }
 
-    private func allWaysToReach(score: Int, turns: Int, start: Int) -> Int {
-        var n = 0
-        for position in 1...10 {
-            n += waysToReach(score: score, position: position, turns: turns, start: start)
-        }
-        return n
+    private struct GameState: Hashable, Equatable {
+        let player1: Player, player2: Player, player1Turn: Bool
     }
+
 }
