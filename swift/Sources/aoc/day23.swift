@@ -43,7 +43,7 @@ class Day23: Day {
         let b = rooms[1]
         let c = rooms[2]
         let d = rooms[3]
-        if a.top == "A" && a.bottom == "A" && b.top == "B" && b.bottom == "B" && c.top == "C" && c.bottom == "C" && d.top == "D" && d.bottom == "D" {
+        if a.allSpotsFilledWith("A") && b.allSpotsFilledWith("B") && c.allSpotsFilledWith("C") && d.allSpotsFilledWith("D") {
             return energyLevelOfTheStepGettingHere
         }
 
@@ -57,14 +57,15 @@ class Day23: Day {
         for (hallwayPos, pod) in hallway {
             let targetRoomIndex = targetRoomIndexForPod[pod]!
             let targetRoom = rooms[targetRoomIndex]
-            if targetRoom.top != nil {
-                // Room is full
+            if targetRoom.isFull {
                 continue
             }
 
-            if targetRoom.bottom != nil && targetRoom.bottom != pod {
-                // Bottom spot has a non-matching pod, we cannot move in
-                continue
+            if !targetRoom.isEmpty {
+                if !targetRoom.allFilledSpotsAre(pod) {
+                    // There are non-matching pods in the room, cannot move in
+                    continue
+                }
             }
 
             let targetRoomHallwayPosition = hallwayPositionAboveRoomWithIndex[targetRoomIndex]!
@@ -86,14 +87,12 @@ class Day23: Day {
 
             var modifiedHallway = hallway
             modifiedHallway.removeValue(forKey: hallwayPos) // Clear this position of the hallway
-            let newBottom = targetRoom.bottom != nil ? targetRoom.bottom : pod
-            let newTop = targetRoom.bottom == nil ? nil : pod
-            let modifiedTargetRoom = Room(top: newTop, bottom: newBottom)
+            let modifiedTargetRoom = targetRoom.push(pod)
             var modifiedRooms = rooms
             modifiedRooms[targetRoomIndex] = modifiedTargetRoom
 
             let horizontalSteps = abs(hallwayPos - targetRoomHallwayPosition)
-            let verticalSteps = targetRoom.bottom == nil ? 2 : 1
+            let verticalSteps = targetRoom.numberOfEmptySpots
             let totalSteps = horizontalSteps + verticalSteps
             let thisMoveEnergyLevel = totalSteps * energyLevelPerStepForPod[pod]!
 
@@ -114,12 +113,12 @@ class Day23: Day {
 
         // Try to move anything from rooms into the hallway
         for (roomIndex, room) in rooms.enumerated() {
-            if room.top == nil && room.bottom == nil {
+            if room.isEmpty {
                 // Room is empty, nothing to move
                 continue
             }
             let targetPodForThisRoom = targetPodForRoomIndex[roomIndex]!
-            if (room.top == targetPodForThisRoom && room.bottom == targetPodForThisRoom) || (room.top == nil && room.bottom == targetPodForThisRoom) {
+            if room.allFilledSpotsAre(targetPodForThisRoom) {
                 // Everything in the room is the target pod, nothing to move
                 continue
             }
@@ -143,11 +142,8 @@ class Day23: Day {
                     continue
                 }
 
-                // Open candidate spot, move in here
-                let movingOutTop = room.top != nil
-                let movingOutBottom = !movingOutTop
-                let podToMove = movingOutTop ? room.top! : room.bottom!
-                let modifiedRoom = Room(top: nil, bottom: movingOutBottom ? nil : room.bottom)
+                // Open candidate position in hallway, move in here
+                let (podToMove, modifiedRoom) = room.pop()
                 var modifiedRooms = rooms
                 modifiedRooms[roomIndex] = modifiedRoom
 
@@ -155,7 +151,7 @@ class Day23: Day {
                 modifiedHallway[hallwayPos] = podToMove
 
                 let horizontalSteps = abs(hallwayPos - roomHallwayPosition)
-                let verticalSteps = movingOutBottom ? 2 : 1
+                let verticalSteps = modifiedRoom.numberOfEmptySpots
                 let totalSteps = horizontalSteps + verticalSteps
                 let thisMoveEnergyLevel = totalSteps * energyLevelPerStepForPod[podToMove]!
 
@@ -182,6 +178,58 @@ class Day23: Day {
 
     private struct Room: Hashable, Equatable, CustomStringConvertible {
         let top: Character?, bottom: Character?
+
+        var isEmpty: Bool {
+            get {
+                top == nil && bottom == nil
+            }
+        }
+
+        var isFull: Bool {
+            get {
+                top != nil && bottom != nil
+            }
+        }
+
+        var numberOfEmptySpots: Int {
+            get {
+                isEmpty ? 2 : (top == nil ? 1 : 0)
+            }
+        }
+
+        func allSpotsFilledWith(_ c: Character) -> Bool {
+            top == c && bottom == c
+        }
+
+        func allFilledSpotsAre(_ c: Character) -> Bool {
+            if isEmpty {
+                return false
+            } else if top == nil {
+                return bottom == c
+            }
+            return allSpotsFilledWith(c)
+        }
+
+        func pop() -> (Character, Room) {
+            if isEmpty {
+                fatalError("pop() on empty room")
+            }
+            if top != nil {
+                return (top!, Room(top: nil, bottom: bottom))
+            }
+            return (bottom!, Room(top: nil, bottom: nil))
+        }
+
+        func push(_ c: Character) -> Room {
+            if isFull {
+                fatalError("push() on full room")
+            }
+
+            if bottom == nil {
+                return Room(top: nil, bottom: c)
+            }
+            return Room(top: c, bottom: bottom)
+        }
 
         var description: String {
             "Room(top: \(top ?? "-"), bottom: \(bottom ?? "-"))"
