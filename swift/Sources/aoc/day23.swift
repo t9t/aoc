@@ -111,11 +111,6 @@ class Day23: Day {
             }
         }
 
-        if hallway.count == (11 - 4) {
-            // Hallway is full, cannot move anything out of rooms
-            // TODO: impl
-        }
-
         // Try to move anything from rooms into the hallway
         for (roomIndex, room) in rooms.enumerated() {
             if room.isEmpty {
@@ -240,7 +235,6 @@ class Day23: Day {
             let podsStrings = podsInRoom.map({ ($0.0, $0.1 == nil ? "-" : $0.1!) }).map({ "\($0.0): \($0.1)" })
             let podsString = podsStrings.joined(separator: ", ")
             return "Room(pods: [\(podsString)])"
-            //"Room(top: \(pods[1] ?? "-"), bottom: \(pods[0] ?? "-"))"
         }
     }
 }
