@@ -68,7 +68,7 @@ class Day23: Day {
         var minEnergyLevelGettingToEndAfterThisStep: Int? = nil
 
         // Try to move everything from the hallway into rooms
-        for (hallwayPos, pod) in hallway {
+        hallwayLoop: for (hallwayPos, pod) in hallway {
             let targetRoomIndex = targetRoomIndexForPod[pod]!
             let targetRoom = rooms[targetRoomIndex]
             if targetRoom.isFull {
@@ -83,20 +83,11 @@ class Day23: Day {
             }
 
             let targetRoomHallwayPosition = hallwayPositionAboveRoomWithIndex[targetRoomIndex]!
-            var pathObstructed = false
-            for inBetweenPos in min(hallwayPos, targetRoomHallwayPosition)...max(hallwayPos, targetRoomHallwayPosition) {
-                if inBetweenPos == hallwayPos {
-                    // TODO: nicer
-                    continue
-                }
+            for inBetweenPos in min(hallwayPos+1, targetRoomHallwayPosition)...max(hallwayPos-1, targetRoomHallwayPosition) {
                 if hallway[inBetweenPos] != nil {
-                    pathObstructed = true
-                    break
+                    // Path is obstructed, cannot move in that direction
+                    continue hallwayLoop
                 }
-            }
-
-            if pathObstructed {
-                continue
             }
 
             var modifiedHallway = hallway
@@ -138,22 +129,17 @@ class Day23: Day {
             }
 
             let roomHallwayPosition = hallwayPositionAboveRoomWithIndex[roomIndex]!
-            for hallwayPos in [1, 2, 4, 6, 8, 10, 11] {
+            hallwayLoop: for hallwayPos in [1, 2, 4, 6, 8, 10, 11] {
                 if hallway[hallwayPos] != nil {
                     // Position occupied, cannot move into it
                     continue
                 }
 
-                var pathObstructed = false
                 for inBetweenPos in min(hallwayPos, roomHallwayPosition)...max(hallwayPos, roomHallwayPosition) {
                     if hallway[inBetweenPos] != nil {
-                        pathObstructed = true
-                        break
+                        // Path is obstructed, cannot move in that direction
+                        continue hallwayLoop
                     }
-                }
-
-                if pathObstructed {
-                    continue
                 }
 
                 // Open candidate position in hallway, move in here
