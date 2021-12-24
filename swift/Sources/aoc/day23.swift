@@ -8,10 +8,10 @@ class Day23: Day {
     }
 
     func part1() -> Int {
-        let a = Room(pods: [1: "B", 0: "A"])
-        let b = Room(pods: [1: "C", 0: "D"])
-        let c = Room(pods: [1: "B", 0: "C"])
-        let d = Room(pods: [1: "D", 0: "A"])
+        let a = Room(pods: [1: "B", 0: "A"], maxPods: 2)
+        let b = Room(pods: [1: "C", 0: "D"], maxPods: 2)
+        let c = Room(pods: [1: "B", 0: "C"], maxPods: 2)
+        let d = Room(pods: [1: "D", 0: "A"], maxPods: 2)
 
         let hallway = [Int: Character]()
         let rooms = [a, b, c, d]
@@ -23,7 +23,18 @@ class Day23: Day {
     }
 
     func part2() -> Int {
-        return 1337
+        let a = Room(pods: [3: "B", 2: "D", 1: "D", 0: "A"], maxPods: 4)
+        let b = Room(pods: [3: "C", 2: "C", 1: "B", 0: "D"], maxPods: 4)
+        let c = Room(pods: [3: "B", 2: "B", 1: "A", 0: "C"], maxPods: 4)
+        let d = Room(pods: [3: "D", 2: "A", 1: "C", 0: "A"], maxPods: 4)
+
+        let hallway = [Int: Character]()
+        let rooms = [a, b, c, d]
+
+        let state = State(rooms: rooms, hallway: hallway)
+        let minEnergyLevel = determineMinEnergyLevelToEnd(state, energyLevelOfTheStepGettingHere: 0)
+
+        return minEnergyLevel!
     }
 
     private let targetRoomIndexForPod: [Character: Int] = ["A": 0, "B": 1, "C": 2, "D": 3]
@@ -178,12 +189,12 @@ class Day23: Day {
     }
 
     private struct Room: Hashable, Equatable, CustomStringConvertible {
-        private let maxPods = 2
+        private let pods: [Int: Character]
+        private let maxPods: Int
 
-        let pods: [Int: Character]
-
-        init(pods: [Int:Character]) {
+        init(pods: [Int: Character], maxPods: Int) {
             self.pods = pods
+            self.maxPods = maxPods
         }
 
         var isEmpty: Bool {
@@ -205,40 +216,40 @@ class Day23: Day {
         }
 
         func allSpotsFilledWith(_ c: Character) -> Bool {
-            (0...maxPods-1).map({pods[$0]}).allSatisfy({$0==c})
+            (0...maxPods - 1).map({ pods[$0] }).allSatisfy({ $0 == c })
         }
 
         func allFilledSpotsAre(_ c: Character) -> Bool {
-            isEmpty ? false : pods.values.allSatisfy({$0 == c})
+            isEmpty ? false : pods.values.allSatisfy({ $0 == c })
         }
 
         func pop() -> (Character, Room) {
-            for spot in (0...maxPods-1).reversed() {
+            for spot in (0...maxPods - 1).reversed() {
                 let pod = pods[spot]
                 if pod != nil {
                     var modifiedPods = pods
                     modifiedPods.removeValue(forKey: spot)
-                    return (pod!, Room(pods: modifiedPods))
+                    return (pod!, Room(pods: modifiedPods, maxPods: maxPods))
                 }
             }
-            fatalError("pop() on empty room")
+            fatalError("pop() on empty room, empty: \(isEmpty); pods: \(pods)")
         }
 
         func push(_ c: Character) -> Room {
-            for spot in 0...maxPods-1 {
+            for spot in 0...maxPods - 1 {
                 let pod = pods[spot]
                 if pod == nil {
                     var modifiedPods = pods
                     modifiedPods[spot] = c
-                    return Room(pods: modifiedPods)
+                    return Room(pods: modifiedPods, maxPods: maxPods)
                 }
             }
             fatalError("push() on full room")
         }
 
         var description: String {
-            let podsInRoom = (0...maxPods - 1).map({($0, pods[$0])})
-            let podsStrings = podsInRoom.map({($0.0, $0.1 == nil ? "-" : $0.1!)}).map({"\($0.0): \($0.1)"})
+            let podsInRoom = (0...maxPods - 1).map({ ($0, pods[$0]) })
+            let podsStrings = podsInRoom.map({ ($0.0, $0.1 == nil ? "-" : $0.1!) }).map({ "\($0.0): \($0.1)" })
             let podsString = podsStrings.joined(separator: ", ")
             return "Room(pods: [\(podsString)])"
             //"Room(top: \(pods[1] ?? "-"), bottom: \(pods[0] ?? "-"))"
