@@ -8,10 +8,11 @@ class Day23: Day {
     }
 
     func part1() -> Int {
-        let a = Room(top: "B", bottom: "A")
-        let b = Room(top: "C", bottom: "D")
-        let c = Room(top: "B", bottom: "C")
-        let d = Room(top: "D", bottom: "A")
+        let a = Room(pods: [1: "B", 0: "A"])
+        let b = Room(pods: [1: "C", 0: "D"])
+        let c = Room(pods: [1: "B", 0: "C"])
+        let d = Room(pods: [1: "D", 0: "A"])
+
         let hallway = [Int: Character]()
         let rooms = [a, b, c, d]
 
@@ -177,62 +178,70 @@ class Day23: Day {
     }
 
     private struct Room: Hashable, Equatable, CustomStringConvertible {
-        let top: Character?, bottom: Character?
+        private let maxPods = 2
+
+        let pods: [Int: Character]
+
+        init(pods: [Int:Character]) {
+            self.pods = pods
+        }
 
         var isEmpty: Bool {
             get {
-                top == nil && bottom == nil
+                pods.isEmpty
             }
         }
 
         var isFull: Bool {
             get {
-                top != nil && bottom != nil
+                pods.count == maxPods
             }
         }
 
         var numberOfEmptySpots: Int {
             get {
-                isEmpty ? 2 : (top == nil ? 1 : 0)
+                maxPods - pods.count
             }
         }
 
         func allSpotsFilledWith(_ c: Character) -> Bool {
-            top == c && bottom == c
+            (0...maxPods-1).map({pods[$0]}).allSatisfy({$0==c})
         }
 
         func allFilledSpotsAre(_ c: Character) -> Bool {
-            if isEmpty {
-                return false
-            } else if top == nil {
-                return bottom == c
-            }
-            return allSpotsFilledWith(c)
+            isEmpty ? false : pods.values.allSatisfy({$0 == c})
         }
 
         func pop() -> (Character, Room) {
-            if isEmpty {
-                fatalError("pop() on empty room")
+            for spot in (0...maxPods-1).reversed() {
+                let pod = pods[spot]
+                if pod != nil {
+                    var modifiedPods = pods
+                    modifiedPods.removeValue(forKey: spot)
+                    return (pod!, Room(pods: modifiedPods))
+                }
             }
-            if top != nil {
-                return (top!, Room(top: nil, bottom: bottom))
-            }
-            return (bottom!, Room(top: nil, bottom: nil))
+            fatalError("pop() on empty room")
         }
 
         func push(_ c: Character) -> Room {
-            if isFull {
-                fatalError("push() on full room")
+            for spot in 0...maxPods-1 {
+                let pod = pods[spot]
+                if pod == nil {
+                    var modifiedPods = pods
+                    modifiedPods[spot] = c
+                    return Room(pods: modifiedPods)
+                }
             }
-
-            if bottom == nil {
-                return Room(top: nil, bottom: c)
-            }
-            return Room(top: c, bottom: bottom)
+            fatalError("push() on full room")
         }
 
         var description: String {
-            "Room(top: \(top ?? "-"), bottom: \(bottom ?? "-"))"
+            let podsInRoom = (0...maxPods - 1).map({($0, pods[$0])})
+            let podsStrings = podsInRoom.map({($0.0, $0.1 == nil ? "-" : $0.1!)}).map({"\($0.0): \($0.1)"})
+            let podsString = podsStrings.joined(separator: ", ")
+            return "Room(pods: [\(podsString)])"
+            //"Room(top: \(pods[1] ?? "-"), bottom: \(pods[0] ?? "-"))"
         }
     }
 }
