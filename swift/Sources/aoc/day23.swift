@@ -1,20 +1,22 @@
 import Foundation
 
 class Day23: Day {
-    private let inputLines: Array<Substring>
+    private let inputRooms: Array<Room>
 
     init(_ input: String) {
-        inputLines = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n")
+        let roomLines = input.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n")[2...3]
+        inputRooms = [3, 5, 7, 9].map({
+            var pods = [Int: Character]()
+            for (i, line) in roomLines.reversed().enumerated() {
+                pods[i] = line[line.index(line.startIndex, offsetBy: $0)]
+            }
+            return Room(pods: pods, maxPods: 2)
+        })
     }
 
     func part1() -> Int {
-        let a = Room(pods: [1: "B", 0: "A"], maxPods: 2)
-        let b = Room(pods: [1: "C", 0: "D"], maxPods: 2)
-        let c = Room(pods: [1: "B", 0: "C"], maxPods: 2)
-        let d = Room(pods: [1: "D", 0: "A"], maxPods: 2)
-
         let hallway = [Int: Character]()
-        let rooms = [a, b, c, d]
+        let rooms = inputRooms
 
         let state = State(rooms: rooms, hallway: hallway)
         let minEnergyLevel = determineMinEnergyLevelToEnd(state, energyLevelOfTheStepGettingHere: 0)
@@ -23,18 +25,18 @@ class Day23: Day {
     }
 
     func part2() -> Int {
-        let a = Room(pods: [3: "B", 2: "D", 1: "D", 0: "A"], maxPods: 4)
-        let b = Room(pods: [3: "C", 2: "C", 1: "B", 0: "D"], maxPods: 4)
-        let c = Room(pods: [3: "B", 2: "B", 1: "A", 0: "C"], maxPods: 4)
-        let d = Room(pods: [3: "D", 2: "A", 1: "C", 0: "A"], maxPods: 4)
+        let backside: [[Character]] = [["D", "D"], ["C", "B"], ["B", "A"], ["A", "C"]]
+        let unfolded = inputRooms.enumerated().map({ (i, room) -> Room in
+            let patch = backside[i]
+            return Room(pods: [3: room.pods[1]!, 2: patch[0], 1: patch[1], 0: room.pods[0]!], maxPods: 4)
+        })
 
-        let hallway = [Int: Character]()
-        let rooms = [a, b, c, d]
+        return findMinimumEnergyLevelToEnd(rooms: unfolded)
+    }
 
-        let state = State(rooms: rooms, hallway: hallway)
-        let minEnergyLevel = determineMinEnergyLevelToEnd(state, energyLevelOfTheStepGettingHere: 0)
-
-        return minEnergyLevel!
+    private func findMinimumEnergyLevelToEnd(rooms: [Room]) -> Int {
+        let startState = State(rooms: rooms, hallway: [Int: Character]())
+        return determineMinEnergyLevelToEnd(startState, energyLevelOfTheStepGettingHere: 0)!
     }
 
     private let targetRoomIndexForPod: [Character: Int] = ["A": 0, "B": 1, "C": 2, "D": 3]
@@ -189,7 +191,7 @@ class Day23: Day {
     }
 
     private struct Room: Hashable, Equatable, CustomStringConvertible {
-        private let pods: [Int: Character]
+        let pods: [Int: Character]
         private let maxPods: Int
 
         init(pods: [Int: Character], maxPods: Int) {
