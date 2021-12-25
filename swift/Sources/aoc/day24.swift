@@ -8,7 +8,11 @@ class Day24: Day {
     }
 
     func part1() throws -> Int {
-        try runCode(inputNumber: 13579246899999)
+        let n = 13579246899999
+        let ret1 = try runCode(inputNumber: n)
+        let ret2 = try runSimplified(inputNumber: n)
+        print("Running code: \(ret1); running simplified form: \(ret2); same? \(ret1 == ret2)")
+        return ret1
     }
 
     func part2() -> Int {
@@ -68,6 +72,28 @@ class Day24: Day {
             }
         }
         return vars["z"]!
+    }
+
+    internal func runSimplified(inputNumber: Int) throws -> Int {
+        try runSimplified(inputs: String(inputNumber).map({ Int(String($0))! }))
+    }
+
+    internal func runSimplified(inputs: Array<Int>) throws -> Int {
+        var z = 0
+
+        for (i, w) in inputs.enumerated() {
+            func getV(_ lineNumber: Int) -> Int {
+                Int(inputLines[i * 18 + lineNumber].split(separator: " ")[2])!
+            }
+
+            // Assumption: this is probably only valid for my own input
+            let v1 = getV(4), v2 = getV(5), v3 = getV(15)
+
+            let x = ((z % 26) + v2) == w ? 0 : 1
+            z = ((z/v1) * ((25 * x) + 1)) + ((w + v3) * x)
+        }
+
+        return z
     }
 
     private struct InvalidInstruction: Error {
