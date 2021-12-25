@@ -8,6 +8,10 @@ final class integrationTests: XCTestCase {
         let results = try loadResults()
         for dayNum in Days.getAllDayNumbers() {
             for part in 1...2 {
+                if dayNum == 25 && part == 2 {
+                    // No part 2 on the final day
+                    continue
+                }
                 let id = ResultId(year: 2021, day: dayNum, part: part)
                 if let result = results[id] {
                     let input = try String(contentsOfFile: "../input/2021/\(dayNum).txt")
