@@ -12,7 +12,25 @@ class Day24: Day {
     }
 
     func part2() -> Int {
-        1337
+        showDifferences()
+        return 1337
+    }
+
+    private func showDifferences() {
+        for lineNum in 0...17 {
+            var allSame = true, previous = ""
+            for digitNum in 0...13 {
+                let inputLineNum = digitNum * 18 + lineNum
+                let line = inputLines[inputLineNum]
+                if previous != "" && line != previous {
+                    allSame = false
+                }
+                previous = line
+
+                print("| \(line.padding(toLength: 9, withPad: " ", startingAt: 0)) ", terminator: "")
+            }
+            print("| \(allSame ? "✅️" : "❌ ") |")
+        }
     }
 
     internal func runCode(inputNumber: Int) throws -> Int {
