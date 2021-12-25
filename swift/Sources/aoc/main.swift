@@ -57,6 +57,7 @@ internal class Days {
         21: stringWrapped(Day21.init),
         22: stringWrapped(Day22.init),
         23: stringWrapped(Day23.init),
+        24: stringWrapped(Day24.init),
         25: stringWrapped(Day25.init),
 /*newday*/]
 
