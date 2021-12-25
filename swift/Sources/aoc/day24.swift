@@ -21,6 +21,8 @@ class Day24: Day {
     }
 
     private func showDifferences() {
+        var v1s = Array<String>(), v2s = Array<String>(), v3s = Array<String>()
+
         for lineNum in 0...17 {
             var allSame = true, previous = ""
             for digitNum in 0...13 {
@@ -32,9 +34,20 @@ class Day24: Day {
                 previous = line
 
                 print("| \(line.padding(toLength: 9, withPad: " ", startingAt: 0)) ", terminator: "")
+
+                if lineNum == 4 {
+                    v1s.append(String(line.split(separator: " ")[2]))
+                } else if lineNum == 5 {
+                    v2s.append(String(line.split(separator: " ")[2]))
+                } else if lineNum == 15 {
+                    v3s.append(String(line.split(separator: " ")[2]))
+                }
             }
             print("| \(allSame ? "✅️" : "❌ ") |")
         }
+        print("v1s: \(v1s) (unique: \(Set(v1s)); \(Set(v1s).count))")
+        print("v2s: \(v2s) (unique: \(Set(v2s)); \(Set(v2s).count))")
+        print("v3s: \(v3s) (unique: \(Set(v3s)); \(Set(v3s).count))")
     }
 
     internal func runCode(inputNumber: Int) throws -> Int {
