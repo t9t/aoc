@@ -8,22 +8,70 @@ class Day24: Day {
     }
 
     func part1() throws -> Int {
-        try checkNumber(13579246899999)
-        try checkNumber(51589394894991)
-        return 42
+        try calculateHighestAndLowestModelNumber().0
     }
 
-    func part2() -> Int {
-        showDifferences()
-        return 1337
+    func part2() throws -> Int {
+        try calculateHighestAndLowestModelNumber().1
     }
 
+    internal func calculateHighestAndLowestModelNumber() throws -> (Int, Int) {
+        var stack = Array<(Int, Int)>()
+        var highestDigits = Array<Int>(repeating: 0, count: 14)
+        var lowestDigits = Array<Int>(repeating: 0, count: 14)
+
+        for i in 0...13 {
+            func getV(_ lineNumber: Int) -> Int {
+                Int(inputLines[i * 18 + lineNumber].split(separator: " ")[2])!
+            }
+
+            // Assumption: line numbers will be the same in each input, with only the values on those lines being different
+            let v1 = getV(4), v2 = getV(5), v3 = getV(15)
+            if v1 == 1 {
+                // push
+                stack.append((i, v3))
+            } else {
+                let (otherI, otherV) = stack.removeLast()
+                let diff = v2 + otherV
+                if diff >= 0 {
+                    highestDigits[i] = 9
+                    highestDigits[otherI] = 9 - diff
+
+                    lowestDigits[i] = 1 + diff
+                    lowestDigits[otherI] = 1
+                } else {
+                    highestDigits[i] = 9 + diff
+                    highestDigits[otherI] = 9
+
+                    lowestDigits[i] = 1
+                    lowestDigits[otherI] = 1 - diff
+                }
+            }
+        }
+
+        func toInt(_ arr: Array<Int>) throws -> Int {
+            if arr.contains(0) {
+                throw InvalidInput()
+            }
+            return Int(arr.map({ String($0) }).joined())!
+        }
+
+        return (try toInt(highestDigits), try toInt(lowestDigits))
+    }
+
+    private struct InvalidInput: Error {
+    }
+
+    // All code below is a remainder of the manual reverse engineering process, left in for posterity
+
+    /// Check a number by running the input code & the simplified form, validating the algorithms
     private func checkNumber(_ n: Int) throws {
         let ret1 = try runCode(inputNumber: n)
         let ret2 = try runSimplified(inputNumber: n)
         print("Running code: \(ret1); running simplified form: \(ret2); same? \(ret1 == ret2)")
     }
 
+    /// Visualize differences in the input code for processing each number
     private func showDifferences() {
         var v1s = Array<String>(), v2s = Array<String>(), v3s = Array<String>()
 
@@ -39,6 +87,7 @@ class Day24: Day {
 
                 print("| \(line.padding(toLength: 9, withPad: " ", startingAt: 0)) ", terminator: "")
 
+                // Assumption: line numbers will be the same in each input, with only the values on those lines being different
                 if lineNum == 4 {
                     v1s.append(String(line.split(separator: " ")[2]))
                 } else if lineNum == 5 {
@@ -55,11 +104,7 @@ class Day24: Day {
     }
 
     internal func runCode(inputNumber: Int) throws -> Int {
-        try runCode(inputs: String(inputNumber).map({ Int(String($0))! }))
-    }
-
-    internal func runCode(inputs: Array<Int>) throws -> Int {
-        var inputStack = Array<Int>(inputs.reversed())
+        var inputStack = Array<Int>(String(inputNumber).map({ Int(String($0))! }).reversed())
         var vars = ["w": 0, "x": 0, "y": 0, "z": 0]
         for line in inputLines {
             let parts = line.split(separator: " ").map(String.init)
@@ -91,12 +136,11 @@ class Day24: Day {
         return vars["z"]!
     }
 
-    internal func runSimplified(inputNumber: Int) throws -> Int {
-        try runSimplified(inputs: String(inputNumber).map({ Int(String($0))! }))
-    }
-
-    internal func runSimplified(inputs: Array<Int>) throws -> Int {
-        var zz = Array<Int>()
+    private func runSimplified(inputNumber: Int) throws -> Int {
+        let inputs = String(inputNumber).map({ Int(String($0))! })
+        // Stack for processing (see comments below why)
+        var zStack = Array<Int>()
+        var z = 0
 
         for (i, w) in inputs.enumerated() {
             func getV(_ lineNumber: Int) -> Int {
@@ -113,25 +157,23 @@ class Day24: Day {
             // +  7 = "fill in last position", e.g. 1330 -> 1337
             // % 10 = "get last position", e.g. 1337 -> 7
             // / 10 = "remove last position", e.g. 1337 -> 133
-            // z is base 26; z is a stack, * followed by + is push, % followed by / is pop
-            // z = 0 is empty stack, so goal is to empty the stack
+            // z is base 26; z is a stack; * followed by + is push; % followed by / is pop
+            // z = 0 means an empty stack, so the goal is to empty the stack
+            // Since there are 7 pushes (v1=1), we need to make sure each other instruction (v1=26) is able to pop
 
-            #if false
             // Most simplified form of my input:
             let x = ((z % 26) + v2) == w ? 0 : 1
             z = ((z / v1) * ((25 * x) + 1)) + ((w + v3) * x)
-            #endif
 
-            //     | 0         | 1         | 2         | 3         | 4         | 5         | 6         | 7         | 8         | 9         | 10        | 11        | 12        | 13        |
+            // Detailed overview of differences for my input & manually constructing any number based on push/pop rules:
+            //|  i | 0         | 1         | 2         | 3         | 4         | 5         | 6         | 7         | 8         | 9         | 10        | 11        | 12        | 13        |
             //| v1 | div z 1   | div z 1   | div z 1   | div z 26  | div z 1   | div z 26  | div z 26  | div z 1   | div z 1   | div z 1   | div z 26  | div z 26  | div z 26  | div z 26  |
             //| v2 | add x 13  | add x 11  | add x 15  | add x -6  | add x 15  | add x -8  | add x -4  | add x 15  | add x 10  | add x 11  | add x -11 | add x 0   | add x -8  | add x -7  |
             //| v3 | add y 3   | add y 12  | add y 9   | add y 12  | add y 2   | add y 1   | add y 1   | add y 13  | add y 1   | add y 6   | add y 2   | add y 11  | add y 10  | add y 3   |
-            //     | append    | append    | append    | ?         | append    | ?         | ?         | append    | append    | append    | ?         | ?         | ?         | ?         |
+            //     | push      | push      | push      | ?         | push      | ?         | ?         | push      | push      | push      | ?         | ?         | ?         | ?         |
             //       1           3           5           7           9           2           4           6           8           9           9           9           9           9
             //     | 5: +8     | 1: +13    | 5: +14    | 14-6=8: - | 9: +11    | 11-8=3: - | 13-4=9: - | 4: +17    | 8: +9     | 9: +15    | 15-11=4:- | 9-0=9: -  | 17-8=9: - | 8-7=1: -  |
             //     | push -> 1 | push -> 2 | push -> 3 | pop[2]->2 | push -> 3 | pop[4]->2 | pop[1]->1 | push -> 2 | push -> 3 | push -> 4 | pop[9]->3 | pop[8]->2 | pop[7]->1 | pop[0]->0 |
-            // 51589394894991
-            //     | 1: +4     | 3: +15    | 5: +14    | 7: 14->19 | 9: +11 .. etc
 
             // pushed at -> popped at; what is the highest value we can push, to be able to pop?
             // 0 -> 13; push  +3; pop  -7; 9 -> 5 (diff -4)
@@ -141,7 +183,6 @@ class Day24: Day {
             // 7 -> 12; push +13; pop  -8; 4 -> 9 (diff +5)
             // 8 -> 11; push: +1; pop  -0; 8 -> 9 (diff +1)
             // 9 -> 10; push: +6; pop -11; 9 -> 4 (diff -5)
-            // 9 1 6 9 9 3 9 4 8 9 4 9 9 5
             // 91699394894995
 
             // pushed at -> popped at; what is the lowest value we can push, to be able to pop?
@@ -152,31 +193,34 @@ class Day24: Day {
             // 7 -> 12; push +13; pop  -8; 1 -> 6
             // 8 -> 11; push: +1; pop  -0; 1 -> 2
             // 9 -> 10; push: +6; pop -11; 6 -> 1
-            // 5 1 1 4 7 1 9 1 1 6 1 2 6 1
             // 51147191161261
 
             let u = w + v3
             if v1 == 1 {
-                zz.append(u)
-            } else if zz.last! + v2 == w { // v1 == 26 and v2 is always <=0 here
-                // v2: 3: -6; 5: -8; 6: -4; 10: -11; 11: 0; 12: -8; 13: -7
-                zz.removeLast()
-            } else { // v1 == 26
-                zz[zz.count - 1] = u
+                zStack.append(u)
+            } else if zStack.last! + v2 == w { // v1 == 26 and v2 is always <=0 here
+                zStack.removeLast()
+            } else { // v1 == 26; this will never happen for a valid input (only pushes and pops)
+                zStack[zStack.count - 1] = u
             }
 
-            print("Step \(i); w: \(w); v1: \(v1); v2: \(v2); v3: \(v3); zz: \(zz)")
+            print("Step \(i); w: \(w); v1: \(v1); v2: \(v2); v3: \(v3); zStack: \(zStack)")
         }
 
-        var z = 0
-        for v in zz {
-            z *= 26 // shift left
-            z += v // add
+        // Reconstruct "z" value from the stack
+        var reZ = 0
+        for v in zStack {
+            reZ *= 26 // shift left
+            reZ += v // add
         }
+
+        // For example, 13579246899999 outputs 1422667258
+        print("z: \(z); zzz: \(reZ); same? \(z == reZ)")
         return z
     }
 
     private struct InvalidInstruction: Error {
         let instruction: String
     }
+
 }

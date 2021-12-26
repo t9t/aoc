@@ -4,25 +4,25 @@ import class Foundation.Bundle
 @testable import aoc
 
 final class day24Tests: XCTestCase {
-    private let input = """
-                        inp w
-                        add z w
-                        add z 10
-                        add x z
-                        mul x 3
-                        add y x
-                        div y 2
-                        inp w
-                        add w y
-                        add w 1
-                        mod x 9
-                        div w 4
-                        eql x w
-                        mul z 0
-                        add z x
-                        """
-
     func testRunCode() throws {
+        let input = """
+                    inp w
+                    add z w
+                    add z 10
+                    add x z
+                    mul x 3
+                    add y x
+                    div y 2
+                    inp w
+                    add w y
+                    add w 1
+                    mod x 9
+                    div w 4
+                    eql x w
+                    mul z 0
+                    add z x
+                    """
+
         let n = try Day24(input).runCode(inputNumber: 42)
         XCTAssertEqual(n, 1)
     }
