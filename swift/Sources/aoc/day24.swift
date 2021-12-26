@@ -92,7 +92,7 @@ class Day24: Day {
     }
 
     internal func runSimplified(inputs: Array<Int>) throws -> Int {
-        var z = 0
+        var zz = Array<Int>()
 
         for (i, w) in inputs.enumerated() {
             func getV(_ lineNumber: Int) -> Int {
@@ -100,12 +100,42 @@ class Day24: Day {
             }
 
             // Assumption: this is probably only valid for my own input
+            // v1 = 1 or 26; v2 = correlates to v1, either positive (v1=1) or negative (v1=26); v3 = a positive value
             let v1 = getV(4), v2 = getV(5), v3 = getV(15)
 
+            // Imagine base 10
+            // * 10 = "add position", e.g. 133 -> 1330
+            // +  7 = "fill in last position", e.g. 1330 -> 1337
+            // % 10 = "get last position", e.g. 1337 -> 7
+            // / 10 = "remove last position", e.g. 1337 -> 133
+            // z is base 26; z is a stack, * followed by + is push, % followed by / is pop
+
+            #if false
+            // Most simplified form:
             let x = ((z % 26) + v2) == w ? 0 : 1
             z = ((z/v1) * ((25 * x) + 1)) + ((w + v3) * x)
+            #endif
+
+            let rem = zz.last ?? 0
+            if rem + v2 == w {
+                if v1 == 26 {
+                    zz.removeLast()
+                }
+            } else {
+                let u = w + v3
+                if v1 == 26 {
+                    zz[zz.count-1] = u
+                } else {
+                    zz.append(u)
+                }
+            }
         }
 
+        var z = 0
+        for v in zz {
+            z *= 26
+            z += v
+        }
         return z
     }
 
