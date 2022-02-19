@@ -4,31 +4,19 @@ fn main() {
 }
 
 fn calc_sum(s: &str) -> u32 {
-    let chars: Vec<char> = s.chars().collect();
-    let mut sum = 0;
-    for (i, c) in chars.iter().enumerate() {
-        let next: char = if i == chars.len() - 1 {
-            chars[0]
-        } else {
-            chars[i + 1]
-        };
-        if *c == next {
-            sum += c.to_digit(10).unwrap()
-        }
-    }
-    return sum;
+    return calc_sum_x(s, 1);
 }
 
 fn calc_sum2(s: &str) -> u32 {
+    return calc_sum_x(s, s.len() / 2);
+}
+
+fn calc_sum_x(s: &str, x: usize) -> u32 {
     let chars: Vec<char> = s.chars().collect();
     let len = chars.len();
-    let half = len / 2;
     let mut sum = 0;
     for (i, c) in chars.iter().enumerate() {
-        let mut next_pos = i + half;
-        if next_pos >= len {
-            next_pos -= len;
-        }
+        let next_pos = (i + x) % len;
         let next = chars[next_pos];
         if *c == next {
             sum += c.to_digit(10).unwrap()
