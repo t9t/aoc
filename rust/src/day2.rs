@@ -1,11 +1,13 @@
-pub fn part1(s: &str) -> Option<i32> {
+use std::error::Error;
+
+pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
     let mut sum = 0;
     for line in s.lines() {
         let nums = line.split("\t");
         let mut highest = i32::MIN;
         let mut lowest = i32::MAX;
         for num in nums {
-            let n = num.trim().parse::<i32>().unwrap();
+            let n = num.trim().parse::<i32>()?;
             if n > highest {
                 highest = n;
             }
@@ -16,10 +18,10 @@ pub fn part1(s: &str) -> Option<i32> {
         let diff = highest - lowest;
         sum += diff;
     }
-    return Some(sum);
+    return Ok(sum);
 }
 
-pub fn part2(s: &str) -> Option<i32> {
+pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
     let mut sum = 0;
     for line in s.lines() {
         let nums: Vec<i32> = line
@@ -38,7 +40,7 @@ pub fn part2(s: &str) -> Option<i32> {
             }
         }
     }
-    return Some(sum);
+    return Ok(sum);
 }
 
 #[cfg(test)]
@@ -48,12 +50,12 @@ mod tests {
     #[test]
     fn test_part1() {
         let input = "5\t1\t9\t5\n7\t5\t3\n2\t4\t6\t8";
-        assert_eq!(part1(input), Some(18));
+        assert_eq!(part1(input).unwrap(), 18);
     }
 
     #[test]
     fn test_part2() {
         let input = "5\t9\t2\t8\n9\t4\t7\t3\n3\t8\t6\t5";
-        assert_eq!(part2(input), Some(9));
+        assert_eq!(part2(input).unwrap(), 9);
     }
 }
