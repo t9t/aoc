@@ -1,6 +1,13 @@
+use std::fs;
+use std::io;
+
 fn main() {
-    let s = "1122";
-    println!("sum: {}", calc_sum2(s))
+    let s = read_input(2017, 1).unwrap();
+    println!("sum: {}", calc_sum(&s.trim()))
+}
+
+fn read_input(year: u16, day: u8) -> io::Result<String> {
+    return fs::read_to_string(format!("../input/{}/{}.txt", year, day));
 }
 
 fn calc_sum(s: &str) -> u32 {
@@ -8,7 +15,8 @@ fn calc_sum(s: &str) -> u32 {
 }
 
 fn calc_sum2(s: &str) -> u32 {
-    return calc_sum_x(s, s.len() / 2);
+    let l = s.len();
+    return calc_sum_x(s, l / 2);
 }
 
 fn calc_sum_x(s: &str, x: usize) -> u32 {
