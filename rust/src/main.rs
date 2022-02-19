@@ -3,10 +3,11 @@ use std::fs;
 use std::io;
 
 mod day1;
+mod day2;
 /*mod newday*/
 
 fn main() {
-    let funs = [day1::part1, day1::part2 /*newday*/];
+    let funs = [day1::part1, day1::part2, day2::part1, day2::part2 /*newday*/];
     let args: Vec<String> = env::args().collect();
 
     let day = args[1].parse::<u8>().unwrap();

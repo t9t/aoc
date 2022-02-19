@@ -1,8 +1,8 @@
-pub fn part1(s: &str) -> i32 {
+pub fn part1(_s: &str) -> i32 {
     return 1337;
 }
 
-pub fn part2(s: &str) -> i32 {
+pub fn part2(_s: &str) -> i32 {
     return 5521;
 }
 
