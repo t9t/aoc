@@ -7,7 +7,12 @@ mod day2;
 /*mod newday*/
 
 fn main() {
-    let funs = [day1::part1, day1::part2, day2::part1, day2::part2 /*newday*/];
+    let funs = [
+        day1::part1,
+        day1::part2,
+        day2::part1,
+        day2::part2, /*newday*/
+    ];
     let args: Vec<String> = env::args().collect();
 
     let day = args[1].parse::<u8>().unwrap();
@@ -16,7 +21,7 @@ fn main() {
     println!("Day: {}; part: {}", day, part);
     let input = read_input(2017, day).unwrap();
     let fun = funs[(((day - 1) * 2) + part - 1) as usize];
-    println!("Result: {}", fun(input.trim()));
+    println!("Result: {}", fun(input.trim()).unwrap());
 }
 
 fn read_input(year: u16, day: u8) -> io::Result<String> {

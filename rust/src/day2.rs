@@ -1,4 +1,4 @@
-pub fn part1(s: &str) -> i32 {
+pub fn part1(s: &str) -> Option<i32> {
     let mut sum = 0;
     for line in s.lines() {
         let nums = line.split("\t");
@@ -16,10 +16,10 @@ pub fn part1(s: &str) -> i32 {
         let diff = highest - lowest;
         sum += diff;
     }
-    return sum;
+    return Some(sum);
 }
 
-pub fn part2(s: &str) -> i32 {
+pub fn part2(s: &str) -> Option<i32> {
     let mut sum = 0;
     for line in s.lines() {
         let nums: Vec<i32> = line
@@ -38,7 +38,7 @@ pub fn part2(s: &str) -> i32 {
             }
         }
     }
-    return sum;
+    return Some(sum);
 }
 
 #[cfg(test)]
@@ -48,12 +48,12 @@ mod tests {
     #[test]
     fn test_part1() {
         let input = "5\t1\t9\t5\n7\t5\t3\n2\t4\t6\t8";
-        assert_eq!(part1(input), 18);
+        assert_eq!(part1(input), Some(18));
     }
 
     #[test]
     fn test_part2() {
         let input = "5\t9\t2\t8\n9\t4\t7\t3\n3\t8\t6\t5";
-        assert_eq!(part2(input), 9);
+        assert_eq!(part2(input), Some(9));
     }
 }
