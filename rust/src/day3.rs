@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
@@ -43,8 +44,66 @@ pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
     return Ok(tot);
 }
 
-pub fn part2(_s: &str) -> Result<i32, Box<dyn Error>> {
-    return Ok(5521);
+pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
+    let t = s.parse::<i32>()?;
+
+    enum Direction {
+        UP,
+        LEFT,
+        DOWN,
+        RIGHT,
+    }
+
+    let mut n = 1;
+    let mut x = 0;
+    let mut y = 0;
+    let mut next_turn_at = 2;
+    let mut dx = 1;
+    let mut dy = 0;
+    let mut dir = Direction::RIGHT;
+    let mut side_length = 1;
+    let mut grid: HashMap<(i32, i32), i32> = HashMap::new();
+    grid.insert((0, 0), 1);
+    loop {
+        n += 1;
+        x += dx;
+        y += dy;
+
+        let mut sum = 0;
+        for ox in (x - 1)..(x + 2) {
+            for oy in (y - 1)..(y + 2) {
+                if ox != x || oy != y {
+                    sum += *grid.get(&(ox, oy)).unwrap_or(&0);
+                }
+            }
+        }
+        if sum > t {
+            return Ok(sum);
+        }
+        grid.insert((x, y), sum);
+
+        if n == next_turn_at {
+            // "turn left"
+            dir = match dir {
+                Direction::UP => Direction::LEFT,
+                Direction::LEFT => Direction::DOWN,
+                Direction::DOWN => Direction::RIGHT,
+                Direction::RIGHT => Direction::UP,
+            };
+            let delta = match dir {
+                Direction::UP => (0, -1),
+                Direction::LEFT => (-1, 0),
+                Direction::DOWN => (0, 1),
+                Direction::RIGHT => (1, 0),
+            };
+            dx = delta.0;
+            dy = delta.1;
+            if matches!(dir, Direction::RIGHT) || matches!(dir, Direction::LEFT) {
+                side_length += 1;
+            }
+            next_turn_at += side_length;
+        }
+    }
 }
 
 #[cfg(test)]
@@ -61,6 +120,10 @@ mod tests {
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2("0").unwrap(), 5521);
+        assert_eq!(part2("3").unwrap(), 4);
+        assert_eq!(part2("120").unwrap(), 122);
+        assert_eq!(part2("350").unwrap(), 351);
+        assert_eq!(part2("351").unwrap(), 362);
+        assert_eq!(part2("800").unwrap(), 806);
     }
 }
