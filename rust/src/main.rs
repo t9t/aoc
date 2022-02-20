@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::io;
+use std::time::Instant;
 
 mod day1;
 mod day2;
@@ -21,10 +22,13 @@ fn main() {
     let day = args[1].parse::<u8>().unwrap();
     let part = args[2].parse::<u8>().unwrap();
 
-    println!("Day: {}; part: {}", day, part);
+    println!("Running Year: 2017; Day: {}; Part: {}", day, part);
     let input = read_input(2017, day).unwrap();
     let fun = funs[(((day - 1) * 2) + part - 1) as usize];
-    println!("Result: {}", fun(input.trim()).unwrap());
+    let start = Instant::now();
+    let result = fun(input.trim()).unwrap();
+    let duration = start.elapsed();
+    println!("Result ({:?}): {}", duration, result);
 }
 
 fn read_input(year: u16, day: u8) -> io::Result<String> {
