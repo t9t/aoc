@@ -1,29 +1,53 @@
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
+    return Ok(count_valid(s, are_equal));
+}
+
+pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
+    return Ok(count_valid(s, are_equal_or_anagrams));
+}
+
+fn count_valid(s: &str, cmp: fn(&str, &str) -> bool) -> i32 {
     let lines = s.split("\n");
     let mut valid_count = 0;
     for line in lines {
-        if is_valid(line) {
+        if is_valid(line, cmp) {
             valid_count += 1;
         }
     }
-    return Ok(valid_count);
+    return valid_count;
 }
 
-pub fn part2(_s: &str) -> Result<i32, Box<dyn Error>> {
-    return Ok(5521);
-}
-
-fn is_valid(s: &str) -> bool {
+fn is_valid(s: &str, cmp: fn(&str, &str) -> bool) -> bool {
     let words: Vec<&str> = s.split(" ").collect();
     for i in 0..words.len() {
         let left = words[i];
         for j in i + 1..words.len() {
             let right = words[j];
-            if left == right {
+            if cmp(left, right) {
                 return false;
             }
+        }
+    }
+    return true;
+}
+
+fn are_equal(left: &str, right: &str) -> bool {
+    return left == right;
+}
+
+fn are_equal_or_anagrams(left: &str, right: &str) -> bool {
+    return left == right || are_anagrams(left, right);
+}
+
+fn are_anagrams(left: &str, right: &str) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+    for c in left.chars() {
+        if left.matches(c).count() != right.matches(c).count() {
+            return false;
         }
     }
     return true;
@@ -33,14 +57,35 @@ fn is_valid(s: &str) -> bool {
 mod tests {
     use super::*;
 
-    static INPUT: &str = "bla
-bla";
+    #[test]
+    fn test_are_anagrams() {
+        assert_eq!(are_anagrams("abcde", "fghij"), false);
+        assert_eq!(are_anagrams("abcde", "ecdab"), true);
+        assert_eq!(are_anagrams("ab", "abc"), false);
+        assert_eq!(are_anagrams("abc", "abd"), false);
+        assert_eq!(are_anagrams("oiii", "ioii"), true);
+        assert_eq!(are_anagrams("ooii", "oooi"), false);
+    }
 
     #[test]
     fn test_is_valid() {
-        assert_eq!(is_valid("aa bb cc dd ee"), true);
-        assert_eq!(is_valid("aa bb cc dd aa"), false);
-        assert_eq!(is_valid("aa bb cc dd aaa"), true);
+        assert_eq!(is_valid("aa bb cc dd ee", are_equal), true);
+        assert_eq!(is_valid("aa bb cc dd aa", are_equal), false);
+        assert_eq!(is_valid("aa bb cc dd aaa", are_equal), true);
+        assert_eq!(is_valid("abcde fghij", are_equal_or_anagrams), true);
+        assert_eq!(is_valid("abcde xyz ecdab", are_equal_or_anagrams), false);
+        assert_eq!(
+            is_valid("a ab abc abd abf abj", are_equal_or_anagrams),
+            true
+        );
+        assert_eq!(
+            is_valid("iiii oiii ooii oooi oooo", are_equal_or_anagrams),
+            true
+        );
+        assert_eq!(
+            is_valid("oiii ioii iioi iiio", are_equal_or_anagrams),
+            false
+        );
     }
 
     #[test]
@@ -51,6 +96,7 @@ bla";
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2(INPUT).unwrap(), 5521);
+        let input = "abcde fghij\nabcde xyz ecdab\na ab abc abd abf abj\niiii oiii ooii oooi oooo\noiii ioii iioi iiio";
+        assert_eq!(part2(input).unwrap(), 3);
     }
 }
