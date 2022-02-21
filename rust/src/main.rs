@@ -1,8 +1,3 @@
-use std::env;
-use std::fs;
-use std::io;
-use std::time::Instant;
-
 mod day1;
 mod day2;
 mod day3;
@@ -17,7 +12,13 @@ fn main() {
         day3::part1,
         day3::part2, /*newday*/
     ];
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() != 3 {
+        println!("Usage:");
+        println!("\t{} <day> <part>", args[0]);
+        std::process::exit(1);
+    }
 
     let day = args[1].parse::<u8>().unwrap();
     let part = args[2].parse::<u8>().unwrap();
@@ -25,12 +26,12 @@ fn main() {
     println!("Running Year: 2017; Day: {}; Part: {}", day, part);
     let input = read_input(2017, day).unwrap();
     let fun = funs[(((day - 1) * 2) + part - 1) as usize];
-    let start = Instant::now();
+    let start = std::time::Instant::now();
     let result = fun(input.trim()).unwrap();
     let duration = start.elapsed();
     println!("Result ({:?}): {}", duration, result);
 }
 
-fn read_input(year: u16, day: u8) -> io::Result<String> {
-    return fs::read_to_string(format!("../input/{}/{}.txt", year, day));
+fn read_input(year: u16, day: u8) -> std::io::Result<String> {
+    return std::fs::read_to_string(format!("../input/{}/{}.txt", year, day));
 }
