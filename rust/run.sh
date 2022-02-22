@@ -2,4 +2,4 @@
 
 set -eu
 
-cargo run $*
+cargo run --release $*
