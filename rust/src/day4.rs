@@ -9,7 +9,7 @@ pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
 }
 
 fn count_valid(s: &str, cmp: fn(&str, &str) -> bool) -> i32 {
-    let lines = s.split("\n");
+    let lines = s.lines();
     let mut valid_count = 0;
     for line in lines {
         if is_valid(line, cmp) {
