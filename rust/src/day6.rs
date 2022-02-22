@@ -1,15 +1,15 @@
 use std::collections::HashSet;
 use std::error::Error;
 
-pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
+pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
     let banks: Vec<u32> = s.split("\t").map(|x| x.parse::<u32>().unwrap()).collect();
-    return Ok(reallocation_cycles(banks).0);
+    return Ok(format!("{}", reallocation_cycles(banks).0));
 }
 
-pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     let mut banks: Vec<u32> = s.split("\t").map(|x| x.parse::<u32>().unwrap()).collect();
     banks = reallocation_cycles(banks).1;
-    return Ok(reallocation_cycles(banks).0);
+    return Ok(format!("{}", reallocation_cycles(banks).0));
 }
 
 fn reallocation_cycles(mut banks: Vec<u32>) -> (i32, Vec<u32>) {
@@ -47,11 +47,11 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1("0\t2\t7\t0").unwrap(), 5);
+        assert_eq!(part1("0\t2\t7\t0").unwrap(), "5");
     }
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2("0\t2\t7\t0").unwrap(), 4);
+        assert_eq!(part2("0\t2\t7\t0").unwrap(), "4");
     }
 }

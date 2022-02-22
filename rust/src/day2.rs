@@ -1,6 +1,6 @@
 use std::error::Error;
 
-pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
+pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
     let mut sum = 0;
     for line in s.lines() {
         let nums = line.split("\t");
@@ -18,10 +18,10 @@ pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
         let diff = highest - lowest;
         sum += diff;
     }
-    return Ok(sum);
+    return Ok(format!("{}", sum));
 }
 
-pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     let mut sum = 0;
     for line in s.lines() {
         let nums: Vec<i32> = line
@@ -40,7 +40,7 @@ pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
             }
         }
     }
-    return Ok(sum);
+    return Ok(format!("{}", sum));
 }
 
 #[cfg(test)]
@@ -50,12 +50,12 @@ mod tests {
     #[test]
     fn test_part1() {
         let input = "5\t1\t9\t5\n7\t5\t3\n2\t4\t6\t8";
-        assert_eq!(part1(input).unwrap(), 18);
+        assert_eq!(part1(input).unwrap(), "18");
     }
 
     #[test]
     fn test_part2() {
         let input = "5\t9\t2\t8\n9\t4\t7\t3\n3\t8\t6\t5";
-        assert_eq!(part2(input).unwrap(), 9);
+        assert_eq!(part2(input).unwrap(), "9");
     }
 }

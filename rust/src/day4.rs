@@ -1,11 +1,11 @@
 use std::error::Error;
 
-pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
-    return Ok(count_valid(s, are_equal));
+pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
+    return Ok(format!("{}", count_valid(s, are_equal)));
 }
 
-pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
-    return Ok(count_valid(s, are_equal_or_anagrams));
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
+    return Ok(format!("{}", count_valid(s, are_equal_or_anagrams)));
 }
 
 fn count_valid(s: &str, cmp: fn(&str, &str) -> bool) -> i32 {
@@ -91,12 +91,12 @@ mod tests {
     #[test]
     fn test_part1() {
         let input = "aa bb cc dd ee\naa bb cc dd aa\naa bb cc dd aaa";
-        assert_eq!(part1(input).unwrap(), 2);
+        assert_eq!(part1(input).unwrap(), "2");
     }
 
     #[test]
     fn test_part2() {
         let input = "abcde fghij\nabcde xyz ecdab\na ab abc abd abf abj\niiii oiii ooii oooi oooo\noiii ioii iioi iiio";
-        assert_eq!(part2(input).unwrap(), 3);
+        assert_eq!(part2(input).unwrap(), "3");
     }
 }

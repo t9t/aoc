@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::error::Error;
 
-pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
+pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
     let n = s.parse::<i32>()?;
 
     let mut next_opt: Option<i32> = None;
@@ -41,10 +41,10 @@ pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
         tot = steps + (d - top_right - steps).abs();
     }
 
-    return Ok(tot);
+    return Ok(format!("{}", tot));
 }
 
-pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     let t = s.parse::<i32>()?;
 
     enum Direction {
@@ -78,7 +78,7 @@ pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
             }
         }
         if sum > t {
-            return Ok(sum);
+            return Ok(format!("{}", sum));
         }
         grid.insert((x, y), sum);
 
@@ -112,18 +112,18 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1("1").unwrap(), 0);
-        assert_eq!(part1("12").unwrap(), 3);
-        assert_eq!(part1("23").unwrap(), 2);
-        assert_eq!(part1("1024").unwrap(), 31);
+        assert_eq!(part1("1").unwrap(), "0");
+        assert_eq!(part1("12").unwrap(), "3");
+        assert_eq!(part1("23").unwrap(), "2");
+        assert_eq!(part1("1024").unwrap(), "31");
     }
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2("3").unwrap(), 4);
-        assert_eq!(part2("120").unwrap(), 122);
-        assert_eq!(part2("350").unwrap(), 351);
-        assert_eq!(part2("351").unwrap(), 362);
-        assert_eq!(part2("800").unwrap(), 806);
+        assert_eq!(part2("3").unwrap(), "4");
+        assert_eq!(part2("120").unwrap(), "122");
+        assert_eq!(part2("350").unwrap(), "351");
+        assert_eq!(part2("351").unwrap(), "362");
+        assert_eq!(part2("800").unwrap(), "806");
     }
 }
