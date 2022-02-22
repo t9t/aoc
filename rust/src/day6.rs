@@ -2,7 +2,17 @@ use std::collections::HashSet;
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
+    let banks: Vec<u32> = s.split("\t").map(|x| x.parse::<u32>().unwrap()).collect();
+    return Ok(reallocation_cycles(banks).0);
+}
+
+pub fn part2(s: &str) -> Result<i32, Box<dyn Error>> {
     let mut banks: Vec<u32> = s.split("\t").map(|x| x.parse::<u32>().unwrap()).collect();
+    banks = reallocation_cycles(banks).1;
+    return Ok(reallocation_cycles(banks).0);
+}
+
+fn reallocation_cycles(mut banks: Vec<u32>) -> (i32, Vec<u32>) {
     let mut cycle = 0;
     let mut seen: HashSet<Vec<u32>> = HashSet::new();
     while !seen.contains(&banks) {
@@ -28,19 +38,12 @@ pub fn part1(s: &str) -> Result<i32, Box<dyn Error>> {
         }
     }
 
-    return Ok(cycle);
-}
-
-pub fn part2(_s: &str) -> Result<i32, Box<dyn Error>> {
-    return Ok(5521);
+    return (cycle, banks);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    static INPUT: &str = "bla
-bla";
 
     #[test]
     fn test_part1() {
@@ -49,6 +52,6 @@ bla";
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2(INPUT).unwrap(), 5521);
+        assert_eq!(part2("0\t2\t7\t0").unwrap(), 4);
     }
 }
