@@ -2,14 +2,21 @@ use std::collections::HashSet;
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
-    let banks: Vec<u32> = s.split("\t").map(|x| x.parse::<u32>().unwrap()).collect();
+    let banks = parse(s)?;
     return Ok(format!("{}", reallocation_cycles(banks).0));
 }
 
 pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
-    let mut banks: Vec<u32> = s.split("\t").map(|x| x.parse::<u32>().unwrap()).collect();
+    let mut banks = parse(s)?;
     banks = reallocation_cycles(banks).1;
     return Ok(format!("{}", reallocation_cycles(banks).0));
+}
+
+fn parse(s: &str) -> Result<Vec<u32>, std::num::ParseIntError> {
+    return s
+        .split("\t")
+        .map(|x| x.parse())
+        .collect::<Result<Vec<u32>, _>>();
 }
 
 fn reallocation_cycles(mut banks: Vec<u32>) -> (i32, Vec<u32>) {

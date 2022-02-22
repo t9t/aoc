@@ -9,7 +9,10 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
 }
 
 fn steps_to_exit(s: &str, d: fn(i32) -> i32) -> Result<String, Box<dyn Error>> {
-    let mut lines: Vec<i32> = s.lines().map(|l| l.parse::<i32>().unwrap()).collect();
+    let mut lines = s
+        .lines()
+        .map(|l| l.parse::<i32>())
+        .collect::<Result<Vec<i32>, _>>()?;
 
     let mut pos: i32 = 0;
     let mut steps = 0;

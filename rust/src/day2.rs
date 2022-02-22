@@ -24,10 +24,10 @@ pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
 pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     let mut sum = 0;
     for line in s.lines() {
-        let nums: Vec<i32> = line
+        let nums = (line
             .split("\t")
-            .map(|x| x.parse::<i32>().unwrap())
-            .collect();
+            .map(|x| x.parse::<i32>())
+            .collect::<Result<Vec<i32>, _>>())?;
         for (i, n) in nums.iter().enumerate() {
             let left = *n;
             for j in i + 1..nums.len() {
