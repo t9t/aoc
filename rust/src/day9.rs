@@ -1,10 +1,19 @@
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
+    return Ok(format!("{}", count(s)?.0));
+}
+
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
+    return Ok(format!("{}", count(s)?.1));
+}
+
+fn count(s: &str) -> Result<(u32, u32), Box<dyn Error>> {
     let mut depth = 0;
     let mut ignore_next = false;
     let mut garbage = false;
     let mut score = 0;
+    let mut total_garbage = 0;
     for c in s.chars() {
         if ignore_next {
             ignore_next = false;
@@ -16,6 +25,8 @@ pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
                 garbage = false;
             } else if c == '!' {
                 ignore_next = true;
+            } else {
+                total_garbage += 1;
             }
             continue;
         }
@@ -30,27 +41,22 @@ pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
             _ => {}
         }
     }
-    return Ok(format!("{}", score));
-}
-
-pub fn part2(_s: &str) -> Result<String, Box<dyn Error>> {
-    return Ok(format!("{}", 5521));
+    return Ok((score, total_garbage));
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    static INPUT: &str = "bla
-bla";
-
     #[test]
-    fn test_part1() {
-        assert_eq!(part1(INPUT).unwrap(), "1337");
-    }
-
-    #[test]
-    fn test_part2() {
-        assert_eq!(part2(INPUT).unwrap(), "5521");
+    fn test_count() {
+        assert_eq!(count("{}").unwrap(), (1, 0));
+        assert_eq!(count("{{{}}}").unwrap(), (6, 0));
+        assert_eq!(count("{{},{}}").unwrap(), (5, 0));
+        assert_eq!(count("{{{},{},{{}}}}").unwrap(), (16, 0));
+        assert_eq!(count("{<a>,<a>,<a>,<a>}").unwrap(), (1, 4));
+        assert_eq!(count("{{<ab>},{<ab>},{<ab>},{<ab>}}").unwrap(), (9, 8));
+        assert_eq!(count("{{<!!>},{<!!>},{<!!>},{<!!>}}").unwrap(), (9, 0));
+        assert_eq!(count("{{<a!>},{<a!>},{<a!>},{<ab>}}").unwrap(), (3, 17));
     }
 }
