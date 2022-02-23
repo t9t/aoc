@@ -1,10 +1,10 @@
 use std::error::Error;
 
-pub fn part1(_s: &str) -> Result<String, Box<dyn Error>> {
+pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
     return Ok(format!("{}", 1337));
 }
 
-pub fn part2(_s: &str) -> Result<String, Box<dyn Error>> {
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     return Ok(format!("{}", 5521));
 }
 
