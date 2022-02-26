@@ -1,11 +1,10 @@
-use std::collections::HashSet;
-use std::collections::VecDeque;
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
     let route = s.split(",").collect();
-    let target = find_target(route)?;
-    let steps = find_path((0, 0, 0), target).ok_or("No route found from target to origin")?;
+    let (tx, ty, tz) = find_target(route)?;
+    let steps = (tx.abs() + ty.abs() + tz.abs()) / 2;
+
     return Ok(format!("{}", steps));
 }
 
@@ -47,39 +46,6 @@ fn find_target(route: Vec<&str>) -> Result<(i32, i32, i32), Box<dyn Error>> {
         }
     }
     return Ok((x, y, z));
-}
-
-fn find_path((sx, sy, sz): (i32, i32, i32), (tx, ty, tz): (i32, i32, i32)) -> Option<u32> {
-    let mut visited: HashSet<(i32, i32, i32)> = HashSet::new();
-    let mut next: VecDeque<(i32, i32, i32, u32)> = VecDeque::new();
-    next.push_back((sx, sy, sz, 0));
-
-    while !next.is_empty() {
-        let (x, y, z, steps) = next.pop_front().unwrap();
-        if x == tx && y == ty && z == tz {
-            return Some(steps);
-        }
-
-        let neighbors = neighbors(x, y, z);
-        for n in neighbors {
-            if !visited.contains(&n) {
-                visited.insert(n);
-                next.push_back((n.0, n.1, n.2, steps + 1));
-            }
-        }
-    }
-    return None;
-}
-
-fn neighbors(x: i32, y: i32, z: i32) -> Vec<(i32, i32, i32)> {
-    let mut neighbors: Vec<(i32, i32, i32)> = Vec::new();
-    neighbors.push((x, y - 1, z + 1));
-    neighbors.push((x + 1, y - 1, z));
-    neighbors.push((x + 1, y, z - 1));
-    neighbors.push((x, y + 1, z - 1));
-    neighbors.push((x - 1, y + 1, z));
-    neighbors.push((x - 1, y, z + 1));
-    return neighbors;
 }
 
 #[cfg(test)]
