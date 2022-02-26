@@ -8,6 +8,7 @@ mod day7;
 mod day8;
 mod day9;
 mod day10;
+mod day11;
 /*mod newday*/
 
 fn main() {
@@ -31,7 +32,9 @@ fn main() {
         day9::part1,
         day9::part2,
         day10::part1,
-        day10::part2, /*newday*/
+        day10::part2,
+        day11::part1,
+        day11::part2, /*newday*/
     ];
     let args: Vec<String> = std::env::args().collect();
 
