@@ -1,41 +1,18 @@
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
-    return Ok(format!("{}", knot_hash(s, 256)?));
+    return Ok(format!("{}", simple_knot_hash(s, 256)?));
 }
 
-fn knot_hash(s: &str, list_size: u32) -> Result<u32, Box<dyn Error>> {
+fn simple_knot_hash(s: &str, list_size: usize) -> Result<u32, Box<dyn Error>> {
     let lengths = s
         .split(",")
         .map(|n| n.parse::<usize>())
         .collect::<Result<Vec<usize>, _>>()?;
 
-    let mut list: Vec<u32> = Vec::new();
-    for i in 0..list_size {
-        list.push(i);
-    }
+    let list = full_knot_hash(lengths, list_size, 1);
 
-    let mut pos = 0;
-    let mut skip = 0;
-    for l in lengths {
-        let end_pos = pos + l - 1;
-
-        for k in 0..l / 2 {
-            let li = (pos + k) % list.len();
-            let ri = (end_pos - k) % list.len();
-
-            let left = list[li];
-            let right = list[ri];
-
-            list[li] = right;
-            list[ri] = left;
-        }
-
-        pos += l + skip;
-        skip += 1;
-    }
-
-    return Ok(list[0] * list[1]);
+    return Ok(list[0] as u32 * list[1] as u32);
 }
 
 pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
@@ -43,7 +20,26 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     s.chars().for_each(|c| lengths.push(c as usize));
     [17, 31, 73, 47, 23].iter().for_each(|n| lengths.push(*n));
 
-    let list_size = 256;
+    let list = full_knot_hash(lengths, 256, 64);
+
+    let mut hash = String::new();
+    for block in 0..16 {
+        let mut x: i32 = -1;
+        for k in 0..16 {
+            let n = list[block * 16 + k] as i32;
+            if x == -1 {
+                x = n;
+            } else {
+                x = x ^ n;
+            }
+        }
+        hash += format!("{:0>2x}", x).as_str();
+    }
+
+    return Ok(hash);
+}
+
+fn full_knot_hash(lengths: Vec<usize>, list_size: usize, rounds: u32) -> Vec<usize> {
     let mut list: Vec<usize> = Vec::new();
     for i in 0..list_size {
         list.push(i);
@@ -51,7 +47,7 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
 
     let mut pos = 0;
     let mut skip = 0;
-    for _ in 0..64 {
+    for _ in 0..rounds {
         for l in &lengths {
             let end_pos = pos + l - 1;
 
@@ -70,21 +66,7 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
             skip += 1;
         }
     }
-    let mut hash = String::new();
-    for block in 0..16 {
-        let mut x: i32 = -1;
-        for k in 0..16 {
-            let n = list[block * 16 + k] as i32;
-            if x == -1 {
-                x = n;
-            } else {
-                x = x ^ n;
-            }
-        }
-        hash += format!("{:0>2x}", x).as_str();
-    }
-
-    return Ok(hash);
+    return list;
 }
 
 #[cfg(test)]
@@ -93,7 +75,7 @@ mod tests {
 
     #[test]
     fn test_knot_hash() {
-        assert_eq!(knot_hash("3,4,1,5", 5).unwrap(), 12);
+        assert_eq!(simple_knot_hash("3,4,1,5", 5).unwrap(), 12);
     }
 
     #[test]
