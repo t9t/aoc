@@ -1,81 +1,17 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
-    let mut used = 0;
-    for row in 0..128 {
-        let mut lengths: Vec<usize> = Vec::new();
-        format!("{}-{}", s, row)
-            .chars()
-            .for_each(|c| lengths.push(c as usize));
-        [17, 31, 73, 47, 23].iter().for_each(|n| lengths.push(*n));
-
-        let list = full_knot_hash(lengths, 256, 64);
-
-        let mut hash = String::new();
-        for block in 0..16 {
-            let mut x: i32 = -1;
-            for k in 0..16 {
-                let n = list[block * 16 + k] as i32;
-                if x == -1 {
-                    x = n;
-                } else {
-                    x = x ^ n;
-                }
-            }
-            hash += format!("{:0>2x}", x).as_str();
-        }
-
-        let mut bin = String::new();
-        for c in hash.chars() {
-            bin += format!(
-                "{:0>4b}",
-                u16::from_str_radix(format!("{}", c).as_str(), 16)?
-            )
-            .as_str();
-        }
-        used += bin.matches("1").count();
-    }
-
+    let used = build_grid(s)?
+        .iter()
+        .flat_map(|row| row.chars())
+        .filter(|c| *c == '1')
+        .count();
     return Ok(format!("{}", used));
 }
 
 pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
-    let mut grid: Vec<String> = Vec::new();
-    for row in 0..128 {
-        let mut lengths: Vec<usize> = Vec::new();
-        format!("{}-{}", s, row)
-            .chars()
-            .for_each(|c| lengths.push(c as usize));
-        [17, 31, 73, 47, 23].iter().for_each(|n| lengths.push(*n));
-
-        let list = full_knot_hash(lengths, 256, 64);
-
-        let mut hash = String::new();
-        for block in 0..16 {
-            let mut x: i32 = -1;
-            for k in 0..16 {
-                let n = list[block * 16 + k] as i32;
-                if x == -1 {
-                    x = n;
-                } else {
-                    x = x ^ n;
-                }
-            }
-            hash += format!("{:0>2x}", x).as_str();
-        }
-
-        let mut bin = String::new();
-        for c in hash.chars() {
-            bin += format!(
-                "{:0>4b}",
-                u16::from_str_radix(format!("{}", c).as_str(), 16)?
-            )
-            .as_str();
-        }
-        grid.push(bin);
-    }
+    let grid = build_grid(s)?;
 
     let mut groups: HashMap<(i32, i32), u32> = HashMap::new();
     let mut group_counter = 0;
@@ -113,6 +49,44 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     }
 
     return Ok(format!("{}", group_counter));
+}
+
+fn build_grid(s: &str) -> Result<Vec<String>, Box<dyn Error>> {
+    let mut grid: Vec<String> = Vec::new();
+    for row in 0..128 {
+        let mut lengths: Vec<usize> = Vec::new();
+        format!("{}-{}", s, row)
+            .chars()
+            .for_each(|c| lengths.push(c as usize));
+        [17, 31, 73, 47, 23].iter().for_each(|n| lengths.push(*n));
+
+        let list = full_knot_hash(lengths, 256, 64);
+
+        let mut hash = String::new();
+        for block in 0..16 {
+            let mut x: i32 = -1;
+            for k in 0..16 {
+                let n = list[block * 16 + k] as i32;
+                if x == -1 {
+                    x = n;
+                } else {
+                    x = x ^ n;
+                }
+            }
+            hash += format!("{:0>2x}", x).as_str();
+        }
+
+        let mut bin = String::new();
+        for c in hash.chars() {
+            bin += format!(
+                "{:0>4b}",
+                u16::from_str_radix(format!("{}", c).as_str(), 16)?
+            )
+            .as_str();
+        }
+        grid.push(bin);
+    }
+    return Ok(grid);
 }
 
 fn full_knot_hash(lengths: Vec<usize>, list_size: usize, rounds: u32) -> Vec<usize> {
