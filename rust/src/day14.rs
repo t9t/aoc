@@ -30,17 +30,16 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
 
             while !next.is_empty() {
                 let (nx, ny) = next.pop().unwrap();
-                let nrow = &grid[ny as usize];
-                let nc = nrow.chars().nth(nx as usize).unwrap();
-                if nc == '1' {
-                    groups.insert((nx, ny), group_counter);
-                    let others = [(nx + 1, ny), (nx - 1, ny), (nx, ny + 1), (nx, ny - 1)];
-                    for o in others {
-                        if o.0 >= 0 && o.1 >= 0 && o.0 <= 127 && o.1 <= 127 {
-                            if !groups.contains_key(&o) {
-                                next.push(o);
-                            }
-                        }
+                let nc = &grid[ny as usize].chars().nth(nx as usize).unwrap();
+                if *nc != '1' {
+                    continue;
+                }
+
+                groups.insert((nx, ny), group_counter);
+                for o in [(nx + 1, ny), (nx - 1, ny), (nx, ny + 1), (nx, ny - 1)] {
+                    if o.0 >= 0 && o.1 >= 0 && o.0 <= 127 && o.1 <= 127 && !groups.contains_key(&o)
+                    {
+                        next.push(o);
                     }
                 }
             }
@@ -51,18 +50,19 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     return Ok(format!("{}", group_counter));
 }
 
-fn build_grid(s: &str) -> Result<Vec<String>, Box<dyn Error>> {
+fn build_grid(key: &str) -> Result<Vec<String>, Box<dyn Error>> {
     let mut grid: Vec<String> = Vec::new();
     for row in 0..128 {
         let mut lengths: Vec<usize> = Vec::new();
-        format!("{}-{}", s, row)
+        format!("{}-{}", key, row)
             .chars()
             .for_each(|c| lengths.push(c as usize));
         [17, 31, 73, 47, 23].iter().for_each(|n| lengths.push(*n));
 
         let list = full_knot_hash(lengths, 256, 64);
 
-        let mut hash = String::new();
+        let mut row = String::new();
+
         for block in 0..16 {
             let mut x: i32 = -1;
             for k in 0..16 {
@@ -73,18 +73,17 @@ fn build_grid(s: &str) -> Result<Vec<String>, Box<dyn Error>> {
                     x = x ^ n;
                 }
             }
-            hash += format!("{:0>2x}", x).as_str();
+
+            for c in format!("{:0>2x}", x).chars() {
+                row += format!(
+                    "{:0>4b}",
+                    u16::from_str_radix(format!("{}", c).as_str(), 16)?
+                )
+                .as_str();
+            }
         }
 
-        let mut bin = String::new();
-        for c in hash.chars() {
-            bin += format!(
-                "{:0>4b}",
-                u16::from_str_radix(format!("{}", c).as_str(), 16)?
-            )
-            .as_str();
-        }
-        grid.push(bin);
+        grid.push(row);
     }
     return Ok(grid);
 }
