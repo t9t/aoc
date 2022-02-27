@@ -1,24 +1,18 @@
 use std::error::Error;
 
-pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
-    let _s = "Generator A starts with 65
-Generator B starts with 8921";
-    fn parse_line(line_opt: Option<&str>) -> Result<u64, Box<dyn Error>> {
-        let line = line_opt.ok_or("Invalid input")?;
-        let s = line.split(" starts with ").nth(1).ok_or("Invalid line")?;
-        return Ok(s.parse::<u64>()?);
-    }
+const DIV: u64 = 2147483647;
+const MULT_A: u64 = 16807;
+const MULT_B: u64 = 48271;
 
-    let mut lines = s.lines();
-    let mut a = parse_line(lines.next())?;
-    let mut b = parse_line(lines.next())?;
+pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
+    let (mut a, mut b) = parse_generators(s)?;
     let mut matches = 0;
 
-    for _ in 0..40000000 {
-        a = (a * 16807) % 2147483647;
-        b = (b * 48271) % 2147483647;
+    for _ in 0..40_000_000 {
+        a = (a * MULT_A) % DIV;
+        b = (b * MULT_B) % DIV;
 
-        if (a as u16) == (b as u16) {
+        if a as u16 == b as u16 {
             matches += 1;
         }
     }
@@ -26,8 +20,44 @@ Generator B starts with 8921";
     return Ok(format!("{}", matches));
 }
 
-pub fn part2(_s: &str) -> Result<String, Box<dyn Error>> {
-    return Ok(format!("{}", 5521));
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
+    let (mut a, mut b) = parse_generators(s)?;
+    let mut matches = 0;
+
+    for _ in 0..5_000_000 {
+        loop {
+            a = (a * MULT_A) % DIV;
+            if a % 4 == 0 {
+                break;
+            }
+        }
+
+        loop {
+            b = (b * MULT_B) % DIV;
+            if b % 8 == 0 {
+                break;
+            }
+        }
+
+        if a as u16 == b as u16 {
+            matches += 1;
+        }
+    }
+
+    return Ok(format!("{}", matches));
+}
+
+fn parse_generators(s: &str) -> Result<(u64, u64), Box<dyn Error>> {
+    fn parse_line(line_opt: Option<&str>) -> Result<u64, Box<dyn Error>> {
+        let line = line_opt.ok_or("Invalid input")?;
+        let s = line.split(" starts with ").nth(1).ok_or("Invalid line")?;
+        return Ok(s.parse::<u64>()?);
+    }
+
+    let mut lines = s.lines();
+    let a = parse_line(lines.next())?;
+    let b = parse_line(lines.next())?;
+    return Ok((a, b));
 }
 
 #[cfg(test)]
@@ -44,6 +74,6 @@ Generator B starts with 8921";
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2(INPUT).unwrap(), "5521");
+        assert_eq!(part2(INPUT).unwrap(), "309");
     }
 }
