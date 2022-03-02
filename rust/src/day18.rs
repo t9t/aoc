@@ -60,110 +60,103 @@ pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
 
 pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     let lines = s.lines().collect::<Vec<&str>>();
-    let mut regs0: HashMap<char, i64> = HashMap::new();
-    regs0.insert('p', 0);
-    let mut regs1: HashMap<char, i64> = HashMap::new();
-    regs1.insert('p', 1);
 
-    let mut from0to1: VecDeque<i64> = VecDeque::new();
-    let mut from1to0: VecDeque<i64> = VecDeque::new();
+    let mut program0 = Program {
+        pos: 0,
+        regs: HashMap::new(),
+        inbox: VecDeque::new(),
+    };
+    program0.regs.insert('p', 0);
 
-    let mut pos0: i64 = 0;
-    let mut pos1: i64 = 0;
-
-    fn get_val(regs: &HashMap<char, i64>, reg_or_value: &str) -> i64 {
-        let as_int = reg_or_value.parse::<i64>();
-        if as_int.is_ok() {
-            return as_int.unwrap();
-        }
-        let c = reg_or_value.chars().next().unwrap();
-        let v = regs.get(&c);
-        let i = v.unwrap_or(&0);
-        return *i;
-    }
+    let mut program1 = Program {
+        pos: 0,
+        regs: HashMap::new(),
+        inbox: VecDeque::new(),
+    };
+    program1.regs.insert('p', 1);
 
     let mut one_sent = 0;
+    loop {
+        let _ = program0.run(&mut program1.inbox, &lines)?;
+        one_sent += program1.run(&mut program0.inbox, &lines)?;
 
+        if program0.inbox.is_empty() && program1.inbox.is_empty() {
+            return Ok(format!("{}", one_sent));
+        }
+    }
+}
+
+struct Program {
+    pos: i64,
+    regs: HashMap<char, i64>,
+    inbox: VecDeque<i64>,
+}
+
+impl Program {
     fn run(
-        mut regs: HashMap<char, i64>,
-        mut pos: i64,
+        &mut self,
+        outbox: &mut VecDeque<i64>,
         lines: &Vec<&str>,
-        mut send: VecDeque<i64>,
-        mut receive: VecDeque<i64>,
-    ) -> Result<(HashMap<char, i64>, i64, VecDeque<i64>, VecDeque<i64>, u32), Box<dyn Error>> {
+    ) -> Result<u32, Box<dyn Error>> {
+        fn get_val(regs: &HashMap<char, i64>, reg_or_value: &str) -> i64 {
+            let as_int = reg_or_value.parse::<i64>();
+            if as_int.is_ok() {
+                return as_int.unwrap();
+            }
+            let c = reg_or_value.chars().next().unwrap();
+            let v = regs.get(&c);
+            let i = v.unwrap_or(&0);
+            return *i;
+        }
         let mut sent = 0;
         loop {
-            if pos < 0 || pos >= lines.len() as i64 {
+            if self.pos < 0 || self.pos >= lines.len() as i64 {
                 Err("Jumped outside of range")?
             }
-            let line = lines[pos as usize];
+            let line = lines[self.pos as usize];
             let mut split = line.split(" ");
             let op = split.next().unwrap();
             let reg_or_val = split.next().unwrap();
             let reg = reg_or_val.chars().next().unwrap();
-            let x = get_val(&regs, reg_or_val);
-            let val = get_val(&regs, split.next().unwrap_or("0"));
+            let x = get_val(&self.regs, reg_or_val);
+            let val = get_val(&self.regs, split.next().unwrap_or("0"));
 
             match op {
                 "snd" => {
-                    //from0to1.push_back(x);
-                    send.push_back(x);
+                    outbox.push_back(x);
                     sent += 1;
                 }
                 "set" => {
-                    regs.insert(reg, val);
+                    self.regs.insert(reg, val);
                 }
                 "add" => {
-                    regs.insert(reg, x + val);
+                    self.regs.insert(reg, x + val);
                 }
                 "mul" => {
-                    regs.insert(reg, x * val);
+                    self.regs.insert(reg, x * val);
                 }
                 "mod" => {
-                    regs.insert(reg, x % val);
+                    self.regs.insert(reg, x % val);
                 }
                 "rcv" => {
-                    if receive.is_empty() {
+                    if self.inbox.is_empty() {
                         break;
                     }
-                    let rcv = receive.pop_front().unwrap();
-                    regs.insert(reg, rcv);
+                    let rcv = self.inbox.pop_front().unwrap();
+                    self.regs.insert(reg, rcv);
                 }
                 "jgz" => {
                     if x > 0 {
-                        pos += val;
+                        self.pos += val;
                         continue;
                     }
                 }
                 _ => Err(format!("Invalid instruction: {}", line))?,
             }
-            pos += 1;
+            self.pos += 1;
         }
-        return Ok((regs, pos, send, receive, sent));
+        return Ok(sent);
     }
-
-    loop {
-        // Program 0
-        let (new_regs0, new_pos0, new_from0to1, new_from1to0, _) =
-            run(regs0, pos0, &lines, from0to1, from1to0)?;
-        regs0 = new_regs0;
-        pos0 = new_pos0;
-        from0to1 = new_from0to1;
-        from1to0 = new_from1to0;
-
-        let (new_regs1, new_pos1, new_from1to0, new_from0to1, sent) =
-            run(regs1, pos1, &lines, from1to0, from0to1)?;
-        regs1 = new_regs1;
-        pos1 = new_pos1;
-        from1to0 = new_from1to0;
-        from0to1 = new_from0to1;
-        one_sent += sent;
-
-        if from0to1.is_empty() && from1to0.is_empty() {
-            break;
-        }
-    }
-    return Ok(format!("{}", one_sent));
 }
 
 #[cfg(test)]
