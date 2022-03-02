@@ -84,101 +84,80 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
 
     let mut one_sent = 0;
 
+    fn run(
+        mut regs: HashMap<char, i64>,
+        mut pos: i64,
+        lines: &Vec<&str>,
+        mut send: VecDeque<i64>,
+        mut receive: VecDeque<i64>,
+    ) -> Result<(HashMap<char, i64>, i64, VecDeque<i64>, VecDeque<i64>, u32), Box<dyn Error>> {
+        let mut sent = 0;
+        loop {
+            if pos < 0 || pos >= lines.len() as i64 {
+                Err("Jumped outside of range")?
+            }
+            let line = lines[pos as usize];
+            let mut split = line.split(" ");
+            let op = split.next().unwrap();
+            let reg_or_val = split.next().unwrap();
+            let reg = reg_or_val.chars().next().unwrap();
+            let x = get_val(&regs, reg_or_val);
+            let val = get_val(&regs, split.next().unwrap_or("0"));
+
+            match op {
+                "snd" => {
+                    //from0to1.push_back(x);
+                    send.push_back(x);
+                    sent += 1;
+                }
+                "set" => {
+                    regs.insert(reg, val);
+                }
+                "add" => {
+                    regs.insert(reg, x + val);
+                }
+                "mul" => {
+                    regs.insert(reg, x * val);
+                }
+                "mod" => {
+                    regs.insert(reg, x % val);
+                }
+                "rcv" => {
+                    if receive.is_empty() {
+                        break;
+                    }
+                    let rcv = receive.pop_front().unwrap();
+                    regs.insert(reg, rcv);
+                }
+                "jgz" => {
+                    if x > 0 {
+                        pos += val;
+                        continue;
+                    }
+                }
+                _ => Err(format!("Invalid instruction: {}", line))?,
+            }
+            pos += 1;
+        }
+        return Ok((regs, pos, send, receive, sent));
+    }
+
     loop {
         // Program 0
-        loop {
-            if pos0 < 0 || pos0 >= lines.len() as i64 {
-                Err("Jumped outside of range")?
-            }
-            let line = lines[pos0 as usize];
-            let mut split = line.split(" ");
-            let op = split.next().unwrap();
-            let reg_or_val = split.next().unwrap();
-            let reg = reg_or_val.chars().next().unwrap();
-            let x = get_val(&regs0, reg_or_val);
-            let val = get_val(&regs0, split.next().unwrap_or("0"));
+        let (new_regs0, new_pos0, new_from0to1, new_from1to0, _) =
+            run(regs0, pos0, &lines, from0to1, from1to0)?;
+        regs0 = new_regs0;
+        pos0 = new_pos0;
+        from0to1 = new_from0to1;
+        from1to0 = new_from1to0;
 
-            match op {
-                "snd" => {
-                    from0to1.push_back(x);
-                }
-                "set" => {
-                    regs0.insert(reg, val);
-                }
-                "add" => {
-                    regs0.insert(reg, x + val);
-                }
-                "mul" => {
-                    regs0.insert(reg, x * val);
-                }
-                "mod" => {
-                    regs0.insert(reg, x % val);
-                }
-                "rcv" => {
-                    if from1to0.is_empty() {
-                        break;
-                    }
-                    let rcv = from1to0.pop_front().unwrap();
-                    regs0.insert(reg, rcv);
-                }
-                "jgz" => {
-                    if x > 0 {
-                        pos0 += val;
-                        continue;
-                    }
-                }
-                _ => Err(format!("Invalid instruction: {}", line))?,
-            }
-            pos0 += 1;
-        }
-
-        // Program 1
-        loop {
-            if pos1 < 0 || pos1 >= lines.len() as i64 {
-                Err("Jumped outside of range")?
-            }
-            let line = lines[pos1 as usize];
-            let mut split = line.split(" ");
-            let op = split.next().unwrap();
-            let reg_or_val = split.next().unwrap();
-            let reg = reg_or_val.chars().next().unwrap();
-            let x = get_val(&regs1, reg_or_val);
-            let val = get_val(&regs1, split.next().unwrap_or("0"));
-
-            match op {
-                "snd" => {
-                    from1to0.push_back(x);
-                    one_sent += 1;
-                }
-                "set" => {
-                    regs1.insert(reg, val);
-                }
-                "add" => {
-                    regs1.insert(reg, x + val);
-                }
-                "mul" => {
-                    regs1.insert(reg, x * val);
-                }
-                "mod" => {
-                    regs1.insert(reg, x % val);
-                }
-                "rcv" => {
-                    if from0to1.is_empty() {
-                        break;
-                    }
-                    let rcv = from0to1.pop_front().unwrap();
-                    regs1.insert(reg, rcv);
-                }
-                "jgz" => {
-                    if x > 0 {
-                        pos1 += val;
-                        continue;
-                    }
-                }
-                _ => Err(format!("Invalid instruction: {}", line))?,
-            }
-            pos1 += 1;
-        }
+        let (new_regs1, new_pos1, new_from1to0, new_from0to1, sent) =
+            run(regs1, pos1, &lines, from1to0, from0to1)?;
+        regs1 = new_regs1;
+        pos1 = new_pos1;
+        from1to0 = new_from1to0;
+        from0to1 = new_from0to1;
+        one_sent += sent;
 
         if from0to1.is_empty() && from1to0.is_empty() {
             break;
