@@ -42,18 +42,20 @@ fn main() {
     let input = read_input(2017, day).unwrap();
     let fun = get_fun(day, part).unwrap();
     let start = std::time::Instant::now();
-    let inp = if day == 19 {
-        input.as_str()
-    } else {
-        input.trim()
-    };
-    let result = fun(inp).unwrap();
+    let result = fun(input.as_str()).unwrap();
     let duration = start.elapsed();
     println!("Result ({:?}): {}", duration, result);
 }
 
 fn read_input(year: u16, day: u8) -> std::io::Result<String> {
-    return std::fs::read_to_string(format!("../input/{}/{}.txt", year, day));
+    let s = std::fs::read_to_string(format!("../input/{}/{}.txt", year, day))?;
+    // trim() interferes with day 19, so only remove trailing newline, if it exists
+    if s.ends_with('\n') {
+        let mut chars = s.chars();
+        chars.next_back();
+        return Ok(chars.collect());
+    }
+    return Ok(s);
 }
 
 type DayFunc = fn(&str) -> Result<String, Box<dyn Error>>;
@@ -64,7 +66,7 @@ fn run_all() -> Result<(), Box<dyn Error>> {
         for part in 1..3 {
             let fun_opt = get_fun(day, part);
             if let Some(fun) = fun_opt {
-                let result = fun(input.trim())?;
+                let result = fun(input.as_str())?;
                 println!("2017-{}-{}: {}", day, part, result);
             }
         }
@@ -147,15 +149,9 @@ mod tests {
             let part = id_split.next().unwrap().parse::<u8>().unwrap();
 
             let input = read_input(year, day).unwrap();
-
             let fun = get_fun(day, part).unwrap();
-            let bla = if day == 19 {
-                input.as_str()
-            } else {
-                input.trim()
-            };
-            let result = fun(bla).unwrap();
-            assert_eq!(result, expected);
+            let result = fun(input.as_str()).unwrap();
+            assert_eq!(result, expected, "2017-{}-{}", day, part);
         }
     }
 }
