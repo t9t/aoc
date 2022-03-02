@@ -1,3 +1,5 @@
+use std::error::Error;
+
 mod day1;
 mod day10;
 mod day11;
@@ -62,6 +64,10 @@ fn main() {
     ];
     let args: Vec<String> = std::env::args().collect();
 
+    if args.len() == 1 {
+        run_all(&funs).unwrap();
+        return;
+    }
     if args.len() != 3 {
         println!("Usage:");
         println!("\t{} <day> <part>", args[0]);
@@ -82,4 +88,21 @@ fn main() {
 
 fn read_input(year: u16, day: u8) -> std::io::Result<String> {
     return std::fs::read_to_string(format!("../input/{}/{}.txt", year, day));
+}
+
+type DayFunc = fn(&str) -> Result<String, Box<dyn Error>>;
+
+fn run_all(funs: &[DayFunc]) -> Result<(), Box<dyn Error>> {
+    for day in 1..26 {
+        let input = read_input(2017, day)?;
+        for part in 1..3 {
+            let idx = (((day - 1) * 2) + part - 1) as usize;
+            if idx < funs.len() {
+                let fun = funs[(((day - 1) * 2) + part - 1) as usize];
+                let result = fun(input.trim())?;
+                println!("2017-{}-{}: {}", day, part, result);
+            }
+        }
+    }
+    return Ok(());
 }
