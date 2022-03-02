@@ -22,7 +22,68 @@ mod day9;
 /*mod newday*/
 
 fn main() {
-    let funs = [
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() == 1 {
+        run_all().unwrap();
+        return;
+    }
+
+    if args.len() != 3 {
+        println!("Usage:");
+        println!("\t{} <day> <part>", args[0]);
+        std::process::exit(1);
+    }
+
+    let day = args[1].parse::<u8>().unwrap();
+    let part = args[2].parse::<u8>().unwrap();
+
+    println!("Running Year: 2017; Day: {}; Part: {}", day, part);
+    let input = read_input(2017, day).unwrap();
+    let fun = get_fun(day, part).unwrap();
+    let start = std::time::Instant::now();
+    let inp = if day == 19 {
+        input.as_str()
+    } else {
+        input.trim()
+    };
+    let result = fun(inp).unwrap();
+    let duration = start.elapsed();
+    println!("Result ({:?}): {}", duration, result);
+}
+
+fn read_input(year: u16, day: u8) -> std::io::Result<String> {
+    return std::fs::read_to_string(format!("../input/{}/{}.txt", year, day));
+}
+
+type DayFunc = fn(&str) -> Result<String, Box<dyn Error>>;
+
+fn run_all() -> Result<(), Box<dyn Error>> {
+    for day in 1..26 {
+        let input = read_input(2017, day)?;
+        for part in 1..3 {
+            let fun_opt = get_fun(day, part);
+            if let Some(fun) = fun_opt {
+                let result = fun(input.trim())?;
+                println!("2017-{}-{}: {}", day, part, result);
+            }
+        }
+    }
+    return Ok(());
+}
+
+fn get_fun(day: u8, part: u8) -> Option<DayFunc> {
+    let funs = all_funs();
+    let idx = (((day - 1) * 2) + part - 1) as usize;
+    return if idx < funs.len() {
+        Some(funs[idx])
+    } else {
+        return None;
+    };
+}
+
+fn all_funs() -> Vec<DayFunc> {
+    return vec![
         day1::part1,
         day1::part2,
         day2::part1,
@@ -62,47 +123,39 @@ fn main() {
         day19::part1,
         day19::part2, /*newday*/
     ];
-    let args: Vec<String> = std::env::args().collect();
-
-    if args.len() == 1 {
-        run_all(&funs).unwrap();
-        return;
-    }
-    if args.len() != 3 {
-        println!("Usage:");
-        println!("\t{} <day> <part>", args[0]);
-        std::process::exit(1);
-    }
-
-    let day = args[1].parse::<u8>().unwrap();
-    let part = args[2].parse::<u8>().unwrap();
-
-    println!("Running Year: 2017; Day: {}; Part: {}", day, part);
-    let input = read_input(2017, day).unwrap();
-    let fun = funs[(((day - 1) * 2) + part - 1) as usize];
-    let start = std::time::Instant::now();
-    let result = fun(input.as_str()).unwrap();
-    let duration = start.elapsed();
-    println!("Result ({:?}): {}", duration, result);
 }
 
-fn read_input(year: u16, day: u8) -> std::io::Result<String> {
-    return std::fs::read_to_string(format!("../input/{}/{}.txt", year, day));
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-type DayFunc = fn(&str) -> Result<String, Box<dyn Error>>;
-
-fn run_all(funs: &[DayFunc]) -> Result<(), Box<dyn Error>> {
-    for day in 1..26 {
-        let input = read_input(2017, day)?;
-        for part in 1..3 {
-            let idx = (((day - 1) * 2) + part - 1) as usize;
-            if idx < funs.len() {
-                let fun = funs[(((day - 1) * 2) + part - 1) as usize];
-                let result = fun(input.trim())?;
-                println!("2017-{}-{}: {}", day, part, result);
+    #[test]
+    #[ignore] // use cargo test test_all to run
+    fn test_all() {
+        let results = std::fs::read_to_string("../input/2017/results.txt").unwrap();
+        for line in results.lines() {
+            if line == "" {
+                continue;
             }
+
+            let mut line_split = line.split(": ");
+            let id = line_split.next().unwrap();
+            let expected = line_split.next().unwrap();
+            let mut id_split = id.split("-");
+            let year = id_split.next().unwrap().parse::<u16>().unwrap();
+            let day = id_split.next().unwrap().parse::<u8>().unwrap();
+            let part = id_split.next().unwrap().parse::<u8>().unwrap();
+
+            let input = read_input(year, day).unwrap();
+
+            let fun = get_fun(day, part).unwrap();
+            let bla = if day == 19 {
+                input.as_str()
+            } else {
+                input.trim()
+            };
+            let result = fun(bla).unwrap();
+            assert_eq!(result, expected);
         }
     }
-    return Ok(());
 }
