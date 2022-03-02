@@ -109,9 +109,6 @@ fn to_str(programs: Vec<char>) -> String {
 mod tests {
     use super::*;
 
-    static INPUT: &str = "bla
-bla";
-
     #[test]
     fn test_parse_moves() {
         assert_eq!(
@@ -148,10 +145,5 @@ bla";
         let moves = vec![Move::Spin(1), Move::Exchange(3, 4), Move::Partner('e', 'b')];
         let programs = vec!['a', 'b', 'c', 'd', 'e'];
         assert_eq!(dance(programs, &moves), vec!['b', 'a', 'e', 'd', 'c']);
-    }
-
-    #[test]
-    fn test_part2() {
-        assert_eq!(part2(INPUT).unwrap(), "5521");
     }
 }
