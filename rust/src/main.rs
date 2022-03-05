@@ -19,6 +19,7 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
+mod day20;
 /*mod newday*/
 
 fn main() {
@@ -123,7 +124,9 @@ fn all_funs() -> Vec<DayFunc> {
         day18::part1,
         day18::part2,
         day19::part1,
-        day19::part2, /*newday*/
+        day19::part2,
+        day20::part1,
+        day20::part2, /*newday*/
     ];
 }
 
