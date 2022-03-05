@@ -1,4 +1,6 @@
 use std::error::Error;
+use std::io::{self, Write};
+use std::time::{Duration, Instant};
 
 mod day1;
 mod day10;
@@ -12,6 +14,8 @@ mod day17;
 mod day18;
 mod day19;
 mod day2;
+mod day20;
+mod day21;
 mod day3;
 mod day4;
 mod day5;
@@ -19,31 +23,35 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
-mod day20;
-mod day21;
 /*mod newday*/
+
+// https://unix.stackexchange.com/a/26592
+const CLEAR_LINE: &str = "\u{001b}[2K\r";
+const YEAR: u16 = 2017;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len() == 1 {
-        run_all().unwrap();
+    if args.len() == 2 && (args[1] == "all" || args[1] == "results" || args[1] == "benchmark") {
+        run_all(&args[1]).unwrap();
         return;
     }
 
     if args.len() != 3 {
         println!("Usage:");
         println!("\t{} <day> <part>", args[0]);
+        println!("\tor:");
+        println!("\t{} <all | benchmark | results>", args[0]);
         std::process::exit(1);
     }
 
     let day = args[1].parse::<u8>().unwrap();
     let part = args[2].parse::<u8>().unwrap();
 
-    println!("Running Year: 2017; Day: {}; Part: {}", day, part);
-    let input = read_input(2017, day).unwrap();
+    println!("Running Year: {}; Day: {}; Part: {}", YEAR, day, part);
+    let input = read_input(YEAR, day).unwrap();
     let fun = get_fun(day, part).unwrap();
-    let start = std::time::Instant::now();
+    let start = Instant::now();
     let result = fun(input.as_str()).unwrap();
     let duration = start.elapsed();
     println!("Result ({:?}): {}", duration, result);
@@ -62,18 +70,86 @@ fn read_input(year: u16, day: u8) -> std::io::Result<String> {
 
 type DayFunc = fn(&str) -> Result<String, Box<dyn Error>>;
 
-fn run_all() -> Result<(), Box<dyn Error>> {
+fn run_all(mode: &str) -> Result<(), Box<dyn Error>> {
+    let benchmark_mode = mode == "benchmark";
+    let results_mode = mode == "results";
+
+    if !results_mode {
+        println!("| Year | Day | Part | Output                           | Run time   |");
+        println!("|------|-----|------|----------------------------------|------------|");
+    }
+
+    let total = all_funs().len();
+    let begin = Instant::now();
+    let mut total_time = Duration::ZERO;
+    let mut results: Vec<(u16, u8, u8, String, Duration)> = Vec::new();
     for day in 1..26 {
-        let input = read_input(2017, day)?;
+        let input = read_input(YEAR, day)?;
         for part in 1..3 {
             let fun_opt = get_fun(day, part);
             if let Some(fun) = fun_opt {
+                if !results_mode {
+                    print!(
+                        "{} {:}/{:2}; {:?}; day: {}; part: {}",
+                        CLEAR_LINE,
+                        (day - 1) * 2 + part,
+                        total,
+                        begin.elapsed(),
+                        day,
+                        part
+                    );
+                    flush_stdout();
+                }
+
+                let start = Instant::now();
                 let result = fun(input.as_str())?;
-                println!("2017-{}-{}: {}", day, part, result);
+                let took = start.elapsed();
+                total_time += took;
+
+                if benchmark_mode {
+                    results.push((YEAR, day, part, result, took));
+                } else if results_mode {
+                    println!("{}-{}-{}: {}", YEAR, day, part, result);
+                } else {
+                    println!(
+                        "{}| {:4} | {:3} | {:4} | {:>32} | {:>10} |",
+                        CLEAR_LINE,
+                        YEAR,
+                        day,
+                        part,
+                        result,
+                        format!("{:?}", took)
+                    );
+                }
+                flush_stdout();
             }
         }
     }
+
+    if benchmark_mode {
+        print!("{}", CLEAR_LINE);
+        results.sort_by(|a, b| a.4.cmp(&b.4));
+        for (year, day, part, result, took) in results {
+            println!(
+                "| {:4} | {:3} | {:4} | {:>32} | {:>10} |",
+                year,
+                day,
+                part,
+                result,
+                format!("{:?}", took)
+            );
+        }
+    }
+
+    if !results_mode {
+        println!("\nTotal run time: {:?}", total_time);
+    }
+
     return Ok(());
+}
+
+fn flush_stdout() {
+    io::stdout().flush().unwrap();
 }
 
 fn get_fun(day: u8, part: u8) -> Option<DayFunc> {
@@ -138,9 +214,9 @@ mod tests {
     use super::*;
 
     #[test]
-    #[ignore] // use cargo test test_all to run
+    #[ignore] // use "cargo test test_all" to run
     fn test_all() {
-        let results = std::fs::read_to_string("../input/2017/results.txt").unwrap();
+        let results = std::fs::read_to_string(format!("../input/{}/results.txt", YEAR)).unwrap();
         for line in results.lines() {
             if line == "" {
                 continue;
@@ -157,7 +233,7 @@ mod tests {
             let input = read_input(year, day).unwrap();
             let fun = get_fun(day, part).unwrap();
             let result = fun(input.as_str()).unwrap();
-            assert_eq!(result, expected, "2017-{}-{}", day, part);
+            assert_eq!(result, expected, "{}-{}-{}", YEAR, day, part);
         }
     }
 }
