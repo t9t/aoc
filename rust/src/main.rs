@@ -24,6 +24,7 @@ mod day7;
 mod day8;
 mod day9;
 mod day22;
+mod day23;
 /*mod newday*/
 
 // https://unix.stackexchange.com/a/26592
@@ -208,7 +209,9 @@ fn all_funs() -> Vec<DayFunc> {
         day21::part1,
         day21::part2,
         day22::part1,
-        day22::part2, /*newday*/
+        day22::part2,
+        day23::part1,
+        day23::part2, /*newday*/
     ];
 }
 
