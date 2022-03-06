@@ -5,8 +5,70 @@ pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
     return Ok(format!("{}", burst_and_count_infections(s, 10_000)?));
 }
 
-pub fn part2(_s: &str) -> Result<String, Box<dyn Error>> {
-    return Ok(format!("{}", 5521));
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
+    return Ok(format!("{}", burst_and_count_infections2(s, 10000000)?));
+}
+
+#[derive(Debug, PartialEq)]
+enum NodeState {
+    Clean,
+    Weakened,
+    Infected,
+    Flagged,
+}
+
+impl NodeState {
+    fn next(&self) -> NodeState {
+        return match *self {
+            NodeState::Clean => NodeState::Weakened,
+            NodeState::Weakened => NodeState::Infected,
+            NodeState::Infected => NodeState::Flagged,
+            NodeState::Flagged => NodeState::Clean,
+        };
+    }
+}
+
+fn burst_and_count_infections2(s: &str, count: u32) -> Result<u32, Box<dyn Error>> {
+    let mut nodes: HashMap<(i32, i32), NodeState> = HashMap::new();
+
+    for (y, line) in s.lines().enumerate() {
+        for (x, c) in line.chars().enumerate() {
+            if c == '#' {
+                nodes.insert((x as i32, y as i32), NodeState::Infected);
+            } else {
+                nodes.insert((x as i32, y as i32), NodeState::Clean);
+            }
+        }
+    }
+
+    let mut infections = 0;
+    let mut x = s.lines().next().unwrap().len() as i32 / 2;
+    let mut y = s.lines().count() as i32 / 2;
+    let mut dir = Direction::Up;
+
+    for _ in 0..count {
+        let state = nodes.get(&(x, y)).unwrap_or(&NodeState::Clean);
+
+        dir = match &state {
+            NodeState::Clean => dir.turn_left(),
+            NodeState::Weakened => dir, // Does not turn
+            NodeState::Infected => dir.turn_right(),
+            NodeState::Flagged => dir.reverse(),
+        };
+
+        let new_state = state.next();
+        if new_state == NodeState::Infected {
+            infections += 1;
+        }
+
+        nodes.insert((x, y), new_state);
+
+        let (dx, dy) = dir.delta();
+        x += dx;
+        y += dy;
+    }
+
+    return Ok(infections);
 }
 
 fn burst_and_count_infections(s: &str, count: u32) -> Result<u32, Box<dyn Error>> {
@@ -23,7 +85,7 @@ fn burst_and_count_infections(s: &str, count: u32) -> Result<u32, Box<dyn Error>
     let mut infections = 0;
     let mut x = s.lines().next().unwrap().len() as i32 / 2;
     let mut y = s.lines().count() as i32 / 2;
-    let mut dir = Direction::UP;
+    let mut dir = Direction::Up;
 
     for _ in 0..count {
         let infected = *nodes.get(&(x, y)).unwrap_or(&false);
@@ -46,37 +108,45 @@ fn burst_and_count_infections(s: &str, count: u32) -> Result<u32, Box<dyn Error>
 
 #[derive(Debug)]
 enum Direction {
-    UP,
-    RIGHT,
-    DOWN,
-    LEFT,
+    Up,
+    Right,
+    Down,
+    Left,
 }
 
 impl Direction {
     fn delta(&self) -> (i32, i32) {
         match *self {
-            Direction::UP => (0, -1),
-            Direction::RIGHT => (1, 0),
-            Direction::DOWN => (0, 1),
-            Direction::LEFT => (-1, 0),
+            Direction::Up => (0, -1),
+            Direction::Right => (1, 0),
+            Direction::Down => (0, 1),
+            Direction::Left => (-1, 0),
         }
     }
 
     fn turn_left(&self) -> Direction {
         match *self {
-            Direction::UP => Direction::LEFT,
-            Direction::RIGHT => Direction::UP,
-            Direction::DOWN => Direction::RIGHT,
-            Direction::LEFT => Direction::DOWN,
+            Direction::Up => Direction::Left,
+            Direction::Right => Direction::Up,
+            Direction::Down => Direction::Right,
+            Direction::Left => Direction::Down,
         }
     }
 
     fn turn_right(&self) -> Direction {
         match *self {
-            Direction::UP => Direction::RIGHT,
-            Direction::RIGHT => Direction::DOWN,
-            Direction::DOWN => Direction::LEFT,
-            Direction::LEFT => Direction::UP,
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+        }
+    }
+    fn reverse(&self) -> Direction {
+        match *self {
+            Direction::Up => Direction::Down,
+            Direction::Right => Direction::Left,
+            Direction::Down => Direction::Up,
+            Direction::Left => Direction::Right,
         }
     }
 }
@@ -97,7 +167,8 @@ mod tests {
     }
 
     #[test]
-    fn test_part2() {
-        assert_eq!(part2(INPUT).unwrap(), "5521");
+    fn test_burst_and_count_infections2() {
+        assert_eq!(burst_and_count_infections2(INPUT, 100).unwrap(), 26);
+        assert_eq!(burst_and_count_infections2(INPUT, 10_000).unwrap(), 2608);
     }
 }
