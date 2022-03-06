@@ -9,8 +9,6 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
     return Ok(format!("{}", enhance_multi_and_count_on(s, 18)?));
 }
 
-type Picture = Vec<String>;
-
 fn enhance_multi_and_count_on(s: &str, num: u32) -> Result<u32, Box<dyn Error>> {
     let enhancements = parse_and_expand_rules(s)?;
     let mut picture = split(".#.\n..#\n###");
@@ -20,7 +18,7 @@ fn enhance_multi_and_count_on(s: &str, num: u32) -> Result<u32, Box<dyn Error>> 
     return Ok(count_on(&picture));
 }
 
-fn count_on(picture: &Picture) -> u32 {
+fn count_on(picture: &Vec<String>) -> u32 {
     let mut count = 0;
     for row in picture {
         for c in row.chars() {
@@ -32,15 +30,20 @@ fn count_on(picture: &Picture) -> u32 {
     return count;
 }
 
-fn enhance_multi(picture: &Picture, enhancements: &HashMap<Picture, Picture>, num: u32) -> Picture {
+fn enhance_multi(
+    picture: &Vec<String>,
+    enhancements: &HashMap<String, String>,
+    num: u32,
+) -> Vec<String> {
     let mut pic = picture.clone();
     for _ in 0..num {
         pic = enhance(&pic, enhancements);
     }
+
     return pic;
 }
 
-fn enhance(picture: &Picture, enhancements: &HashMap<Picture, Picture>) -> Picture {
+fn enhance(picture: &Vec<String>, enhancements: &HashMap<String, String>) -> Vec<String> {
     if picture.len() % 2 != 0 && picture.len() % 3 != 0 {
         panic!("Invalid picture");
     }
@@ -48,12 +51,12 @@ fn enhance(picture: &Picture, enhancements: &HashMap<Picture, Picture>) -> Pictu
     let section_size = if picture.len() % 2 == 0 { 2 } else { 3 };
     let sections = divide_picture(&picture, section_size);
 
-    let x: Vec<Vec<&Picture>> = sections
+    let x: Vec<Vec<&str>> = sections
         .iter()
         .map(|row| {
             row.iter()
-                .map(|p| enhancements.get(p).unwrap())
-                .collect::<Vec<&Picture>>()
+                .map(|p| enhancements.get(p).unwrap() as &str)
+                .collect::<Vec<&str>>()
         })
         .collect();
 
@@ -62,27 +65,26 @@ fn enhance(picture: &Picture, enhancements: &HashMap<Picture, Picture>) -> Pictu
     return stitched;
 }
 
-fn stitch(sections: &Vec<Vec<&Picture>>) -> Picture {
-    let mut ret = Picture::new();
-    let section_size = sections[0][0].len();
-    for section_row in sections {
-        for j in 0..section_size {
-            let mut new_line = Vec::new();
-            for section_col in section_row {
-                new_line.push(section_col[j].clone());
-            }
-            let x = new_line.join("");
-            ret.push(x);
-        }
-    }
-    return ret;
+fn stitch(sections: &Vec<Vec<&str>>) -> Vec<String> {
+    let section_size = sections[0][0].lines().count();
+    return sections
+        .iter()
+        .flat_map(|row| {
+            (0..section_size).map(|j| {
+                row.iter()
+                    .map(|col| col.lines().nth(j).unwrap())
+                    .collect::<Vec<&str>>()
+                    .join("")
+            })
+        })
+        .collect::<Vec<String>>();
 }
 
-fn divide_picture(picture: &Picture, size: usize) -> Vec<Vec<Picture>> {
-    let mut divisions: Vec<Vec<Picture>> = Vec::new();
+fn divide_picture(picture: &Vec<String>, size: usize) -> Vec<Vec<String>> {
+    let mut divisions: Vec<Vec<String>> = Vec::new();
     let sections = picture.len() / size;
     for sub_row in 0..sections {
-        let mut sections_row: Vec<Picture> = Vec::new();
+        let mut sections_row: Vec<String> = Vec::new();
         for sub_col in 0..sections {
             let min_row = sub_row * size;
             let max_row = sub_row * size + size;
@@ -91,10 +93,9 @@ fn divide_picture(picture: &Picture, size: usize) -> Vec<Vec<Picture>> {
 
             let section = picture[min_row..max_row]
                 .iter()
-                .map(|line| {
-                    return String::from(&line[min_col..max_col]);
-                })
-                .collect::<Picture>();
+                .map(|line| &line[min_col..max_col])
+                .collect::<Vec<&str>>()
+                .join("\n");
             sections_row.push(section);
         }
         divisions.push(sections_row);
@@ -102,8 +103,8 @@ fn divide_picture(picture: &Picture, size: usize) -> Vec<Vec<Picture>> {
     return divisions;
 }
 
-fn parse_and_expand_rules(s: &str) -> Result<HashMap<Picture, Picture>, Box<dyn Error>> {
-    let mut enhancements: HashMap<Picture, Picture> = HashMap::new();
+fn parse_and_expand_rules(s: &str) -> Result<HashMap<String, String>, Box<dyn Error>> {
+    let mut enhancements: HashMap<String, String> = HashMap::new();
     for line in s.lines() {
         let mut parts = line.split(" => ");
         let left = parts.next().ok_or(format!("Invalid line: {}", line))?;
@@ -114,17 +115,17 @@ fn parse_and_expand_rules(s: &str) -> Result<HashMap<Picture, Picture>, Box<dyn 
 
         let all_inputs = all_orientations(input.as_str());
         for xformed_input in all_inputs {
-            enhancements.insert(split(&xformed_input), split(&output));
+            enhancements.insert(xformed_input, output.clone());
         }
     }
     return Ok(enhancements);
 }
 
-fn split(s: &str) -> Picture {
-    return s.lines().map(|x| String::from(x)).collect::<Picture>();
+fn split(s: &str) -> Vec<String> {
+    return s.lines().map(|x| String::from(x)).collect::<Vec<String>>();
 }
 
-fn all_orientations(s: &str) -> Picture {
+fn all_orientations(s: &str) -> Vec<String> {
     let mut orientations = Vec::new();
     for flip in [flip_no, flip_h, flip_v] {
         let flipped = flip(s);
