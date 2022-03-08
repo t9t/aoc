@@ -56,8 +56,80 @@ pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
     return Ok(format!("{}", muls));
 }
 
-pub fn part2(_s: &str) -> Result<String, Box<dyn Error>> {
-    return Ok(format!("{}", 5521));
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
+    // Find instructions that I think can be different in various inputs
+    // Assumption: all other instructions are the same, and in the same place
+
+    fn extract_num(line: &str, prefix: &str) -> Result<i32, std::num::ParseIntError> {
+        return line.strip_prefix(prefix).unwrap().parse::<i32>();
+    }
+
+    let mut first_sub_b = true;
+    let mut b: i32 = 0;
+    let mut c: i32 = 0;
+    let mut bd: i32 = 0;
+
+    for line in s.lines() {
+        if line.starts_with("set b") {
+            b = extract_num(line, "set b ")?;
+        } else if line.starts_with("mul b") {
+            b *= extract_num(line, "mul b ")?;
+        } else if line.starts_with("sub c") {
+            c = b - extract_num(line, "sub c ")?;
+        } else if line.starts_with("sub b") {
+            if first_sub_b {
+                b -= extract_num(line, "sub b ")?;
+                first_sub_b = false;
+            } else {
+                bd = -extract_num(line, "sub b ")?;
+            }
+        }
+    }
+    let mut h = 0; // number of occurrences found
+    let mut d: i32; // factor one
+    let mut e: i32; // factor two
+    let mut f: i32; // has a product been found
+
+    loop {
+        f = 1;
+        d = 2;
+        loop {
+            e = 2;
+            loop {
+                let p = d * e;
+                if p > b {
+                    // d*e will never == b any more
+                    break;
+                }
+                if p == b {
+                    f = 0;
+                    // break because it will never reset to 1
+                    break;
+                }
+                e += 1;
+                if e == b {
+                    break;
+                }
+            }
+            d += 1;
+            if d == b {
+                break;
+            }
+            if f == 0 {
+                // break because it will never reset to 1
+                break;
+            }
+        }
+        if f == 0 {
+            h += 1;
+        }
+        if (b - c) == 0 {
+            break;
+        }
+        b += bd;
+    }
+
+    return Ok(format!("{}", h));
 }
 
 #[cfg(test)]
