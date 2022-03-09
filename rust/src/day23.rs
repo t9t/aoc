@@ -133,19 +133,4 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    static INPUT: &str = "bla
-bla";
-
-    #[test]
-    fn test_part1() {
-        assert_eq!(part1(INPUT).unwrap(), "1337");
-    }
-
-    #[test]
-    fn test_part2() {
-        assert_eq!(part2(INPUT).unwrap(), "5521");
-    }
-}
+mod tests {}
