@@ -2,20 +2,11 @@ use std::collections::HashMap;
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
-    let mut map: HashMap<&str, Vec<&str>> = HashMap::new();
-    for line in s.lines() {
-        let ab = line.split(" -> ").collect::<Vec<&str>>();
-        let programs: Vec<&str> = if ab.len() == 2 {
-            ab[1].split(", ").collect()
-        } else {
-            Vec::new()
-        };
-        map.insert(ab[0].split(" ").collect::<Vec<&str>>()[0], programs);
-    }
+    let map = parse_programs(s)?;
 
-    for (lk, lv) in &map {
+    for (lk, (_, lv)) in &map {
         if !lv.is_empty() {
-            if !map.values().any(|rv| rv.contains(lk)) {
+            if !map.values().any(|(_, rv)| rv.contains(lk)) {
                 return Ok(format!("{}", lk));
             }
         }
@@ -25,75 +16,65 @@ pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
 }
 
 pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
-    let mut weights: HashMap<&str, u32> = HashMap::new();
-    let mut map: HashMap<&str, Vec<&str>> = HashMap::new();
-    for line in s.lines() {
-        let ab = line.split(" -> ").collect::<Vec<&str>>();
-        let programs: Vec<&str> = if ab.len() == 2 {
-            ab[1].split(", ").collect()
-        } else {
-            Vec::new()
-        };
-        let name = ab[0].split(" ").next().unwrap();
-        let weight = ab[0].split("(").nth(1).unwrap().replace(")", "");
-        map.insert(name, programs);
-        weights.insert(name, weight.parse::<u32>()?);
-    }
+    let programs = parse_programs(s)?;
 
-    let mut cache: HashMap<String, u32> = HashMap::new();
-    fn get_weight(
-        name: &str,
-        programs: &HashMap<&str, Vec<&str>>,
-        weights: &HashMap<&str, u32>,
-        cache: &mut HashMap<String, u32>,
-    ) -> u32 {
-        let cached = cache.get(name);
-        if cached.is_some() {
-            return *cached.unwrap();
-        }
-        let mut weight = *weights.get(name).unwrap();
-        let subprograms = programs.get(name).unwrap();
+    fn get_weight(name: &str, programs: &HashMap<&str, (u32, Vec<&str>)>) -> u32 {
+        let (weight, subprograms) = programs.get(name).unwrap();
+        let mut total_weight = *weight;
         for subprogram in subprograms {
-            weight += get_weight(subprogram, programs, weights, cache);
+            total_weight += get_weight(subprogram, programs);
         }
-
-        cache.insert(String::from(name), weight);
-        return weight;
+        return total_weight;
     }
 
-    let mut min_discrep = u32::MAX;
-    for (_, subprograms) in &map {
+    let mut min_discrepancy = u32::MAX;
+    for (_, (_, subprograms)) in &programs {
         if subprograms.len() < 3 {
             // I've no idea how to find out which the "right" weight is when there are only 2 subprograms
             continue;
         }
-        let mut weight_map: HashMap<u32, Vec<&str>> = HashMap::new();
+
+        let mut weight_map = HashMap::new();
         for subprogram in subprograms {
-            let sw = get_weight(subprogram, &map, &weights, &mut cache);
-            let c = weight_map.get_mut(&sw);
-            if c.is_some() {
-                c.unwrap().push(subprogram);
-            } else {
-                let mut x: Vec<&str> = Vec::new();
-                x.push(subprogram);
-                weight_map.insert(sw, x);
-            }
+            weight_map
+                .entry(get_weight(subprogram, &programs))
+                .or_insert_with(Vec::new)
+                .push(subprogram);
         }
-        if weight_map.len() != 1 {
-            let common = weight_map.iter().max_by(|l, r| l.1.len().cmp(&r.1.len()));
-            let discrep = weight_map.iter().min_by(|l, r| l.1.len().cmp(&r.1.len()));
-            let mut yay = *common.unwrap().0;
-            let ohno = discrep.unwrap().1[0];
-            let kek = map.get(ohno).unwrap();
-            for bur in kek {
-                let zw = get_weight(bur, &map, &weights, &mut cache);
-                yay -= zw;
-            }
-            min_discrep = min_discrep.min(yay);
+
+        if weight_map.len() == 1 {
+            continue;
         }
+
+        let common_weight = weight_map.iter().max_by(|l, r| l.1.len().cmp(&r.1.len()));
+        let mut target = *common_weight.unwrap().0;
+        let discrepancy = weight_map.iter().min_by(|l, r| l.1.len().cmp(&r.1.len()));
+        let (_, subsubprograms) = programs.get(discrepancy.unwrap().1[0]).unwrap();
+        for subsubprogram in subsubprograms {
+            let zw = get_weight(subsubprogram, &programs);
+            target -= zw;
+        }
+        min_discrepancy = min_discrepancy.min(target);
     }
 
-    return Ok(format!("{}", min_discrep));
+    return Ok(format!("{}", min_discrepancy));
+}
+
+fn parse_programs(s: &str) -> Result<HashMap<&str, (u32, Vec<&str>)>, Box<dyn Error>> {
+    let mut programs: HashMap<&str, (u32, Vec<&str>)> = HashMap::new();
+    for line in s.lines() {
+        let ab = line.split(" -> ").collect::<Vec<&str>>();
+        let subprograms: Vec<&str> = if ab.len() == 2 {
+            ab[1].split(", ").collect()
+        } else {
+            Vec::new()
+        };
+        let weight_str = ab[0].split("(").nth(1).unwrap().replace(")", "");
+        let name = ab[0].split(" ").collect::<Vec<&str>>()[0];
+        programs.insert(name, (weight_str.parse::<u32>()?, subprograms));
+    }
+
+    return Ok(programs);
 }
 
 #[cfg(test)]
