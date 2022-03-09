@@ -26,24 +26,30 @@ pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
     return Ok(format!("{}", buffer[pos]));
 }
 
-pub fn part2(_s: &str) -> Result<String, Box<dyn Error>> {
-    return Ok(format!("{}", 5521));
+pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
+    let steps = s.parse::<usize>()?;
+
+    let mut pos = 0;
+    let mut result = 0;
+
+    for insertion in 1..50_000_000 {
+        let next_pos = pos + steps;
+        let wrapped = next_pos % insertion;
+        if wrapped == 0 {
+            result = insertion;
+        }
+        pos = wrapped + 1;
+    }
+
+    return Ok(format!("{}", result));
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    static INPUT: &str = "bla
-bla";
-
     #[test]
     fn test_part1() {
         assert_eq!(part1("3").unwrap(), "638");
-    }
-
-    #[test]
-    fn test_part2() {
-        assert_eq!(part2(INPUT).unwrap(), "5521");
     }
 }
