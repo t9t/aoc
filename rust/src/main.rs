@@ -16,6 +16,10 @@ mod day19;
 mod day2;
 mod day20;
 mod day21;
+mod day22;
+mod day23;
+mod day24;
+mod day25;
 mod day3;
 mod day4;
 mod day5;
@@ -23,9 +27,6 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
-mod day22;
-mod day23;
-mod day24;
 /*mod newday*/
 
 // https://unix.stackexchange.com/a/26592
@@ -64,9 +65,7 @@ fn read_input(year: u16, day: u8) -> std::io::Result<String> {
     let s = std::fs::read_to_string(format!("../input/{}/{}.txt", year, day))?;
     // trim() interferes with day 19, so only remove trailing newline, if it exists
     if s.ends_with('\n') {
-        let mut chars = s.chars();
-        chars.next_back();
-        return Ok(chars.collect());
+        return Ok(String::from(&s[0..s.len() - 1]));
     }
     return Ok(s);
 }
@@ -214,7 +213,8 @@ fn all_funs() -> Vec<DayFunc> {
         day23::part1,
         day23::part2,
         day24::part1,
-        day24::part2, /*newday*/
+        day24::part2,
+        day25::part1, /*newday*/
     ];
 }
 
