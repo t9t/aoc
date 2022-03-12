@@ -43,30 +43,13 @@ pub fn part2(s: &str) -> Result<String, Box<dyn Error>> {
         components.push((left, right));
     }
 
-    let all = build_all(0, &Vec::new(), &components);
-    let mut max_len = 0;
-    let mut max_str = 0;
-    for bridge in all {
-        let len = bridge.len();
-        let strength = bridge.iter().map(|(l, r)| l + r).sum();
-
-        if len > max_len {
-            max_len = len;
-            max_str = strength;
-        } else if len == max_len && strength > max_str {
-            max_str = strength;
-        }
-    }
-
+    let (_, max_str) = max_len_strength(0, 0, 0, &components);
     return Ok(format!("{}", max_str));
 }
 
-fn build_all(
-    port: u32,
-    so_far: &Vec<(u32, u32)>,
-    others: &Vec<(u32, u32)>,
-) -> Vec<Vec<(u32, u32)>> {
-    let mut bridges: Vec<Vec<(u32, u32)>> = Vec::new();
+fn max_len_strength(port: u32, len: u32, strength: u32, others: &Vec<(u32, u32)>) -> (u32, u32) {
+    let mut max_len = len;
+    let mut max_str: u32 = strength;
 
     for (i, &(other_left, other_right)) in others.iter().enumerate() {
         if other_left != port && other_right != port {
@@ -81,15 +64,16 @@ fn build_all(
             other_left
         };
 
-        let mut next_bridge = so_far.clone();
-        next_bridge.push((other_left, other_right));
-        let all_next = build_all(next_port, &next_bridge, &next_others);
-        bridges.push(next_bridge);
-        for n in all_next {
-            bridges.push(n);
+        let next_strength = strength + other_left + other_right;
+        let (ml, ms) = max_len_strength(next_port, len + 1, next_strength, &next_others);
+        if ml > max_len {
+            max_len = ml;
+            max_str = ms;
+        } else if ml == max_len && ms > max_str {
+            max_str = ms;
         }
     }
-    return bridges;
+    return (max_len, max_str);
 }
 
 #[cfg(test)]
