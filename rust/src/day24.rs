@@ -1,40 +1,36 @@
 use std::error::Error;
 
 pub fn part1(s: &str) -> Result<String, Box<dyn Error>> {
-    let mut starts = Vec::new();
-    let mut others = Vec::new();
+    let mut components = Vec::new();
 
     for line in s.lines() {
         let mut split = line.split("/");
         let left = split.next().unwrap().parse::<u32>()?;
         let right = split.next().unwrap().parse::<u32>()?;
-        if left == 0 || right == 0 {
-            starts.push((left, right));
-        } else {
-            others.push((left, right));
-        }
+        components.push((left, right));
     }
 
-    let mut max_sum = 0;
-    for &(left, right) in &starts {
-        max_sum = max_sum.max(calculate_max_sum(left, right, &others));
-    }
+    let max_sum = find_max_sum(0, &components);
 
     return Ok(format!("{}", max_sum));
 }
 
-fn calculate_max_sum(left: u32, right: u32, others: &Vec<(u32, u32)>) -> u32 {
-    let mut max_next = 0;
+fn find_max_sum(port: u32, others: &Vec<(u32, u32)>) -> u32 {
+    let mut max_sum = 0;
     for (i, &(other_left, other_right)) in others.iter().enumerate() {
-        if other_left == left || other_left == right || other_right == left || other_right == right
-        {
+        if other_left == port || other_right == port {
             let mut next_others = others.clone();
             next_others.remove(i);
-            let next_sum = calculate_max_sum(other_left, other_right, &next_others);
-            max_next = max_next.max(next_sum);
+            let next_port = if other_left == port {
+                other_right
+            } else {
+                other_left
+            };
+            let sum = find_max_sum(next_port, &next_others) + other_left + other_right;
+            max_sum = max_sum.max(sum);
         }
     }
-    return left + right + max_next;
+    return max_sum;
 }
 
 pub fn part2(_s: &str) -> Result<String, Box<dyn Error>> {
