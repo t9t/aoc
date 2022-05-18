@@ -55,31 +55,33 @@ func Day6Part1(input string) (string, error) {
 	for x := -maxDelta; x <= maxDelta; x++ {
 		for y := -maxDelta; y <= maxDelta; y++ {
 			pos := xAndY{x: x, y: y}
-			closest, hasClosest := closests[pos]
+			e := entry{distance: -1}
 
 			for i, coord := range coords {
 				d := abs(x-coord.x) + abs(y-coord.y)
-				if !hasClosest {
-					closest = entry{distance: d, index: i, shared: false}
-					closests[pos] = closest
-					hasClosest = true
+				if e.distance == -1 {
+					e.distance = d
+					e.index = i
 					continue
 				}
 
-				if d > closest.distance {
+				if d > e.distance {
 					continue
 				}
 
-				if d < closest.distance {
-					closest = entry{distance: d, index: i, shared: false}
-					closests[pos] = closest
+				if d < e.distance {
+					e.distance = d
+					e.index = i
+					e.shared = false
 					continue
 				}
 
-				if d == closest.distance {
-					closest.shared = true
-					closests[pos] = closest
+				if d == e.distance {
+					e.shared = true
 				}
+			}
+			if !e.shared {
+				closests[pos] = e
 			}
 		}
 	}
