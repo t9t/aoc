@@ -20,14 +20,18 @@ func main() {
 		fatalUsage("")
 	}
 
-	if len(args) == 2 && (args[0] == "benchmark" || args[0] == "all" || args[0] == "results") {
-		year := mustParseIntArg("year", args[1])
-		err := runAll(args[0], year)
-		if err != nil {
-			fmt.Printf("\nError running all: %v\n", err)
-			os.Exit(4)
+	if len(args) == 2 {
+		if args[0] == "benchmark" || args[0] == "all" || args[0] == "results" {
+			year := mustParseIntArg("year", args[1])
+			err := runAll(args[0], year)
+			if err != nil {
+				fmt.Printf("\nError running all: %v\n", err)
+				os.Exit(4)
+			}
+			return
+		} else {
+			fatalUsage("")
 		}
-		return
 	}
 
 	year := mustParseIntArg("year", args[0])
