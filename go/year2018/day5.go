@@ -38,26 +38,32 @@ func Day5Part2(input string) (string, error) {
 
 func reduce(input string, discardUpper byte) int {
 	diff := byte('a') - byte('A')
-	discardLower := discardUpper + diff
-	kept := make([]byte, 0, len(input))
+	discardLower := byte(0)
+	if discardUpper != 0 {
+		discardLower = discardUpper + diff
+	}
+	kept := make([]byte, len(input))
+	ptr := 0
 	for _, b := range []byte(input) {
-		if discardUpper != 0 && (b == discardUpper || b == discardLower) {
+		if b == discardUpper || b == discardLower {
 			continue
 		}
 
-		if len(kept) == 0 {
-			kept = append(kept, b)
+		if ptr == 0 {
+			kept[ptr] = b
+			ptr++
 			continue
 		}
 
-		lastPos := len(kept) - 1
+		lastPos := ptr - 1
 		last := kept[lastPos]
 
 		if last+diff == b || last-diff == b {
-			kept = kept[:lastPos]
+			ptr--
 		} else {
-			kept = append(kept, b)
+			kept[ptr] = b
+			ptr++
 		}
 	}
-	return len(kept)
+	return ptr
 }
