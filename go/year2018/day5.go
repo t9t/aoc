@@ -38,20 +38,16 @@ func Day5Part2(input string) (string, error) {
 
 func reduce(input string) int {
 	diff := byte('a') - byte('A')
-	for {
-		anyReduced := false
-		for i := 0; i < len(input)-1; i++ {
-			left := input[i]
-			right := input[i+1]
+	for i := 0; i < len(input)-1; i++ {
+		left := input[i]
+		right := input[i+1]
 
-			if left+diff == right || left-diff == right {
-				input = input[:i] + input[i+2:]
-				anyReduced = true
-				i++
+		if left+diff == right || left-diff == right {
+			input = input[:i] + input[i+2:]
+			i -= 2
+			if i < -1 {
+				i = -1
 			}
-		}
-		if !anyReduced {
-			break
 		}
 	}
 	return len(input)
