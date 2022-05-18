@@ -1,8 +1,8 @@
 package year2018
 
 import (
-	"fmt"
 	"strconv"
+	"strings"
 )
 
 func init() {
@@ -10,6 +10,33 @@ func init() {
 }
 
 func Day5Part1(input string) (string, error) {
+	return strconv.Itoa(reduce(input)), nil
+}
+
+func Day5Part2(input string) (string, error) {
+	diff := byte('a') - byte('A')
+	inputWithout := func(upper byte) string {
+		sb := strings.Builder{}
+		lower := upper + diff
+		for _, c := range []byte(input) {
+			if c != upper && c != lower {
+				sb.WriteByte(c)
+			}
+		}
+		return sb.String()
+	}
+
+	shortest := len(input)
+	for b := byte('A'); b <= byte('Z'); b++ {
+		l := reduce(inputWithout(b))
+		if l < shortest {
+			shortest = l
+		}
+	}
+	return strconv.Itoa(shortest), nil
+}
+
+func reduce(input string) int {
 	diff := byte('a') - byte('A')
 	for {
 		anyReduced := false
@@ -27,10 +54,5 @@ func Day5Part1(input string) (string, error) {
 			break
 		}
 	}
-
-	return strconv.Itoa(len(input)), nil
-}
-
-func Day5Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 5 part 2 not implemented")
+	return len(input)
 }

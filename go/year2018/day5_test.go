@@ -18,7 +18,5 @@ func Test_Day5Part1(t *testing.T) {
 }
 
 func Test_Day5Part2(t *testing.T) {
-	basicMultiTest(t, Day5Part2, []testInput{
-		{"", ""},
-	})
+	basicTest(t, Day5Part2, "dabAcCaCBAcCcaDA", "4")
 }
