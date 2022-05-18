@@ -3,6 +3,7 @@ package main
 import (
 	"aoc/registry"
 	"aoc/year2015"
+	_ "aoc/year2018"
 	"fmt"
 	"os"
 	"sort"
@@ -15,18 +16,18 @@ func main() {
 	year2015.RegisterAll()
 
 	args := os.Args[1:]
+	if len(args) != 2 && len(args) != 3 {
+		fatalUsage("")
+	}
 
-	if len(args) == 1 && (args[0] == "benchmark" || args[0] == "all" || args[0] == "results") {
-		err := runAll(args[0])
+	if len(args) == 2 && (args[0] == "benchmark" || args[0] == "all" || args[0] == "results") {
+		year := mustParseIntArg("year", args[1])
+		err := runAll(args[0], year)
 		if err != nil {
 			fmt.Printf("\nError running all: %v\n", err)
 			os.Exit(4)
 		}
 		return
-	}
-
-	if len(args) != 3 {
-		fatalUsage("")
 	}
 
 	year := mustParseIntArg("year", args[0])
@@ -56,11 +57,11 @@ func main() {
 	fmt.Printf("Result (%v): %v\n", time.Since(start), result)
 }
 
-func runAll(mode string) error {
+func runAll(mode string, year int) error {
 	modeBenchmark := mode == "benchmark"
 	modeResults := mode == "results"
 
-	sortedSelectors := registry.AllSelectorsSorted()
+	sortedSelectors := registry.AllSelectorsSorted(year)
 
 	type result struct {
 		output  string
@@ -145,8 +146,11 @@ func fatalUsage(errorMessage string) {
 		fmt.Println(errorMessage)
 		fmt.Println()
 	}
-	fmt.Println("Usage:")
-	fmt.Printf("\t%s < <year> <day> <part> | all | benchmark | results >\n", os.Args[0])
+	fmt.Println("Usage (one of):")
+	fmt.Printf("\t%s <year> <day> <part>\n", os.Args[0])
+	fmt.Printf("\t%s all <year>\n", os.Args[0])
+	fmt.Printf("\t%s results <year>\n", os.Args[0])
+	fmt.Printf("\t%s benchmark <year>\n", os.Args[0])
 
 	os.Exit(1)
 }

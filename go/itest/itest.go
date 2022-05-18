@@ -1,10 +1,7 @@
-//go:build itest
-
 package itest
 
 import (
 	"aoc/registry"
-	"aoc/year2015"
 	"fmt"
 	"os"
 	"regexp"
@@ -18,10 +15,8 @@ type result struct {
 	result          string
 }
 
-func Test_2015(t *testing.T) {
-	year2015.RegisterAll()
-
-	resultData, err := os.ReadFile("../../input/2015/results.txt")
+func runTest(t *testing.T, year int) {
+	resultData, err := os.ReadFile(fmt.Sprintf("../../input/%d/results.txt", year))
 	if err != nil {
 		t.Fatalf("could not read result data: %v", err)
 	}

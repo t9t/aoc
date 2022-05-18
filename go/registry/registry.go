@@ -20,6 +20,11 @@ func MustRegister(year, day, part int, function Execution) {
 	}
 }
 
+func MustRegisterPair(year, day int, part1 Execution, part2 Execution) {
+	MustRegister(year, day, 1, part1)
+	MustRegister(year, day, 2, part2)
+}
+
 func Register(year, day, part int, function Execution) error {
 	selector := Selector{Year: year, Day: day, Part: part}
 	if _, ok := Map[selector]; ok {
@@ -35,12 +40,12 @@ func Get(year, day, part int) (Execution, bool) {
 	return function, ok
 }
 
-func AllSelectorsSorted() []Selector {
-	all := make([]Selector, len(Map))
-	i := 0
+func AllSelectorsSorted(year int) []Selector {
+	all := make([]Selector, 0)
 	for selector := range Map {
-		all[i] = selector
-		i++
+		if selector.Year == year {
+			all = append(all, selector)
+		}
 	}
 
 	sort.Slice(all, func(i, j int) bool {

@@ -2,4 +2,4 @@
 
 set -eu
 
-./run.sh benchmark
+./run.sh benchmark $*
