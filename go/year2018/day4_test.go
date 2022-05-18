@@ -4,8 +4,7 @@ import (
 	"testing"
 )
 
-func Test_Day4Part1(t *testing.T) {
-	basicTest(t, Day4Part1, `
+var day4input = `
 [1518-11-01 00:00] Guard #10 begins shift
 [1518-11-05 00:03] Guard #99 begins shift
 [1518-11-03 00:05] Guard #10 begins shift
@@ -23,9 +22,12 @@ func Test_Day4Part1(t *testing.T) {
 [1518-11-05 00:45] falls asleep
 [1518-11-04 00:36] falls asleep
 [1518-11-02 00:40] falls asleep
-`, "240")
+`
+
+func Test_Day4Part1(t *testing.T) {
+	basicTest(t, Day4Part1, day4input, "240")
 }
 
 func Test_Day4Part2(t *testing.T) {
-	basicTest(t, Day4Part2, "", "")
+	basicTest(t, Day4Part2, day4input, "4455")
 }

@@ -14,6 +14,14 @@ func init() {
 }
 
 func Day4Part1(input string) (string, error) {
+	return day4(input, true)
+}
+
+func Day4Part2(input string) (string, error) {
+	return day4(input, false)
+}
+
+func day4(input string, part1 bool) (string, error) {
 	timeRe := regexp.MustCompile(`(?m)\[1518-(\d+)-(\d+) (\d+):(\d+)\] .+`)
 	actionRe := regexp.MustCompile(`(?m).+\] (Guard #(\d+) begins shift|falls asleep|wakes up)`)
 
@@ -45,6 +53,8 @@ func Day4Part1(input string) (string, error) {
 	timeTables, totals := make(map[int]map[int]int), make(map[int]int)
 	currentGuard := 0
 	var fellAsleep time.Time
+	maxOnAnyMinute, maxOnAnyMinuteGuardId, maxOnAnyMinuteMinute := 0, 0, 0
+	maxSleeping, maxSleepingGuardId := 0, 0
 	for _, line := range lines {
 		timeMatches := timeRe.FindStringSubmatch(line)
 		actionMatches := actionRe.FindStringSubmatch(line)
@@ -77,8 +87,21 @@ func Day4Part1(input string) (string, error) {
 		} else if actionMatches[1] == "wakes up" {
 			timeTable := timeTables[currentGuard]
 			for !fellAsleep.Equal(timestamp) {
-				timeTable[fellAsleep.Minute()]++
-				totals[currentGuard]++
+				m := fellAsleep.Minute()
+				minuteSleepCount := timeTable[m] + 1
+				timeTable[m] = minuteSleepCount
+				if minuteSleepCount > maxOnAnyMinute {
+					maxOnAnyMinute = minuteSleepCount
+					maxOnAnyMinuteGuardId = currentGuard
+					maxOnAnyMinuteMinute = m
+				}
+
+				guardTotalSleepCount := totals[currentGuard] + 1
+				totals[currentGuard] = guardTotalSleepCount
+				if guardTotalSleepCount > maxSleeping {
+					maxSleeping = guardTotalSleepCount
+					maxSleepingGuardId = currentGuard
+				}
 				fellAsleep = fellAsleep.Add(time.Minute)
 			}
 		} else {
@@ -87,25 +110,17 @@ func Day4Part1(input string) (string, error) {
 
 	}
 
-	maxCount, mostSleepingGuardId := 0, 0
-	for guardId, count := range totals {
-		if count > maxCount {
-			maxCount = count
-			mostSleepingGuardId = guardId
+	if part1 {
+		maxCount, mostSleepingMinute := 0, 0
+		for minute, count := range timeTables[maxSleepingGuardId] {
+			if count > maxCount {
+				maxCount = count
+				mostSleepingMinute = minute
+			}
 		}
+
+		return strconv.Itoa(maxSleepingGuardId * mostSleepingMinute), nil
 	}
 
-	maxCount, mostSleepingMinute := 0, 0
-	for minute, count := range timeTables[mostSleepingGuardId] {
-		if count > maxCount {
-			maxCount = count
-			mostSleepingMinute = minute
-		}
-	}
-
-	return strconv.Itoa(mostSleepingGuardId * mostSleepingMinute), nil
-}
-
-func Day4Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 4 part 2 not implemented")
+	return strconv.Itoa(maxOnAnyMinuteMinute * maxOnAnyMinuteGuardId), nil
 }
