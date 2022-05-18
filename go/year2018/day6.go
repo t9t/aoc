@@ -110,5 +110,58 @@ func Day6Part1(input string) (string, error) {
 }
 
 func Day6Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 6 part 2 not implemented")
+	return day6Part2(input, 10_000)
+}
+
+func day6Part2(input string, maxTotalDistance int) (string, error) {
+	type xAndY struct{ x, y int }
+
+	abs := func(n int) int {
+		if n < 0 {
+			return -n
+		}
+		return n
+	}
+
+	coords := make([]xAndY, 0)
+	for _, line := range strings.Split(input, "\n") {
+		parts := strings.Split(line, ", ")
+		x, err := strconv.Atoi(parts[0])
+		if err != nil {
+			return "", fmt.Errorf("invalid line %s: %w", line, err)
+		}
+		y, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return "", fmt.Errorf("invalid line %s: %w", line, err)
+		}
+		coords = append(coords, xAndY{x: x, y: y})
+	}
+
+	maxDelta := 0
+	for i, a := range coords {
+		for j, b := range coords {
+			if i == j {
+				continue
+			}
+			d := abs(a.x-b.x) + abs(a.y-b.y)
+			if d > maxDelta {
+				maxDelta = d
+			}
+		}
+	}
+
+	regionSize := 0
+	for x := -maxDelta; x <= maxDelta; x++ {
+		for y := -maxDelta; y <= maxDelta; y++ {
+			totalDistance := 0
+			for _, coord := range coords {
+				totalDistance += abs(x-coord.x) + abs(y-coord.y)
+			}
+			if totalDistance < maxTotalDistance {
+				regionSize++
+			}
+		}
+	}
+
+	return strconv.Itoa(regionSize), nil
 }

@@ -9,7 +9,7 @@ func Test_Day6Part1(t *testing.T) {
 }
 
 func Test_Day6Part2(t *testing.T) {
-	basicMultiTest(t, Day6Part2, []testInput{
-		{"", ""},
-	})
+	basicTest(t, func(input string) (string, error) {
+		return day6Part2(input, 32)
+	}, "1, 1\n1, 6\n8, 3\n3, 4\n5, 5\n8, 9", "16")
 }
