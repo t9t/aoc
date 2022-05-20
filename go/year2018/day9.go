@@ -1,7 +1,6 @@
 package year2018
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 )
@@ -11,6 +10,14 @@ func init() {
 }
 
 func Day9Part1(input string) (string, error) {
+	return day9(input, 1)
+}
+
+func Day9Part2(input string) (string, error) {
+	return day9(input, 100)
+}
+
+func day9(input string, factor int) (string, error) {
 	type marble struct{ cw, ccw int }
 
 	matches := regexp.MustCompile(`(\d+) players; last marble is worth (\d+) points`).FindStringSubmatch(input)
@@ -23,6 +30,7 @@ func Day9Part1(input string) (string, error) {
 		return "", err
 	}
 
+	highest *= factor
 	marbles := map[int]*marble{0: {cw: 0, ccw: 0}}
 	currentNumber, playerNumber := 0, 1
 	scores := make([]int, playerCount+1)
@@ -68,8 +76,4 @@ func Day9Part1(input string) (string, error) {
 	}
 
 	return strconv.Itoa(highScore), nil
-}
-
-func Day9Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 9 part 2 not implemented")
 }
