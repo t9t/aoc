@@ -13,7 +13,8 @@ func Test_Day11Part1(t *testing.T) {
 
 func Test_Day11Part2(t *testing.T) {
 	basicMultiTest(t, Day11Part2, []testInput{
-		{"", ""},
+		{"18", "90,269,16"},
+		{"42", "232,251,12"},
 	})
 }
 
