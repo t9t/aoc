@@ -8,7 +8,10 @@ import (
 )
 
 func Test_Day11Part1(t *testing.T) {
-	basicTest(t, Day11Part1, "18", "33,45")
+	basicMultiTest(t, Day11Part1, []testInput{
+		{"18", "33,45"},
+		{"42", "21,61"},
+	})
 }
 
 func Test_Day11Part2(t *testing.T) {

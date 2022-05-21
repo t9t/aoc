@@ -34,40 +34,41 @@ func Day11Part1(input string) (string, error) {
 }
 
 func Day11Part2(input string) (string, error) {
-	type xAndY struct{ x, y int }
 	gridSerialNumber, err := strconv.Atoi(input)
 	if err != nil {
 		return "", fmt.Errorf("invalid input: %w", err)
 	}
 
-	powerLevelMap := make(map[xAndY]int)
-
 	var day11 day11
-	maxPowerLevel, maxX, maxY, theSquareSize := 0, 0, 0, 0
-	// TODO: valid square sizes are from 1x1 to 300x300
-	for squareSize := 10; squareSize <= 16; squareSize++ {
-		for x := 1; x <= 301-squareSize; x++ {
-			for y := 1; y <= 301-squareSize; y++ {
-				pl := 0
-				for dx := 0; dx <= squareSize-1; dx++ {
-					for dy := 0; dy <= squareSize-1; dy++ {
-						xy := xAndY{x: x + dx, y: y + dy}
-						if spl, found := powerLevelMap[xy]; found {
-							pl += spl
-						} else {
-							spl := day11.calculatePowerLevel(x+dx, y+dy, gridSerialNumber)
-							powerLevelMap[xy] = spl
-							pl += spl
-						}
-					}
-				}
+	// https://en.wikipedia.org/wiki/Summed-area_table
+	summedAreaTable := make([][]int, 301)
+	summedAreaTable[0] = make([]int, 301)
+	for y := 1; y <= 300; y++ {
+		summedAreaTable[y] = make([]int, 301)
+		for x := 1; x <= 300; x++ {
+			pl := day11.calculatePowerLevel(x, y, gridSerialNumber)
+			t2 := summedAreaTable[y-1][x]
+			t3 := summedAreaTable[y][x-1]
+			t4 := summedAreaTable[y-1][x-1]
+			summedAreaTable[y][x] = pl + t2 + t3 - t4
+		}
+	}
+
+	maxPowerLevel, maxX, maxY, matchingSquareSize := 0, 0, 0, 0
+	for squareSize := 1; squareSize <= 300; squareSize++ {
+		for y := 1; y <= 300-squareSize; y++ {
+			for x := 1; x <= 300-squareSize; x++ {
+				pl := summedAreaTable[y+squareSize][x+squareSize] + summedAreaTable[y][x] - summedAreaTable[y+squareSize][x] - summedAreaTable[y][x+squareSize]
+
 				if pl > maxPowerLevel {
-					maxPowerLevel, maxX, maxY, theSquareSize = pl, x, y, squareSize
+					maxPowerLevel, maxX, maxY, matchingSquareSize = pl, x, y, squareSize
 				}
 			}
 		}
 	}
-	return fmt.Sprintf("%d,%d,%d", maxX, maxY, theSquareSize), nil
+
+	// TODO: I don't understand why I have to do +1 :(
+	return fmt.Sprintf("%d,%d,%d", maxX+1, maxY+1, matchingSquareSize), nil
 }
 
 type day11 struct{}
