@@ -165,5 +165,6 @@ func readInputData(year, day int) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("cannot read data for %d/%d: %w", year, day, err)
 	}
-	return strings.TrimSpace(string(data)), nil
+	// 2018/13 requires leading & trailing spaces
+	return strings.TrimRight(string(data), "\r\n"), nil
 }
