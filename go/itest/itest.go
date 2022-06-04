@@ -39,7 +39,7 @@ func runTest(t *testing.T, year int) {
 			if err != nil {
 				t.Fatalf("could not read input file %q: %v", inputFile, err)
 			}
-			input := strings.TrimSpace(string(inputData))
+			input := strings.TrimRight(string(inputData), "\r\n")
 
 			result, err := execution(input)
 			if err != nil {

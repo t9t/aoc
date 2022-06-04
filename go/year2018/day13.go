@@ -11,186 +11,56 @@ func init() {
 }
 
 func Day13Part1(input string) (string, error) {
-	type cart struct{ current, next byte }
-
-	carts := make([]*cart, 0)
-	initialMap := make([][]byte, 0)
-	cartMap := make([][]int, 0)
-
-	for _, line := range strings.Split(input, "\n") {
-		initialMapRow := make([]byte, 0)
-		cartMapRow := make([]int, 0)
-		for _, c := range []byte(line) {
-			in := c
-			if in == '>' || in == '<' {
-				in = '-'
-			} else if in == '^' || in == 'v' {
-				in = '|'
-			}
-			initialMapRow = append(initialMapRow, in)
-
-			if c != in {
-				cartNum := len(carts)
-				carts = append(carts, &cart{current: c, next: 'l'})
-				cartMapRow = append(cartMapRow, cartNum)
-			} else {
-				cartMapRow = append(cartMapRow, -1)
-			}
-		}
-		initialMap = append(initialMap, initialMapRow)
-		cartMap = append(cartMap, cartMapRow)
-	}
-
-	copyCartMap := func() [][]int {
-		newMap := make([][]int, len(cartMap))
-		for y, line := range cartMap {
-			newRow := make([]int, len(line))
-			for x := range line {
-				newRow[x] = -1
-			}
-			newMap[y] = newRow
-		}
-		return newMap
-	}
-
-	for i := 0; i < 1000; i++ {
-		newCartMap := copyCartMap()
-		for y, line := range initialMap {
-			for x := range line {
-				cartNum := cartMap[y][x]
-				if cartNum == -1 {
-					continue
-				}
-				cart := carts[cartNum]
-				dx, dy := 0, 0
-				if cart.current == '<' {
-					dx = -1
-				} else if cart.current == '>' {
-					dx = 1
-				} else if cart.current == '^' {
-					dy = -1
-				} else if cart.current == 'v' {
-					dy = 1
-				}
-				ny, nx := y+dy, x+dx
-				if newCartMap[ny][nx] != -1 || cartMap[ny][nx] != -1 {
-					return fmt.Sprintf("%d,%d", nx, ny), nil
-				}
-				newCartMap[ny][nx] = cartNum
-
-				nextC := initialMap[y+dy][x+dx]
-
-				if nextC == '\\' {
-					if cart.current == '<' {
-						cart.current = '^'
-					} else if cart.current == '>' {
-						cart.current = 'v'
-					} else if cart.current == '^' {
-						cart.current = '<'
-					} else if cart.current == 'v' {
-						cart.current = '>'
-					} else {
-						panic("")
-					}
-				} else if nextC == '/' {
-					if cart.current == '<' {
-						cart.current = 'v'
-					} else if cart.current == '>' {
-						cart.current = '^'
-					} else if cart.current == '^' {
-						cart.current = '>'
-					} else if cart.current == 'v' {
-						cart.current = '<'
-					} else {
-						panic("")
-					}
-				} else if nextC == '+' {
-					if cart.next == 'l' {
-						cart.next = 's'
-						if cart.current == '<' {
-							cart.current = 'v'
-						} else if cart.current == '>' {
-							cart.current = '^'
-						} else if cart.current == '^' {
-							cart.current = '<'
-						} else if cart.current == 'v' {
-							cart.current = '>'
-						} else {
-							panic("")
-						}
-					} else if cart.next == 's' {
-						cart.next = 'r'
-						// do not turn
-					} else if cart.next == 'r' {
-						cart.next = 'l'
-						if cart.current == '<' {
-							cart.current = '^'
-						} else if cart.current == '>' {
-							cart.current = 'v'
-						} else if cart.current == '^' {
-							cart.current = '>'
-						} else if cart.current == 'v' {
-							cart.current = '<'
-						} else {
-							panic("")
-						}
-					} else {
-						panic("")
-					}
-				} else if nextC != '-' && nextC != '|' {
-					panic("")
-				}
-			}
-		}
-		cartMap = newCartMap
-	}
-
-	return "", fmt.Errorf("no answer found after 1000 iterations")
+	return day13(input, true)
 }
 
 func Day13Part2(input string) (string, error) {
+	return day13(input, false)
+}
+
+func day13(input string, returnFirstCrash bool) (string, error) {
 	type cart struct {
-		counter, current, next byte
-		x, y                   int
-		alive                  bool
+		current, next byte
+		x, y          int
 	}
 
 	carts := make([]*cart, 0)
-	initialMap := make([][]byte, 0)
-	counter := byte(1)
+	tracks := make([][]byte, 0)
 
 	for y, line := range strings.Split(input, "\n") {
-		initialMapRow := make([]byte, 0)
-		for x, c := range []byte(line) {
-			in := c
-			if in == '>' || in == '<' {
-				in = '-'
-			} else if in == '^' || in == 'v' {
-				in = '|'
+		row := []byte(line)
+		for x, c := range row {
+			if c == '>' || c == '<' {
+				row[x] = '-'
+			} else if c == '^' || c == 'v' {
+				row[x] = '|'
 			}
-			initialMapRow = append(initialMapRow, in)
-
-			if c != in {
-				carts = append(carts, &cart{counter: counter, current: c, next: 'l', x: x, y: y, alive: true})
-				counter++
+			if c != row[x] {
+				carts = append(carts, &cart{current: c, next: 'l', x: x, y: y})
 			}
 		}
-		initialMap = append(initialMap, initialMapRow)
+		tracks = append(tracks, row)
 	}
 
-	findAt := func(carts []*cart, x, y int) (found bool, c *cart) {
-		for _, c = range carts {
-			if !c.alive {
-				continue
-			}
-			if c.x == x && c.y == y {
-				return true, c
+	backSlash := map[byte]byte{'<': '^', '>': 'v', '^': '<', 'v': '>'}
+	forwardSlash := map[byte]byte{'<': 'v', '>': '^', '^': '>', 'v': '<'}
+	rightTurns := map[byte]byte{'<': '^', '>': 'v', '^': '>', 'v': '<'}
+	leftTurns := map[byte]byte{'<': 'v', '>': '^', '^': '<', 'v': '>'}
+
+	maxIter := 100_000
+	for i := 0; i < maxIter; i++ {
+		oldCarts := carts
+		carts = carts[0:0]
+		for _, cart := range oldCarts {
+			if cart != nil {
+				carts = append(carts, cart)
 			}
 		}
-		return false, c
-	}
 
-	for i := 0; i < 1_000_000; i++ {
+		if len(carts) == 1 {
+			return fmt.Sprintf("%d,%d", carts[0].x, carts[0].y), nil
+		}
+
 		sort.Slice(carts, func(i, j int) bool {
 			l, r := carts[i], carts[j]
 			if l.y == r.y {
@@ -198,109 +68,56 @@ func Day13Part2(input string) (string, error) {
 			}
 			return l.y < r.y
 		})
-		for _, cart := range carts {
-			if !cart.alive {
+
+		for ci, cart := range carts {
+			if cart == nil {
 				continue
 			}
-			x, y := cart.x, cart.y
-			dx, dy := 0, 0
-			if cart.current == '<' {
-				dx = -1
-			} else if cart.current == '>' {
-				dx = 1
-			} else if cart.current == '^' {
-				dy = -1
+
+			nx, ny := cart.x, cart.y
+			if cart.current == '>' {
+				nx++
+			} else if cart.current == '<' {
+				nx--
 			} else if cart.current == 'v' {
-				dy = 1
+				ny++
+			} else if cart.current == '^' {
+				ny--
 			}
-			ny, nx := y+dy, x+dx
-			if otherFound, other := findAt(carts, nx, ny); otherFound {
-				fmt.Printf("~Crash @%d at %d,%d / %d,%d of %v and %v\n", i, x, y, nx, ny, cart, other)
-				cart.alive = false
-				other.alive = false
+
+			for oi, other := range carts {
+				if other != nil && other.x == nx && other.y == ny {
+					carts[ci], carts[oi] = nil, nil
+					if returnFirstCrash {
+						return fmt.Sprintf("%d,%d", nx, ny), nil
+					}
+				}
+			}
+			if carts[ci] == nil {
 				continue
 			}
+			cart.x, cart.y = nx, ny
 
-			nextC := initialMap[ny][nx]
-			cart.x = nx
-			cart.y = ny
-
-			if nextC == '\\' {
-				if cart.current == '<' {
-					cart.current = '^'
-				} else if cart.current == '>' {
-					cart.current = 'v'
-				} else if cart.current == '^' {
-					cart.current = '<'
-				} else if cart.current == 'v' {
-					cart.current = '>'
-				} else {
-					panic("")
-				}
-			} else if nextC == '/' {
-				if cart.current == '<' {
-					cart.current = 'v'
-				} else if cart.current == '>' {
-					cart.current = '^'
-				} else if cart.current == '^' {
-					cart.current = '>'
-				} else if cart.current == 'v' {
-					cart.current = '<'
-				} else {
-					panic("")
-				}
-			} else if nextC == '+' {
+			c := tracks[ny][nx]
+			if c == '\\' {
+				cart.current = backSlash[cart.current]
+			} else if c == '/' {
+				cart.current = forwardSlash[cart.current]
+			} else if c == '+' {
 				if cart.next == 'l' {
 					cart.next = 's'
-					if cart.current == '<' {
-						cart.current = 'v'
-					} else if cart.current == '>' {
-						cart.current = '^'
-					} else if cart.current == '^' {
-						cart.current = '<'
-					} else if cart.current == 'v' {
-						cart.current = '>'
-					} else {
-						panic("")
-					}
+					cart.current = leftTurns[cart.current]
 				} else if cart.next == 's' {
 					cart.next = 'r'
-					// do not turn
 				} else if cart.next == 'r' {
 					cart.next = 'l'
-					if cart.current == '<' {
-						cart.current = '^'
-					} else if cart.current == '>' {
-						cart.current = 'v'
-					} else if cart.current == '^' {
-						cart.current = '>'
-					} else if cart.current == 'v' {
-						cart.current = '<'
-					} else {
-						panic("")
-					}
-				} else {
-					panic("")
+					cart.current = rightTurns[cart.current]
 				}
-			} else if nextC != '-' && nextC != '|' {
-				panic(fmt.Sprintf("i: %d; nextC: #%c#; cart: %+v", i, nextC, cart))
+			} else if c != '-' && c != '|' {
+				panic(fmt.Sprintf("wrong turn c: %v", c))
 			}
-		}
-		aliveCount := 0
-		var aliveCart *cart
-		for _, c := range carts {
-			if c.alive {
-				aliveCart = c
-				aliveCount++
-				if aliveCount > 1 {
-					break
-				}
-			}
-		}
-		if aliveCount == 1 {
-			return fmt.Sprintf("%d,%d", aliveCart.x, aliveCart.y), nil
 		}
 	}
 
-	return "", fmt.Errorf("no answer found after 1000 iterations")
+	return "", fmt.Errorf("no answer found after %d iterations", maxIter)
 }
