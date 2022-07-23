@@ -13,7 +13,26 @@ func init() {
 }
 
 func Day15Part1(input string) (string, error) {
-	//input = "#######\n#.G...#\n#...EG#\n#.#.#G#\n#..G#E#\n#.....#\n#######"
+	_, r := day15Part2(input, 3, false)
+	return r, nil
+}
+
+func Day15Part2(input string) (string, error) {
+	i := 4
+	for {
+		//fmt.Printf("trying ap %d\n", i)
+		ok, r := day15Part2(input, i, true)
+		if ok {
+			return r, nil
+		}
+		i++
+		if i >= 50 {
+			panic("kaput")
+		}
+	}
+}
+
+func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
 	debug := false
 	type unit struct {
 		c    byte
@@ -27,15 +46,15 @@ func Day15Part1(input string) (string, error) {
 
 	findUnit := func(x, y int) *unit {
 		for _, u := range units {
-			if u.x == x && u.y == y {
+			if u.x == x && u.y == y && u.hp > 0 {
 				return u
 			}
 		}
 		return nil
 	}
 
-	drawGrid := func(caption string) {
-		if !debug {
+	drawGrid2 := func(caption string, do bool) {
+		if !debug || !do {
 			return
 		}
 		fmt.Println(caption)
@@ -69,6 +88,10 @@ func Day15Part1(input string) (string, error) {
 
 			fmt.Println()
 		}
+	}
+
+	drawGrid := func(caption string) {
+		drawGrid2(caption, debug)
 	}
 
 	for y, line := range strings.Split(input, "\n") {
@@ -121,16 +144,9 @@ func Day15Part1(input string) (string, error) {
 
 	drawGrid("Initially:")
 
-	rounds := 0
+	round := 0
 	for {
-		rounds++
-		newUnits := make([]*unit, 0)
-		for _, u := range units {
-			if u.hp > 0 {
-				newUnits = append(newUnits, u)
-			}
-		}
-		units = newUnits
+		round++
 
 		sort.Slice(units, func(i, j int) bool {
 			l, r := units[i], units[j]
@@ -152,40 +168,50 @@ func Day15Part1(input string) (string, error) {
 				target = 'G'
 			}
 
-			targets := make([]xAndY, 0)
 			shouldMove := true
-			func() {
-				for ty, tline := range grid {
-					for tx := range tline {
-						tc, tu := get(tx, ty)
-						if tc == target && tu.hp > 0 {
-							d := abs(ty-y) + abs(tx-x)
-							if d == 1 {
-								//panic("nope")
-								shouldMove = false
-								return
-							} else {
-								targets = append(targets, xAndY{x: tx, y: ty})
+			for _, a := range around(x, y) {
+				if _, t := get(a.x, a.y); t != nil {
+					if t.c == target && t.hp > 0 {
+						shouldMove = false
+					}
+				}
+			}
+
+			if shouldMove {
+
+				targets := make([]xAndY, 0)
+				func() {
+					for ty, tline := range grid {
+						for tx := range tline {
+							tc, tu := get(tx, ty)
+							if tc == target && tu.hp > 0 {
+								d := abs(ty-y) + abs(tx-x)
+								if d == 1 {
+									//panic("nope")
+									shouldMove = false
+									return
+								} else {
+									targets = append(targets, xAndY{x: tx, y: ty})
+								}
 							}
 						}
 					}
-				}
-			}()
+				}()
 
-			sort.Slice(targets, func(i, j int) bool {
-				l, r := targets[i], targets[j]
-				ldx, ldy := abs(x-l.x), abs(y-l.y)
-				rdx, rdy := abs(x-r.x), abs(y-r.y)
-				if ldy == rdy {
-					return ldx < rdx
-				}
-				return ldy < rdy
-			})
+				sort.Slice(targets, func(i, j int) bool {
+					l, r := targets[i], targets[j]
+					ldx, ldy := abs(x-l.x), abs(y-l.y)
+					rdx, rdy := abs(x-r.x), abs(y-r.y)
+					if ldy == rdy {
+						return ldx < rdx
+					}
+					return ldy < rdy
+				})
 
-			//fmt.Printf("  %dx%d %c; Targets: %d; Should move: %t\n", x, y, c, len(targets), shouldMove)
+				//fmt.Printf("  %dx%d %c; Targets: %d; Should move: %t\n", x, y, c, len(targets), shouldMove)
 
-			if shouldMove {
 				if len(targets) == 0 {
+					fmt.Printf("No targets exist for %dx%d %c %d\n", u.x, u.y, u.c, u.hp)
 					// No targets exist
 					score := 0
 					for sy, line := range grid {
@@ -195,8 +221,10 @@ func Day15Part1(input string) (string, error) {
 							}
 						}
 					}
-					drawGrid("Final")
-					return strconv.Itoa((rounds - 1) * score), nil
+					drawGrid2(fmt.Sprintf("Final (round %d)", round), true)
+					//fmt.Printf("bla bla %d\n", (rounds-2)*score)
+					fmt.Printf("Rounds: %d; score: %d\n", round, score)
+					return true, strconv.Itoa((round - 1) * score)
 				}
 
 				//shortest := math.MaxInt32
@@ -334,16 +362,24 @@ func Day15Part1(input string) (string, error) {
 				}
 			}
 			if toAttack != nil {
-				toAttack.hp -= 3
+				dmg := 3
+				if toAttack.c == 'G' {
+					dmg = ap
+				}
+				toAttack.hp -= dmg
+				if elfDeathIsLoss {
+					if toAttack.c == 'E' && toAttack.hp <= 0 {
+						drawGrid2(fmt.Sprintf("Elf died (round %d)", round), true)
+						// elf died
+						return false, ""
+					}
+				}
 				continue
 			}
 			///
 		}
 
-		drawGrid(fmt.Sprintf("After %d rounds:\n", rounds))
+		asdf := round > 46
+		drawGrid2(fmt.Sprintf("After %d rounds:\n", round), asdf)
 	}
-}
-
-func Day15Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 15 part 2 not implemented")
 }
