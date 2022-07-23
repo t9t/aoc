@@ -1,0 +1,22 @@
+package year2018
+
+import (
+	"testing"
+)
+
+func Test_Day15Part1(t *testing.T) {
+	basicMultiTest(t, Day15Part1, []testInput{
+		{"#######\n#.G...#\n#...EG#\n#.#.#G#\n#..G#E#\n#.....#\n#######", "27730"},
+		{"#######\n#G..#E#\n#E#E.E#\n#G.##.#\n#...#E#\n#...E.#\n#######", "36334"},
+		{"#######\n#E..EG#\n#.#G.E#\n#E.##E#\n#G..#.#\n#..E#.#\n#######", "39514"},
+		{"#######\n#E.G#.#\n#.#G..#\n#G.#.G#\n#G..#.#\n#...E.#\n#######", "27755"},
+		{"#######\n#.E...#\n#.#..G#\n#.###.#\n#E#G#G#\n#...#G#\n#######", "28944"},
+		{"#########\n#G......#\n#.E.#...#\n#..##..G#\n#...##..#\n#...#...#\n#.G...G.#\n#.....G.#\n#########", "18740"},
+	})
+}
+
+func Test_Day15Part2(t *testing.T) {
+	basicMultiTest(t, Day15Part2, []testInput{
+		{"", ""},
+	})
+}
