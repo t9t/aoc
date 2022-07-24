@@ -13,97 +13,53 @@ func init() {
 }
 
 func Day15Part1(input string) (string, error) {
-	_, r := day15Part2(input, 3, false)
-	return r, nil
+	_, outcome := day15Part2(input, 3, false)
+	return outcome, nil
 }
 
 func Day15Part2(input string) (string, error) {
-	i := 4
-	for {
-		//fmt.Printf("trying ap %d\n", i)
-		ok, r := day15Part2(input, i, true)
-		if ok {
-			return r, nil
-		}
-		i++
-		if i >= 50 {
-			panic("kaput")
+	for i := 4; i < math.MaxInt32; i++ {
+		noElfDied, outcome := day15Part2(input, i, true)
+		if noElfDied {
+			return outcome, nil
 		}
 	}
+	return "", fmt.Errorf("no answer found")
 }
 
-func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
-	debug := false
+func day15Part2(input string, elfAttackDamge int, elfDeathIsLoss bool) (bool, string) {
 	type unit struct {
-		c    byte
-		hp   int
-		x, y int
+		c        byte
+		hp, x, y int
 	}
 	type xAndY struct{ x, y int }
 
-	grid := make([][]byte, 0)
+	walls := make([][]bool, 0)
 	units := make([]*unit, 0)
 
-	findUnit := func(x, y int) *unit {
-		for _, u := range units {
-			if u.x == x && u.y == y && u.hp > 0 {
-				return u
-			}
-		}
-		return nil
-	}
-
-	drawGrid2 := func(caption string, do bool) {
-		if !debug || !do {
-			return
-		}
-		fmt.Println(caption)
-		for y, line := range grid {
-			for x, c := range line {
-				if u := findUnit(x, y); u != nil {
-					c = u.c
-				}
-				fmt.Printf("%c", c)
-			}
-
-			unitsOnLine := make([]*unit, 0)
-			for _, u := range units {
-				if u.y == y {
-					unitsOnLine = append(unitsOnLine, u)
-				}
-			}
-			sort.Slice(unitsOnLine, func(i, j int) bool {
-				l, r := unitsOnLine[i], unitsOnLine[j]
-				return l.x < r.x
-			})
-
-			fmt.Printf("   ")
-
-			for n, u := range unitsOnLine {
-				if n > 0 {
-					fmt.Printf(", ")
-				}
-				fmt.Printf("%c(%d)", u.c, u.hp)
-			}
-
-			fmt.Println()
-		}
-	}
-
-	drawGrid := func(caption string) {
-		drawGrid2(caption, debug)
-	}
-
+	// Parse input into walls and units
 	for y, line := range strings.Split(input, "\n") {
-		row := make([]byte, 0)
+		row := make([]bool, 0)
 		for x, c := range []byte(line) {
 			if c == 'G' || c == 'E' {
 				units = append(units, &unit{c: c, hp: 200, x: x, y: y})
-				c = '.'
 			}
-			row = append(row, c)
+			row = append(row, c == '#')
 		}
-		grid = append(grid, row)
+		walls = append(walls, row)
+	}
+
+	maxX, maxY := len(walls[0])-1, len(walls)-1
+	deltas := []xAndY{{x: 0, y: -1}, {x: -1, y: 0}, {x: 1, y: 0}, {x: 0, y: 1}}
+
+	// Helper functions
+	findUnit := func(x, y int) *unit {
+		for _, unit := range units {
+			if unit.x == x && unit.y == y && unit.hp > 0 {
+				return unit
+			}
+		}
+		return nil
 	}
 
 	abs := func(n int) int {
@@ -113,30 +69,16 @@ func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
 		return n
 	}
 
-	maxX, maxY := len(grid[0])-1, len(grid)-1
-	invalid := byte(0)
-
-	get := func(x, y int) (byte, *unit) {
-		if x >= 0 && x <= maxX && y >= 0 && y <= maxY {
-			if u := findUnit(x, y); u != nil && u.hp > 0 {
-				return u.c, u
-			} else {
-				return grid[y][x], nil
-			}
-		}
-		return invalid, nil
-	}
-
-	around := func(x, y int) []xAndY {
-		return []xAndY{{x: x, y: y - 1}, {x: x - 1, y: y}, {x: x + 1, y: y}, {x: x, y: y + 1}}
-	}
-
 	emptyAround := func(x, y int) []xAndY {
 		arounds := make([]xAndY, 0)
-		for _, candidate := range around(x, y) {
-			cx, cy := candidate.x, candidate.y
-			if c, _ := get(cx, cy); c == '.' {
-				arounds = append(arounds, candidate)
+		for _, d := range deltas {
+			cx, cy := x+d.x, y+d.y
+			if cx >= 0 && cx <= maxX && cy >= 0 && cy <= maxY {
+				if !walls[cy][cx] {
+					if unit := findUnit(cx, cy); unit == nil || unit.hp <= 0 {
+						arounds = append(arounds, xAndY{x: cx, y: cy})
+					}
+				}
 			}
 		}
 		return arounds
@@ -149,25 +91,22 @@ func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
 		for len(queue) > 0 {
 			current := queue[0]
 			queue = queue[1:]
-			cx, cy, cd := current.x, current.y, current.d
-
-			for _, a := range emptyAround(cx, cy) {
-				if _, ok := distances[a]; ok {
-					continue
+			for _, a := range emptyAround(current.x, current.y) {
+				if _, found := distances[a]; !found {
+					distances[a] = current.d + 1
+					queue = append(queue, xyd{x: a.x, y: a.y, d: current.d + 1})
 				}
-				distances[a] = cd + 1
-				queue = append(queue, xyd{x: a.x, y: a.y, d: cd + 1})
 			}
 		}
 		return distances
 	}
 
-	drawGrid("Initially:")
-
+	// Battle
 	round := 0
 	for {
 		round++
 
+		// Sort units top-to-bottom then left-to-right
 		sort.Slice(units, func(i, j int) bool {
 			l, r := units[i], units[j]
 			if l.y == r.y {
@@ -176,153 +115,105 @@ func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
 			return l.y < r.y
 		})
 
-		for i, u := range units {
-			func(n int) {}(i)
-			//fmt.Printf("Round %d unit %d: %c %+v\n", round, i, u.c, u)
-			if u.hp <= 0 {
+		for _, current := range units {
+			if current.hp <= 0 {
 				continue
 			}
 
-			c, x, y := u.c, u.x, u.y
-			target := byte('E')
-			if c == 'E' {
-				target = 'G'
+			// Find any targetable units
+			targetUnits := make([]*unit, 0)
+			shouldMove := true
+			for _, other := range units {
+				if other.c != current.c && other.hp > 0 {
+					if abs(other.x-current.x)+abs(other.y-current.y) == 1 {
+						// Directly adjacent, we should attack, not move
+						shouldMove = false
+						break
+					}
+					targetUnits = append(targetUnits, other)
+				}
 			}
 
-			//fmt.Printf("a\n")
-			targetUnits := make([]*unit, 0)
-			shouldMove := func() bool {
-				for _, ou := range units {
-					if ou.c == target && ou.hp > 0 {
-						if abs(ou.x-x)+abs(ou.y-y) == 1 {
-							// Directly adjacent, we should attack
-							return false
-						}
-						targetUnits = append(targetUnits, ou)
-					}
-				}
-				return true
-			}()
-
-			//fmt.Printf("b\n")
 			if shouldMove {
-				//fmt.Printf("c\n")
 				if len(targetUnits) == 0 {
-					//fmt.Printf("d\n")
+					// There are no units to target, the game is over, calcuate & return the score
 					score := 0
-					for _, su := range units {
-						if su.hp > 0 {
-							score += su.hp
+					for _, unit := range units {
+						if unit.hp > 0 {
+							score += unit.hp
 						}
 					}
-					fmt.Printf("round: %d; score: %d\n", round, score)
 					return true, strconv.Itoa((round - 1) * score)
 				}
 
-				targetPositions := make([]xAndY, 0)
-				for _, tu := range targetUnits {
-					for _, a := range emptyAround(tu.x, tu.y) {
-						targetPositions = append(targetPositions, a)
-					}
-				}
+				distances := buildDistanceMap(current.x, current.y)
 
-				//fmt.Printf("e\n")
-
-				distances := buildDistanceMap(x, y)
-
-				//fmt.Printf("f targetPositions: %+v\n", targetPositions)
-				//fmt.Printf("distances: %+v\n", distances)
-
+				// Find the position next to a target that is the shortest distance away
 				shortestDistance := math.MaxInt32
 				var targetPos xAndY
-				for _, pos := range targetPositions {
-					if dist, found := distances[pos]; found {
-						if dist < shortestDistance {
-							shortestDistance = dist
-							targetPos = pos
+				for _, targetUnit := range targetUnits {
+					for _, pos := range emptyAround(targetUnit.x, targetUnit.y) {
+						if dist, found := distances[pos]; found {
+							if dist < shortestDistance {
+								shortestDistance, targetPos = dist, pos
+							}
 						}
 					}
 				}
-				//fmt.Printf("g\n")
-				//fmt.Printf("shortest: %d; targetPos: %+v; distances: %+v\n", shortestDistance, targetPos, distances)
+
 				if shortestDistance == math.MaxInt32 {
-					//drawGrid2("Oh no?", true)
-					//panic("impossible game state")
-					//fmt.Printf("Cannea move\n")
+					// No target position is reachable, so we don't move
 					continue
 				}
 
 				targetDistances := buildDistanceMap(targetPos.x, targetPos.y)
-				//drawGrid("...")
-				//fmt.Printf("targetDistances %+v\n", targetDistances)
 				var step xAndY
-				if abs(targetPos.x-u.x)+abs(targetPos.y-u.y) == 1 {
+				if abs(targetPos.x-current.x)+abs(targetPos.y-current.y) == 1 {
+					// We are directly adjacent to the target position, simply move there
 					step = targetPos
 				} else {
-					step = func() xAndY {
-						lowestDist := math.MaxInt32
-						var lowest xAndY
-						for _, a := range emptyAround(u.x, u.y) {
-							if dist, found := targetDistances[a]; found {
-								if dist < lowestDist {
-									lowestDist = dist
-									lowest = a
-								}
+					// Find the empty spot next to the current unit that is the shortest distance away from the target position
+					lowestDist := math.MaxInt32
+					for _, pos := range emptyAround(current.x, current.y) {
+						if dist, found := targetDistances[pos]; found {
+							if dist < lowestDist {
+								lowestDist, step = dist, pos
 							}
 						}
-						if lowestDist == math.MaxInt32 {
-							panic(":(")
-						}
-						return lowest
-					}()
+					}
 				}
 
-				//fmt.Printf("i\n")
+				// Move to the chosen spot
+				current.x, current.y = step.x, step.y
+			} // if shouldMove
 
-				u.x = step.x
-				u.y = step.y
-			}
-
+			// Find the enemy unit next to the current unit with the lowest HP, if any
 			var toAttack *unit
-			for _, other := range around(u.x, u.y) {
-				ox, oy := other.x, other.y
-				ou := findUnit(ox, oy)
-				if ou == nil {
-					continue
-				}
-				if ou.c != target {
-					continue
-				}
-				if ou.hp <= 0 {
+			for _, delta := range deltas {
+				otherUnit := findUnit(current.x+delta.x, current.y+delta.y)
+				if otherUnit == nil || otherUnit.c == current.c || otherUnit.hp <= 0 {
+					// No unit there, or not an enemy, or already dead
 					continue
 				}
 				if toAttack == nil {
-					toAttack = ou
-					continue
-				}
-				if ou.hp < toAttack.hp {
-					toAttack = ou
+					toAttack = otherUnit
+				} else if otherUnit.hp < toAttack.hp {
+					toAttack = otherUnit
 				}
 			}
+
+			// If an adjacent enemy is found, attack it
 			if toAttack != nil {
 				dmg := 3
-				if toAttack.c == 'G' {
-					dmg = ap
+				if current.c == 'E' {
+					dmg = elfAttackDamge
 				}
 				toAttack.hp -= dmg
-				if elfDeathIsLoss {
-					if toAttack.c == 'E' && toAttack.hp <= 0 {
-						drawGrid2(fmt.Sprintf("Elf died (round %d)", round), true)
-						// elf died
-						return false, ""
-					}
+				if elfDeathIsLoss && toAttack.c == 'E' && toAttack.hp <= 0 {
+					// RIP elf
+					return false, ""
 				}
-				continue
 			}
-			///
 		}
-
-		//asdf := round > 46
-		drawGrid2(fmt.Sprintf("After %d rounds:\n", round), false)
 	}
 }
