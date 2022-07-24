@@ -142,6 +142,26 @@ func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
 		return arounds
 	}
 
+	buildDistanceMap := func(startX, startY int) map[xAndY]int {
+		type xyd struct{ x, y, d int }
+		distances := make(map[xAndY]int)
+		queue := []xyd{{x: startX, y: startY, d: 0}}
+		for len(queue) > 0 {
+			current := queue[0]
+			queue = queue[1:]
+			cx, cy, cd := current.x, current.y, current.d
+
+			for _, a := range emptyAround(cx, cy) {
+				if _, ok := distances[a]; ok {
+					continue
+				}
+				distances[a] = cd + 1
+				queue = append(queue, xyd{x: a.x, y: a.y, d: cd + 1})
+			}
+		}
+		return distances
+	}
+
 	drawGrid("Initially:")
 
 	round := 0
@@ -156,8 +176,9 @@ func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
 			return l.y < r.y
 		})
 
-		for _, u := range units {
-			//fmt.Printf("Round %d unit %d: %+v\n", rounds, i, u)
+		for i, u := range units {
+			func(n int) {}(i)
+			//fmt.Printf("Round %d unit %d: %c %+v\n", round, i, u.c, u)
 			if u.hp <= 0 {
 				continue
 			}
@@ -168,174 +189,96 @@ func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
 				target = 'G'
 			}
 
-			shouldMove := true
-			for _, a := range around(x, y) {
-				if _, t := get(a.x, a.y); t != nil {
-					if t.c == target && t.hp > 0 {
-						shouldMove = false
+			//fmt.Printf("a\n")
+			targetUnits := make([]*unit, 0)
+			shouldMove := func() bool {
+				for _, ou := range units {
+					if ou.c == target && ou.hp > 0 {
+						if abs(ou.x-x)+abs(ou.y-y) == 1 {
+							// Directly adjacent, we should attack
+							return false
+						}
+						targetUnits = append(targetUnits, ou)
 					}
 				}
-			}
+				return true
+			}()
 
+			//fmt.Printf("b\n")
 			if shouldMove {
-
-				targets := make([]xAndY, 0)
-				func() {
-					for ty, tline := range grid {
-						for tx := range tline {
-							tc, tu := get(tx, ty)
-							if tc == target && tu.hp > 0 {
-								d := abs(ty-y) + abs(tx-x)
-								if d == 1 {
-									//panic("nope")
-									shouldMove = false
-									return
-								} else {
-									targets = append(targets, xAndY{x: tx, y: ty})
-								}
-							}
-						}
-					}
-				}()
-
-				sort.Slice(targets, func(i, j int) bool {
-					l, r := targets[i], targets[j]
-					ldx, ldy := abs(x-l.x), abs(y-l.y)
-					rdx, rdy := abs(x-r.x), abs(y-r.y)
-					if ldy == rdy {
-						return ldx < rdx
-					}
-					return ldy < rdy
-				})
-
-				//fmt.Printf("  %dx%d %c; Targets: %d; Should move: %t\n", x, y, c, len(targets), shouldMove)
-
-				if len(targets) == 0 {
-					fmt.Printf("No targets exist for %dx%d %c %d\n", u.x, u.y, u.c, u.hp)
-					// No targets exist
+				//fmt.Printf("c\n")
+				if len(targetUnits) == 0 {
+					//fmt.Printf("d\n")
 					score := 0
-					for sy, line := range grid {
-						for sx := range line {
-							if su := findUnit(sx, sy); su != nil && su.hp > 0 {
-								score += su.hp
-							}
+					for _, su := range units {
+						if su.hp > 0 {
+							score += su.hp
 						}
 					}
-					drawGrid2(fmt.Sprintf("Final (round %d)", round), true)
-					//fmt.Printf("bla bla %d\n", (rounds-2)*score)
-					fmt.Printf("Rounds: %d; score: %d\n", round, score)
+					fmt.Printf("round: %d; score: %d\n", round, score)
 					return true, strconv.Itoa((round - 1) * score)
 				}
 
-				//shortest := math.MaxInt32
-				allPathsToTargets := make([][]xAndY, 0)
-				for _, t := range targets {
-					//fmt.Printf("  Target %d: %+v (%d x %d)\n", ti, t, abs(x-t.x), abs(y-t.y))
-					empty := emptyAround(t.x, t.y)
-					for _, kek := range empty {
-						tx, ty := kek.x, kek.y
-						//fmt.Printf("  - Examining %d x %d\n", tx, ty)
-						type xyl struct{ x, y, l int }
-
-						lengths := map[xAndY]int{{x: tx, y: ty}: 0}
-						examineNext := []xyl{{x: tx, y: ty, l: 0}}
-						for len(examineNext) > 0 {
-							current := examineNext[0]
-							examineNext = examineNext[1:]
-							cx, cy := current.x, current.y
-							for _, next := range emptyAround(cx, cy) {
-								nx, ny := next.x, next.y
-								nxy := xAndY{x: nx, y: ny}
-								if _, found := lengths[nxy]; !found {
-									lengths[nxy] = current.l + 1
-									examineNext = append(examineNext, xyl{x: nx, y: ny, l: current.l + 1})
-								}
-							}
-						}
-						//fmt.Printf("    %d lengths\n", len(lengths))
-						//for k, v := range lengths {
-						//fmt.Printf("      %dx%d = %d\n", k.x, k.y, v)
-						//}
-
-						var start xAndY
-						startLen := math.MaxInt32
-						for _, a := range emptyAround(x, y) {
-							if length, found := lengths[a]; found {
-								if length < startLen {
-									startLen = length
-									start = a
-								}
-							}
-						}
-						if startLen == math.MaxInt32 {
-							//panic("fuck my life")
-							continue
-						}
-						//fmt.Printf("    Start: %+v; len: %d\n", start, startLen)
-
-						path := make([]xAndY, 0)
-						path = append(path, xAndY{x: x, y: y})
-						path = append(path, start)
-						next := start
-						if startLen != 0 {
-							nextLen := startLen - 1
-							for {
-								done, boop := false, false
-								for _, a := range emptyAround(next.x, next.y) {
-									if length, found := lengths[a]; found {
-										if length == nextLen {
-											path = append(path, a)
-											next = a
-											boop = true
-											nextLen = nextLen - 1
-											if length == 0 {
-												done = true
-											}
-											break
-										}
-									}
-								}
-								if done {
-									break
-								}
-								if !boop {
-									fmt.Printf("next: %v %d\n", next, nextLen)
-									panic("die")
-								}
-							}
-						}
-
-						//fmt.Printf("    Path: %+v\n", path)
-						allPathsToTargets = append(allPathsToTargets, path)
+				targetPositions := make([]xAndY, 0)
+				for _, tu := range targetUnits {
+					for _, a := range emptyAround(tu.x, tu.y) {
+						targetPositions = append(targetPositions, a)
 					}
 				}
-				if len(allPathsToTargets) == 0 {
-					if debug {
-						fmt.Printf("  %dx%d %c no allPathsToTargets\n", x, y, c)
+
+				//fmt.Printf("e\n")
+
+				distances := buildDistanceMap(x, y)
+
+				//fmt.Printf("f targetPositions: %+v\n", targetPositions)
+				//fmt.Printf("distances: %+v\n", distances)
+
+				shortestDistance := math.MaxInt32
+				var targetPos xAndY
+				for _, pos := range targetPositions {
+					if dist, found := distances[pos]; found {
+						if dist < shortestDistance {
+							shortestDistance = dist
+							targetPos = pos
+						}
 					}
+				}
+				//fmt.Printf("g\n")
+				//fmt.Printf("shortest: %d; targetPos: %+v; distances: %+v\n", shortestDistance, targetPos, distances)
+				if shortestDistance == math.MaxInt32 {
+					//drawGrid2("Oh no?", true)
+					//panic("impossible game state")
+					//fmt.Printf("Cannea move\n")
 					continue
 				}
-				minPathLength := math.MaxInt32
-				shortests := make([][]xAndY, 0)
-				for _, path := range allPathsToTargets {
-					if len(path) < minPathLength {
-						minPathLength = len(path)
-						shortests = [][]xAndY{path}
-					} else if len(path) == minPathLength {
-						shortests = append(shortests, path)
-					}
+
+				targetDistances := buildDistanceMap(targetPos.x, targetPos.y)
+				//drawGrid("...")
+				//fmt.Printf("targetDistances %+v\n", targetDistances)
+				var step xAndY
+				if abs(targetPos.x-u.x)+abs(targetPos.y-u.y) == 1 {
+					step = targetPos
+				} else {
+					step = func() xAndY {
+						lowestDist := math.MaxInt32
+						var lowest xAndY
+						for _, a := range emptyAround(u.x, u.y) {
+							if dist, found := targetDistances[a]; found {
+								if dist < lowestDist {
+									lowestDist = dist
+									lowest = a
+								}
+							}
+						}
+						if lowestDist == math.MaxInt32 {
+							panic(":(")
+						}
+						return lowest
+					}()
 				}
-				step := xAndY{x: math.MaxInt32, y: math.MaxInt32}
-				for _, path := range shortests {
-					second := path[1]
-					if second.y < step.y || (second.y == step.y && second.x < step.x) {
-						step = second
-					}
-				}
-				toc, _ := get(step.x, step.y)
-				if toc != '.' {
-					panic(fmt.Sprintf("no dot %dx%d %c", step.x, step.y, toc))
-				}
+
+				//fmt.Printf("i\n")
+
 				u.x = step.x
 				u.y = step.y
 			}
@@ -379,7 +322,7 @@ func day15Part2(input string, ap int, elfDeathIsLoss bool) (bool, string) {
 			///
 		}
 
-		asdf := round > 46
-		drawGrid2(fmt.Sprintf("After %d rounds:\n", round), asdf)
+		//asdf := round > 46
+		drawGrid2(fmt.Sprintf("After %d rounds:\n", round), false)
 	}
 }
