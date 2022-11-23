@@ -10,14 +10,6 @@ func init() {
 	mustRegisterPair(17, Day17Part1, Day17Part2)
 }
 
-const (
-	clay        = '#'
-	sand        = '.'
-	reached     = '|'
-	water       = '~'
-	outOfBounds = 'x'
-)
-
 func Day17Part1(input string) (string, error) {
 	_, totalReached, err := day17(input)
 	return strconv.Itoa(totalReached), err
@@ -29,12 +21,20 @@ func Day17Part2(input string) (string, error) {
 }
 
 func day17(input string) (waterSettled, totalReached int, err error) {
+	type xAndY struct{ x, y int }
+
+	const (
+		clay        = '#'
+		sand        = '.'
+		reached     = '|'
+		water       = '~'
+		outOfBounds = 'x'
+	)
+
+	grid := make(map[xAndY]byte)
 	gridMinY, gridMaxY := math.MaxInt32, math.MinInt32
 
-	var re = regexp.MustCompile(`(?m)(\w)=(\d+), (\w)=(\d+)\.\.(\d+)`)
-	grid := make(map[xAndY]byte)
-
-	for _, match := range re.FindAllStringSubmatch(input, -1) {
+	for _, match := range regexp.MustCompile(`(?m)(\w)=(\d+), (\w)=(\d+)\.\.(\d+)`).FindAllStringSubmatch(input, -1) {
 		var leftNum, rangeStart, rangeEnd int
 		if leftNum, err = strconv.Atoi(match[2]); err != nil {
 			return
@@ -161,9 +161,4 @@ func day17(input string) (waterSettled, totalReached int, err error) {
 		}
 	}
 	return
-}
-
-type xAndY struct {
-	x int
-	y int
 }
