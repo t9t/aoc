@@ -1,7 +1,6 @@
 package year2018
 
 import (
-	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -20,6 +19,16 @@ const (
 )
 
 func Day17Part1(input string) (string, error) {
+	_, totalReached, err := day17(input)
+	return strconv.Itoa(totalReached), err
+}
+
+func Day17Part2(input string) (string, error) {
+	waterSettled, _, err := day17(input)
+	return strconv.Itoa(waterSettled), err
+}
+
+func day17(input string) (waterSettled, totalReached int, err error) {
 	gridMinY, gridMaxY := math.MaxInt32, math.MinInt32
 
 	grid := make(map[xAndY]byte)
@@ -33,13 +42,12 @@ func Day17Part1(input string) (string, error) {
 		minX, minY := math.MaxInt32, math.MaxInt32
 		maxX, maxY := math.MinInt32, math.MinInt32
 		var l, lowerR, upperR int
-		var err error
 		if l, err = strconv.Atoi(leftParts[1]); err != nil {
-			return "", err
+			return
 		} else if lowerR, err = strconv.Atoi(rightNums[0]); err != nil {
-			return "", err
+			return
 		} else if upperR, err = strconv.Atoi(rightNums[1]); err != nil {
-			return "", err
+			return
 		}
 		if leftParts[0] == "x" {
 			minX, maxX = l, l
@@ -145,59 +153,20 @@ func Day17Part1(input string) (string, error) {
 		coords = next
 	}
 
-	reachable := 0
 	for xy, c := range grid {
-		if xy.y >= gridMinY && xy.y <= gridMaxY && (c == water || c == reached) {
-			reachable++
+		if xy.y >= gridMinY && xy.y <= gridMaxY {
+			if c == water {
+				waterSettled += 1
+			}
+			if c == water || c == reached {
+				totalReached += 1
+			}
 		}
 	}
-
-	return strconv.Itoa(reachable), nil
-}
-
-func Day17Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 17 part 2 not implemented")
+	return
 }
 
 type xAndY struct {
 	x int
 	y int
-}
-
-func drawGrid(grid map[xAndY]byte) {
-	fmt.Printf(buildGrid(grid))
-}
-
-func buildGrid(grid map[xAndY]byte) string {
-	minX, minY := math.MaxInt32, math.MaxInt32
-	maxX, maxY := math.MinInt32, math.MinInt32
-	for item := range grid {
-		if item.x < minX {
-			minX = item.x
-		}
-		if item.x > maxX {
-			maxX = item.x
-		}
-		if item.y < minY {
-			minY = item.y
-		}
-		if item.y > maxY {
-			maxY = item.y
-		}
-	}
-	var sb strings.Builder
-	for y := minY - 1; y <= maxY+1; y += 1 {
-		for x := minX - 1; x <= maxX+1; x += 1 {
-			v, found := grid[xAndY{x: x, y: y}]
-			if !found {
-				v = sand
-			}
-			if x == 500 && y == 0 {
-				v = '+'
-			}
-			sb.WriteByte(v)
-		}
-		sb.WriteByte('\n')
-	}
-	return sb.String()
 }
