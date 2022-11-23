@@ -2,8 +2,8 @@ package year2018
 
 import (
 	"math"
+	"regexp"
 	"strconv"
-	"strings"
 )
 
 func init() {
@@ -31,31 +31,28 @@ func Day17Part2(input string) (string, error) {
 func day17(input string) (waterSettled, totalReached int, err error) {
 	gridMinY, gridMaxY := math.MaxInt32, math.MinInt32
 
+	var re = regexp.MustCompile(`(?m)(\w)=(\d+), (\w)=(\d+)\.\.(\d+)`)
 	grid := make(map[xAndY]byte)
-	lines := strings.Split(input, "\n")
-	for _, line := range lines {
-		parts := strings.Split(line, ", ")
-		leftParts := strings.Split(parts[0], "=")
-		rightParts := strings.Split(parts[1], "=")
-		rightNums := strings.Split(rightParts[1], "..")
 
-		minX, minY := math.MaxInt32, math.MaxInt32
-		maxX, maxY := math.MinInt32, math.MinInt32
-		var l, lowerR, upperR int
-		if l, err = strconv.Atoi(leftParts[1]); err != nil {
+	for _, match := range re.FindAllStringSubmatch(input, -1) {
+		var leftNum, rangeStart, rangeEnd int
+		if leftNum, err = strconv.Atoi(match[2]); err != nil {
 			return
-		} else if lowerR, err = strconv.Atoi(rightNums[0]); err != nil {
+		} else if rangeStart, err = strconv.Atoi(match[4]); err != nil {
 			return
-		} else if upperR, err = strconv.Atoi(rightNums[1]); err != nil {
+		} else if rangeEnd, err = strconv.Atoi(match[5]); err != nil {
 			return
 		}
-		if leftParts[0] == "x" {
-			minX, maxX = l, l
-			minY, maxY = lowerR, upperR
+
+		var minX, maxX, minY, maxY int
+		if match[1] == "x" {
+			minX, maxX = leftNum, leftNum
+			minY, maxY = rangeStart, rangeEnd
 		} else {
-			minX, maxX = lowerR, upperR
-			minY, maxY = l, l
+			minX, maxX = rangeStart, rangeEnd
+			minY, maxY = leftNum, leftNum
 		}
+
 		if minY < gridMinY {
 			gridMinY = minY
 		}
