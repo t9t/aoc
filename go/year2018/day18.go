@@ -11,6 +11,14 @@ func init() {
 }
 
 func Day18Part1(input string) (string, error) {
+	return day18(input, true)
+}
+
+func Day18Part2(input string) (string, error) {
+	return day18(input, false)
+}
+
+func day18(input string, part1 bool) (string, error) {
 	const (
 		open       = '.'
 		trees      = '|'
@@ -28,6 +36,16 @@ func Day18Part1(input string) (string, error) {
 			row[x] = byte(c)
 		}
 		landscape[y] = row
+	}
+
+	drawGrid := func(g grid) {
+		for _, row := range g {
+			for _, c := range row {
+				fmt.Printf("%c", c)
+			}
+			fmt.Println()
+		}
+		fmt.Println()
 	}
 
 	getAround := func(g grid, x, y int) (opens int, treess int, lumberyards int) {
@@ -80,24 +98,51 @@ func Day18Part1(input string) (string, error) {
 		return out
 	}
 
-	for minute := 1; minute <= 10; minute++ {
-		landscape = transform(landscape)
+	calculateScore := func(g grid) int {
+		woodedAcres, lumberyards := 0, 0
+		for _, row := range g {
+			for _, c := range row {
+				if c == trees {
+					woodedAcres += 1
+				} else if c == lumberyard {
+					lumberyards += 1
+				}
+			}
+		}
+		return woodedAcres * lumberyards
 	}
 
-	woodedAcres, lumberyards := 0, 0
-	for _, row := range landscape {
-		for _, c := range row {
-			if c == trees {
-				woodedAcres += 1
-			} else if c == lumberyard {
-				lumberyards += 1
-			}
+	if false {
+		drawGrid(landscape)
+	}
+
+	// TODO: I don't know how to detect when the pattern starts, in my input it was around 450, so I'll just go to
+	//       1000 as a safe margin lol
+	warmup := 1_000
+	for minute := 1; minute <= warmup; minute++ {
+		landscape = transform(landscape)
+		if part1 && minute == 10 {
+			return strconv.Itoa(calculateScore(landscape)), nil
 		}
 	}
 
-	return strconv.Itoa(woodedAcres * lumberyards), nil
-}
+	scores := make(map[int]int)
+	offset := warmup + 1
+	for minute := offset; minute <= 10_000; minute++ {
+		landscape = transform(landscape)
+		score := calculateScore(landscape)
+		if previousMinute, found := scores[score]; found {
+			// The pattern has repeated itself
+			answerMinute := ((1_000_000_000 - offset) % (minute - previousMinute)) + offset
+			for score, min := range scores {
+				if min == answerMinute {
+					return strconv.Itoa(score), nil
+				}
+			}
+			return "", fmt.Errorf("no matching score found")
+		}
+		scores[score] = minute
+	}
 
-func Day18Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 18 part 2 not implemented")
+	return "", fmt.Errorf("no pattern found")
 }
