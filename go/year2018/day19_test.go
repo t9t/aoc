@@ -16,9 +16,3 @@ seti 9 0 5`
 
 	basicTest(t, Day19Part1, input, "6")
 }
-
-func Test_Day19Part2(t *testing.T) {
-	basicMultiTest(t, Day19Part2, []testInput{
-		{"", ""},
-	})
-}
