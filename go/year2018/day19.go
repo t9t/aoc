@@ -130,13 +130,12 @@ func Day19Part1(input string) (string, error) {
 	}
 	lines = lines[1:]
 
-	ip := 0
-	for {
-		if ip >= len(lines) {
-			return strconv.Itoa(registers[0]), nil
-		}
-		line := lines[ip]
-
+	type instruction struct {
+		op      operation
+		a, b, c int
+	}
+	instructions := make([]instruction, len(lines))
+	for i, line := range lines {
 		parts := strings.Split(line, " ")
 		op := parts[0]
 		inputs := make([]int, 3)
@@ -148,8 +147,18 @@ func Day19Part1(input string) (string, error) {
 			}
 		}
 
+		instructions[i] = instruction{op: operations[op], a: inputs[0], b: inputs[1], c: inputs[2]}
+	}
+
+	ip := 0
+	for {
+		if ip >= len(lines) {
+			return strconv.Itoa(registers[0]), nil
+		}
+		instruction := instructions[ip]
+
 		registers[ipRegister] = ip
-		operations[op](inputs[0], inputs[1], inputs[2], registers)
+		instruction.op(instruction.a, instruction.b, instruction.c, registers)
 		ip = registers[ipRegister]
 
 		ip += 1
