@@ -73,15 +73,15 @@ func runAll(mode string, year int) error {
 	}
 
 	if !modeResults {
-		fmt.Println("| Year | Day | Part | Output          | Run time   |")
-		fmt.Println("|------|-----|------|-----------------|------------|")
+		fmt.Println("| Year | Day | Part | Output                     | Run time     |")
+		fmt.Println("|------|-----|------|----------------------------|--------------|")
 	}
 
 	printOutput := func(selector registry.Selector, output string, runTime time.Duration) {
 		if modeResults {
 			fmt.Printf("%d-%d-%d: %s\n", selector.Year, selector.Day, selector.Part, output)
 		} else {
-			fmt.Printf("%s| %4d | %3d | %4d | %15v | %10v |\n", clearLine(), selector.Year, selector.Day, selector.Part, output, runTime)
+			fmt.Printf("%s| %4d | %3d | %4d | %26v | %12v |\n", clearLine(), selector.Year, selector.Day, selector.Part, output, runTime)
 		}
 	}
 
