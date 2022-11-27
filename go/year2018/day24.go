@@ -115,18 +115,19 @@ func day24(input string, part2 bool) (string, error) {
 						}
 					}
 				}
-				if !infectionFound || !immuneFound {
-					if part2 && !immuneFound {
-						return false, 0
-					}
+				groups = newGroups
 
+				if part2 && !immuneFound {
+					return false, 0
+				}
+
+				if !infectionFound || !immuneFound {
 					totalUnitCount := 0
-					for _, g := range newGroups {
+					for _, g := range groups {
 						totalUnitCount += g.unitCount
 					}
 					return true, totalUnitCount
 				}
-				groups = newGroups
 
 				// Target selection phase
 				sort.Slice(groups, func(i, j int) bool { return groups[i].greaterEpOrInitiativeThan(groups[j]) })
