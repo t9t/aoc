@@ -9,17 +9,17 @@ scoreLose = 0
 scoreDraw = 3
 scoreWin = 6
 
-points ("A", "X") = baseScoreRock + scoreDraw
-points ("A", "Y") = baseScorePaper + scoreWin
-points ("A", "Z") = baseScoreScissors + scoreLose
+points ("A", "X") = baseScoreScissors + scoreLose
+points ("A", "Y") = baseScoreRock + scoreDraw
+points ("A", "Z") = baseScorePaper + scoreWin
 
 points ("B", "X") = baseScoreRock + scoreLose
 points ("B", "Y") = baseScorePaper + scoreDraw
 points ("B", "Z") = baseScoreScissors + scoreWin
 
-points ("C", "X") = baseScoreRock + scoreWin
-points ("C", "Y") = baseScorePaper + scoreLose
-points ("C", "Z") = baseScoreScissors + scoreDraw
+points ("C", "X") = baseScorePaper + scoreLose
+points ("C", "Y") = baseScoreScissors + scoreDraw
+points ("C", "Z") = baseScoreRock + scoreWin
 
 main = do
     c <- getContents
