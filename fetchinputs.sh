@@ -13,7 +13,7 @@ fetch() {
   YEARDIR="${INPUTDIR}/${year}"
   mkdir -p "${YEARDIR}"
   echo "Fetching year ${year}; day ${day}"
-  curl -f -o "${YEARDIR}/${day}.txt" -H"Cookie: session=${SESH}" "https://adventofcode.com/${year}/day/${day}/input" 
+  curl -A 'blah blah blah' -f -o "${YEARDIR}/${day}.txt" -H"Cookie: session=${SESH}" "https://adventofcode.com/${year}/day/${day}/input" 
 }
 
 if [[ $# -eq 2 ]]; then
