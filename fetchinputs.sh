@@ -26,7 +26,7 @@ if [[ $# -ne 0 ]]; then
   exit 1
 fi
 
-for year in {2015..2021}; do
+for year in {2015..2022}; do
   for day in {1..25}; do
     fetch "${year}" "${day}"
   done
