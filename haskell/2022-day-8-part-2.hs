@@ -16,19 +16,11 @@ rights x y grid = drop (x+1) (grid !! y)
 belows :: Int -> Int -> Grid -> [Int]
 belows x y grid = drop (y+1) $ map (\line -> line !! x) grid
 
-arounds :: Int -> Int -> Grid -> [Int]
-arounds x y grid =
-    (aboves x y grid) ++
-    (lefts x y grid) ++
-    (rights x y grid) ++
-    (belows x y grid)
-
-higherThanAll n numbers = and $ map (n>) numbers
-
+-- I wish I knew how to name this function, in fact it's probably available in the standard lib
 kek n l
     | null l = []
     | h < n  = h : (kek n r)
-    | h > n  = h : []    
+    | h > n  = h : []
     | h == n = h : []
     where h = head l
           r = tail l
@@ -37,8 +29,9 @@ viewingDistance :: Int -> [Int] -> Int
 viewingDistance n numbers = length $ kek n numbers
 
 asdf :: Int -> Int -> Grid -> [Int]
-asdf x y grid = [(viewingDistance n (aboves x y grid)), (viewingDistance n (lefts x y grid)), (viewingDistance n (rights x y grid)), (viewingDistance n (belows x y grid))]
+asdf x y grid = [viewingDistance n (f x y grid) | f <- funs]
     where n = (grid !! y) !! x
+          funs = [aboves, lefts, rights, belows]
 
 treeScore x y grid = product $ asdf x y grid
 
