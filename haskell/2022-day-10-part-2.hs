@@ -3,7 +3,6 @@ import Data.List
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
-
 convert :: String -> [Int]
 convert "noop" = [0]
 convert line
@@ -22,9 +21,9 @@ processAll c x operations =
 getPixel :: Int -> Int -> Char
 getPixel screenX xRegister =
     if xRegister == screenX || xRegister == (screenX-1) || xRegister == (screenX+1) then
-        '#'
+        '#' -- pixelOn
     else 
-        '.'
+        '.' -- pixelOff
 
 crTick :: (Int, Int, Int) -> (Int, Int) -> (Int, Int, Char)
 crTick (cycle, xBefore, xAfter) (screenX, screenY) =
@@ -48,7 +47,42 @@ partitionTo n s
     where len = length s
           (l, s') = splitAt n s
 
+splitAllAt :: Int -> [[a]] -> ([[a]], [[a]])
+splitAllAt n l = (firsts, seconds')
+    where splitted = map (splitAt n) l
+          firsts   = map fst splitted
+          seconds  = map snd splitted
+          seconds' = if sum (map length seconds) == 0 then [] else seconds
+
+partitionLetters :: [String] -> [String]
+partitionLetters l 
+    | null l    = []
+    | otherwise = (intercalate "\n" kek) : partitionLetters rest
+    where (kek, rest) = splitAllAt 5 l
+
+fancyChar :: Char -> Char
+fancyChar '#' = '🟩'
+fancyChar '.' = '⬛'
+
+fancy :: [String] -> [String]
+fancy = map (map $ fancyChar)
+
+-- TODO: find more letters
+toLetter :: String -> Char
+toLetter ".##..\n#..#.\n#..#.\n####.\n#..#.\n#..#." = 'A'
+toLetter "####.\n#....\n###..\n#....\n#....\n#...." = 'F'
+toLetter ".##..\n#..#.\n#....\n#.##.\n#..#.\n.###." = 'G'
+toLetter "#..#.\n#.#..\n##...\n#.#..\n#.#..\n#..#." = 'K'
+toLetter "#....\n#....\n#....\n#....\n#....\n####." = 'L'
+toLetter "###..\n#..#.\n#..#.\n###..\n#....\n#...." = 'P'
+toLetter "####.\n...#.\n..#..\n.#...\n#....\n####." = 'Z'
+
+toLetters :: [String] -> String
+toLetters = map toLetter
+
 main = do
     c <- getContents
 
-    putStrLn $ unlines $ partitionTo 40 $ crTickAll (0, 0) [] $ processAll 1 1 $ convertLines $ lines c
+    let crtLines = partitionTo 40 $ crTickAll (0, 0) [] $ processAll 1 1 $ convertLines $ lines c
+    putStrLn $ unlines $ fancy crtLines
+    putStrLn $ toLetters $ partitionLetters crtLines
