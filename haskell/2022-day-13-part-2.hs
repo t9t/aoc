@@ -51,7 +51,7 @@ comparePacketStrings l r = comparePacketValues l'' r''
           r'' = ListValue r'
 
 parseAllPackets :: String -> [PacketValue]
-parseAllPackets s = map parsePacket packetLines
+parseAllPackets s = parsePacket <$> packetLines
     where packetLines = filter (not . null) $ lines s
 
 packetValueOrdering :: PacketValue -> PacketValue -> Ordering
@@ -70,5 +70,5 @@ main = do
     let sorted = sortBy packetValueOrdering withDividerPackets
     let withIndices = zip sorted [1..]
     let dividers = filter (\(p, _) -> p == div1 || p == div2) withIndices
-    let decoderKey = product $ map snd dividers
+    let decoderKey = product $ snd <$> dividers
     print decoderKey
