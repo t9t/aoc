@@ -6,7 +6,10 @@ import (
 
 func Test_Day1Part1(t *testing.T) {
 	basicMultiTest(t, Day1Part1, []testInput{
-		{"", ""},
+		{`1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet`, "142"},
 	})
 }
 
