@@ -1,15 +1,17 @@
 package main
 
 import (
-	"aoc/registry"
-	"aoc/year2015"
-	_ "aoc/year2018"
 	"fmt"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"aoc/registry"
+	"aoc/year2015"
+	_ "aoc/year2018"
+	_ "aoc/year2023"
 )
 
 func main() {
