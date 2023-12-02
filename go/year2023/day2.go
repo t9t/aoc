@@ -67,5 +67,38 @@ func Day2Part1(input string) (string, error) {
 }
 
 func Day2Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 2 part 2 not implemented")
+	sum := 0
+	for _, line := range strings.Split(input, "\n") {
+		_, right, found := strings.Cut(line, ": ")
+		if !found {
+			return "", fmt.Errorf("invalid line (could not find :) %s", line)
+		}
+
+		samples := strings.Split(right, "; ")
+		minRed, minGreen, minBlue := 0, 0, 0
+		for _, sample := range samples {
+			cubes := strings.Split(sample, ", ")
+			for _, cube := range cubes {
+				countString, color, found := strings.Cut(cube, " ")
+				if !found {
+					return "", fmt.Errorf("invalid line (could not split count/color) %s", line)
+				}
+				count, err := strconv.Atoi(countString)
+				if err != nil {
+					return "", err
+				}
+
+				if color == "red" {
+					minRed = max(minRed, count)
+				} else if color == "green" {
+					minGreen = max(minGreen, count)
+				} else if color == "blue" {
+					minBlue = max(minBlue, count)
+				}
+			}
+		}
+
+		sum += minRed * minBlue * minGreen
+	}
+	return strconv.Itoa(sum), nil
 }
