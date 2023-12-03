@@ -25,7 +25,6 @@ func Day3Part1(input string) (string, error) {
 			if c == '.' { // Empty
 			} else if c >= '0' && c <= '9' { // Number
 			} else { // Symbol
-				fmt.Printf("At %dx%d: %c\n", x, y, c)
 				for nx := x - 1; nx <= x+1; nx++ {
 					for ny := y - 1; ny <= y+1; ny++ {
 						_, f := cache[xy{x: nx, y: ny}]
@@ -37,8 +36,6 @@ func Day3Part1(input string) (string, error) {
 									cache[xy{x: cx, y: ny}] = n
 								}
 								uniques[xy{x: fx, y: ny}] = n
-
-								fmt.Printf("Adding %d @ %dx%d\n", n, fx, ny)
 							}
 						}
 					}
@@ -50,8 +47,7 @@ func Day3Part1(input string) (string, error) {
 	for _, v := range uniques {
 		sum += v
 	}
-	fmt.Printf("Sum: %d\n", sum)
-	return "5521", nil
+	return strconv.Itoa(sum), nil
 }
 
 func expandNumber(lines []string, x, y int) (bool, int, int) {
@@ -81,7 +77,6 @@ func expandNumber(lines []string, x, y int) (bool, int, int) {
 			break
 		}
 	}
-	fmt.Printf("Expanded from %dx%d to %dx%d: %s\n", x, y, leftX, y, s)
 	n, err := strconv.Atoi(s)
 	if err != nil {
 		panic(err) // We read only digits, so this must succeed
