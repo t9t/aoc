@@ -21,6 +21,15 @@ func Test_Day3Part1(t *testing.T) {
 
 func Test_Day3Part2(t *testing.T) {
 	basicMultiTest(t, Day3Part2, []testInput{
-		{"", ""},
+		{`467..114..
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..`, "467835"},
 	})
 }

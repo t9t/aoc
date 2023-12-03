@@ -93,5 +93,51 @@ func getDigitChar(lines []string, x, y int) (bool, byte) {
 }
 
 func Day3Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 3 part 2 not implemented")
+	lines := strings.Split(input, "\n")
+
+	type xy struct {
+		x, y int
+	}
+	cache := make(map[xy]int)
+	uniques := make(map[xy]int)
+
+	sum := 0
+	for y, line := range lines {
+		for x := 0; x < len(line); x++ {
+			c := line[x]
+			if c == '.' { // Empty
+			} else if c >= '0' && c <= '9' { // Number
+			} else { // Symbol
+				adjacents := make(map[xy]int)
+				for nx := x - 1; nx <= x+1; nx++ {
+					for ny := y - 1; ny <= y+1; ny++ {
+						_, f := cache[xy{x: nx, y: ny}]
+						if !f {
+							f, n, fx := expandNumber(lines, nx, ny)
+							if f {
+								ns := strconv.Itoa(n)
+								for cx := fx; cx < fx+len(ns); cx++ {
+									cache[xy{x: cx, y: ny}] = n
+								}
+								uniques[xy{x: fx, y: ny}] = n
+								adjacents[xy{x: fx, y: ny}] = n
+							}
+						}
+					}
+				}
+				if c == '*' && len(adjacents) == 2 {
+					ratio := 0
+					for _, v := range adjacents {
+						if ratio == 0 {
+							ratio = v
+						} else {
+							ratio *= v
+						}
+					}
+					sum += ratio
+				}
+			}
+		}
+	}
+	return strconv.Itoa(sum), nil
 }
