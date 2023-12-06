@@ -120,147 +120,186 @@ func almanacConverter(destinationStart, sourceStart, rangeLength int) almanacCon
 func Day5Part2(input string) (string, error) {
 	chunks := strings.Split(input, "\n\n")
 
-	type entry struct{ destStart, sourceStart, rangeLength int }
-	type seedRange struct{ start, length int }
+	type tup2 struct{ a, b int }
+	type tup3 struct{ a, b, c int }
 
-	seedRanges := make([]seedRange, 0)
-	mappings := make([][]entry, 0)
+	type seedRange struct{ start, end int }
+	type mapRange struct{ sourceStart, sourceEnd, diff int }
+	var seedRanges []seedRange
 
-	for _, chunk := range chunks {
-		if strings.HasPrefix(chunk, "seeds:") {
-			parts := strings.Split(strings.TrimPrefix(chunk, "seeds: "), " ")
+	var maps [][]mapRange
+	var names []string
+
+	var fs [][]tup3
+	var pairs []tup2
+
+	for i, chunk := range chunks {
+		if i == 0 {
+			if !strings.HasPrefix(chunk, "seeds:") {
+				return "", fmt.Errorf("invalid first chunk (doesn't start with 'seeds:'): %s", chunk)
+			}
 			start := 0
-
-			for i, part := range parts {
-				n, err := strconv.Atoi(part)
+			for j, s := range strings.Split(strings.TrimSpace(strings.TrimPrefix(chunk, "seeds: ")), " ") {
+				n, err := strconv.Atoi(s)
 				if err != nil {
-					return "", fmt.Errorf("invalid seeds line %s: %w", strings.TrimSpace(chunk), err)
-				} else if i%2 == 0 {
+					return "", fmt.Errorf("invalid seeds chunk %s: %w", chunk, err)
+				}
+				if j%2 == 0 {
 					start = n
 				} else {
-					seedRanges = append(seedRanges, seedRange{start: start, length: n})
-					start = 0
+					seedRanges = append(seedRanges, seedRange{start: start, end: start + n})
+					pairs = append(pairs, tup2{a: start, b: n})
+				}
+			}
+			fmt.Printf("Seed ranges: %+v\n", seedRanges)
+			continue
+		}
+
+		var m []mapRange
+		var f []tup3
+		lines := strings.Split(chunk, "\n")
+		names = append(names, strings.TrimSpace(lines[0]))
+		for j := 1; j < len(lines); j++ {
+			line := lines[j]
+			parts := strings.Split(line, " ")
+			if len(parts) != 3 {
+				return "", fmt.Errorf("invalid line (expected 3 parts but got %d): %s", len(parts), line)
+			}
+			var destStart, sourceStart, length int
+			var err error
+			if destStart, err = strconv.Atoi(parts[0]); err != nil {
+				return "", fmt.Errorf("invalid line %s: %w", line, err)
+			} else if sourceStart, err = strconv.Atoi(parts[1]); err != nil {
+				return "", fmt.Errorf("invalid line %s: %w", line, err)
+			} else if length, err = strconv.Atoi(parts[2]); err != nil {
+				return "", fmt.Errorf("invalid line %s: %w", line, err)
+			}
+			m = append(m, mapRange{sourceStart: sourceStart, sourceEnd: sourceStart + length, diff: destStart - sourceStart})
+			f = append(f, tup3{destStart, sourceStart, length})
+		}
+		maps = append(maps, m)
+		fs = append(fs, f)
+	}
+
+	for _, m := range maps {
+		fmt.Printf("Map:\n")
+		for _, r := range m {
+			fmt.Printf("  Range: %+v\n", r)
+		}
+	}
+
+	for _, f := range fs {
+		fmt.Printf("f:\n")
+		for _, t := range f {
+			fmt.Printf("\t%+v\n", t)
+		}
+	}
+
+	a := func(ranges []seedRange, m []mapRange) []seedRange {
+		var matched []seedRange
+		for _, transform := range m {
+			var unmatched []seedRange
+			for _, r := range ranges {
+				before := seedRange{start: r.start, end: min(r.end, transform.sourceStart)}
+				inside := seedRange{start: max(r.start, transform.sourceStart), end: min(r.end, transform.sourceEnd)}
+				after := seedRange{start: max(r.start, transform.sourceEnd), end: r.end}
+
+				if before.end > before.start {
+					unmatched = append(unmatched, before)
+				}
+				if inside.end > inside.start {
+					matched = append(matched, seedRange{start: inside.start + transform.diff, end: inside.end + transform.diff})
+				}
+				if after.end > after.start {
+					unmatched = append(unmatched, after)
 				}
 			}
 
-			fmt.Printf("seed ranges: %+v\n", seedRanges)
-			continue
+			ranges = unmatched
 		}
-		chunkEntry := make([]entry, 0)
-
-		fmt.Printf("Chunk: %v\n", chunk)
-		lines := strings.Split(strings.TrimSpace(chunk), "\n")
-		for i := 1; i < len(lines); i++ {
-			line := lines[i]
-			fmt.Printf("    Line: %v\n", line)
-			parts := strings.Split(line, " ")
-			var e entry
-			var err error
-			if e.destStart, err = strconv.Atoi(parts[0]); err != nil {
-				return "", fmt.Errorf("invalid line %s: %w", line, err)
-			} else if e.sourceStart, err = strconv.Atoi(parts[1]); err != nil {
-				return "", fmt.Errorf("invalid line %s: %w", line, err)
-			} else if e.rangeLength, err = strconv.Atoi(parts[2]); err != nil {
-				return "", fmt.Errorf("invalid line %s: %w", line, err)
-			}
-			chunkEntry = append(chunkEntry, e)
+		for _, r := range matched {
+			ranges = append(ranges, r)
 		}
-		mappings = append(mappings, chunkEntry)
+		return ranges
 	}
 
-	for _, a := range mappings {
-		fmt.Printf("~~\n")
-		for _, b := range a {
-			fmt.Printf("    %+v\n", b)
-		}
-	}
-
-	// Assumption: the mappings are listed in the input in processing order
-	// Assumption: mapping ranges don't overlap
-
-	a := func(r seedRange, e entry) (matched []seedRange, notMatched []seedRange) {
-		minSeed, maxSeed := r.start, r.start+r.length-1
-		if minSeed > maxSeed {
-			panic(fmt.Sprintf("minSeed %d > maxSeed %d", minSeed, maxSeed))
-		}
-		minSrc, maxSrc := e.sourceStart, e.sourceStart+e.rangeLength-1
-		destDiff := e.destStart - e.sourceStart
-		if maxSeed < minSrc || minSeed > maxSrc {
-			// seed range is entirely "before" or "after" matching range, no overlap
-			return nil, []seedRange{r}
-		}
-		if minSeed < minSrc && maxSeed > maxSrc {
-			// seed range starts "before" matching range and ends "after", meaning the seed range fully encloses the matching range
-			before := seedRange{start: minSeed, length: minSrc - minSeed}
-			inside := seedRange{start: e.sourceStart, length: e.rangeLength}
-			after := seedRange{start: maxSrc + 1, length: maxSeed - maxSrc}
-			return []seedRange{inside}, []seedRange{before, after}
-		}
-		if minSeed >= minSeed && maxSeed <= maxSeed {
-			// seed range is entirely "inside" the matching range, convert the full thing
-			return []seedRange{{start: minSeed + destDiff, length: r.length}}, nil
-		}
-		if minSeed < minSrc && maxSeed <= maxSrc {
-			// seed range starts "before" matching range, and ends "inside"
-			before := []seedRange{{start: minSeed, length: minSrc - minSeed}}
-			inside := []seedRange{{start: minSrc + destDiff, length: maxSeed - minSrc + 1}}
-			return inside, before
-		}
-		if minSeed <= maxSrc && maxSeed > maxSrc {
-			// seed range starts "inside" and ends "after" matching range
-			inside := []seedRange{{start: minSeed + destDiff, length: maxSrc - minSeed + 1}}
-			after := []seedRange{{start: maxSrc + 1, length: maxSeed - maxSrc}}
-			return inside, after
-		}
-		panic("woops")
-	}
-
-	b := func(ranges []seedRange, e entry) (allMatched, allUnmatched []seedRange) {
-		for _, r := range ranges {
-			matched, unmatched := a(r, e)
-			for _, m := range matched {
-				allMatched = append(allMatched, m)
-			}
-			for _, m := range unmatched {
-				allUnmatched = append(allUnmatched, m)
-			}
-		}
-		return allMatched, allUnmatched
-	}
-
-	c := func(ranges []seedRange, entries []entry) []seedRange {
-		var allMatched []seedRange
-		allUnmatched := ranges
-		for _, e := range entries {
-			matched, unmatched := b(allUnmatched, e)
-			for _, m := range matched {
-				allMatched = append(allMatched, m)
-			}
-			allUnmatched = unmatched
-		}
-		// All unmatched are just taken as-is
-		for _, m := range allUnmatched {
-			allMatched = append(allMatched, m)
-		}
-		return allMatched
-	}
-
-	//	seedRanges = []seedRange{{start: 82, length: 1}}
-	for _, mapping := range mappings {
-		_s := c(seedRanges, mapping)
-		fmt.Printf("Mapped %d to %d (%+v -> %+v)\n", len(seedRanges), len(_s), seedRanges, _s)
-		seedRanges = _s
-	}
-
+	// Assumptions: maps are listed in processing order in the input, and map ranges don't overlap
 	lowcation := math.MaxInt
-	for _, r := range seedRanges {
-		fmt.Printf("Out seedrange: %+v\n", r)
-		if r.start < lowcation {
-			lowcation = r.start
+	for _, inputRange := range seedRanges {
+		ranges := []seedRange{inputRange}
+		for _, m := range maps {
+			ranges = a(ranges, m) // APPLY
+		}
+		for _, r := range ranges {
+			if r.start < lowcation {
+				lowcation = r.start
+			}
 		}
 	}
 
-	fmt.Printf("%d\n", lowcation)
+	fmt.Printf("lowcation: %d\n", lowcation)
+
+	apply_range := func(tuples []tup3, r []tup2) []tup2 {
+		var a []tup2
+		for _, _t := range tuples {
+			dest, src, sz := _t.a, _t.b, _t.c
+			src_end := src + sz
+			var nr []tup2
+			for _, _r := range r {
+				st, ed := _r.a, _r.b
+				before := tup2{st, min(ed, src)}
+				inter := tup2{max(st, src), min(src_end, ed)}
+				after := tup2{max(src_end, st), ed}
+				if before.b > before.a {
+					nr = append(nr, before)
+				}
+				if inter.b > inter.a {
+					a = append(a, tup2{inter.a - src + dest, inter.b - src + dest})
+				}
+				if after.b > after.a {
+					nr = append(nr, after)
+				}
+			}
+			r = nr
+		}
+		fmt.Printf("\t\ta: %+v; r: %+v\n", a, r)
+		var n []tup2
+		for _, t := range a {
+			n = append(n, t)
+		}
+		for _, t := range r {
+			n = append(n, t)
+		}
+		return n
+	}
+
+	var p2 []int
+	for _, _p := range pairs {
+		st, sz := _p.a, _p.b
+		r := []tup2{{st, st + sz}}
+		for _, f := range fs {
+			_f := f
+			fmt.Printf("in: %+v\n", r)
+			r = apply_range(_f, r)
+			fmt.Printf("\tout: %+v\n", r)
+		}
+		_min := math.MaxInt
+		for _, t := range r {
+			fmt.Printf("%+v\n", t)
+			if t.a < _min {
+				_min = t.a
+			}
+		}
+		p2 = append(p2, _min)
+	}
+
+	_min := math.MaxInt
+	for _, n := range p2 {
+		if n < _min {
+			_min = n
+		}
+	}
+	fmt.Printf("P2: %d\n", _min)
 
 	return "", fmt.Errorf("Day 5 part 2 not implemented")
 }
