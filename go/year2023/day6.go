@@ -35,6 +35,28 @@ func Day6Part1(input string) (string, error) {
 		return "", fmt.Errorf("invalid line %s: %w\n", lines[1], err)
 	}
 
+	return day6(times, distances)
+}
+
+func Day6Part2(input string) (string, error) {
+	lines := strings.Split(input, "\n")
+	parseLine := func(s string) (int, error) {
+		return strconv.Atoi(strings.ReplaceAll(strings.Split(s, ":")[1], " ", ""))
+	}
+
+	times, err := parseLine(lines[0])
+	if err != nil {
+		return "", fmt.Errorf("invalid line %s: %w\n", lines[0], err)
+	}
+	distances, err := parseLine(lines[1])
+	if err != nil {
+		return "", fmt.Errorf("invalid line %s: %w\n", lines[1], err)
+	}
+
+	return day6([]int{times}, []int{distances})
+}
+
+func day6(times, distances []int) (string, error) {
 	mul := 1
 	for i, time := range times {
 		dist := distances[i]
@@ -50,8 +72,4 @@ func Day6Part1(input string) (string, error) {
 		mul *= beats
 	}
 	return strconv.Itoa(mul), nil
-}
-
-func Day6Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 6 part 2 not implemented")
 }
