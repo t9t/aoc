@@ -123,12 +123,81 @@ func Day7Part2(input string) (string, error) {
 		panic(fmt.Sprintf("invalid hand? %s -> %+v", s, counts))
 	}
 
-	scoreHandJokerized := func(s string) int {
+	check := func(b bool, msg string, s ...any) {
+		if !b {
+			panic(fmt.Sprintf(msg, s...))
+		}
+	}
+
+	jokerize := func(s string, score int) int {
 		jokerCount := strings.Count(s, "J")
 		if jokerCount == 0 {
-			return scoreHand(s)
+			return score
 		}
-		maxScore := scoreHand(s)
+
+		if score == fiveOfAKind {
+			check(jokerCount == 5, "%d", jokerCount)
+			return fiveOfAKind
+		}
+		if score == fourOfAKind {
+			check(jokerCount == 1 || jokerCount == 4, "%d", jokerCount)
+			// XJJJJ or XXXXJ
+			return fiveOfAKind
+		}
+		if score == fullHouse {
+			check(jokerCount == 2 || jokerCount == 3, "%d", jokerCount)
+			// XXJJJ or JJXXX
+			return fiveOfAKind
+		}
+		if score == threeOfAKind {
+			check(jokerCount == 3 || jokerCount == 1, "%d", jokerCount)
+			// XYJJJ or XYYYJ or XXXYJ
+			return fourOfAKind
+		}
+		if score == twoPair {
+			if jokerCount == 2 {
+				// XXJJY
+				// 2 others + 2 jokers = 4 of a kind
+				return fourOfAKind
+			} else {
+				// XXYYJ
+				if jokerCount != 1 {
+					panic(fmt.Sprintf("%s - %d - %d", s, score, jokerCount))
+				}
+				// 2 others + 1 joker = 3 of a kind
+				return fullHouse
+			}
+		}
+		if score == onePair {
+			if jokerCount == 2 {
+				// JJXYZ
+				// 1 of 3 different ones + 2 jokers = 3 of a kind
+				return threeOfAKind
+			} else {
+				if jokerCount != 1 {
+					panic(fmt.Sprintf("%s - %d - %d", s, score, jokerCount))
+				}
+				// XXJYZ
+				// 2 of a pair + 1 joker = 3 of a kind
+				return threeOfAKind
+			}
+		}
+		if score == highCard {
+			// ABCDJ -> ABCJJ
+			return onePair
+		}
+		panic(fmt.Sprintf("cannot jokerize %s", s))
+	}
+
+	scoreHandJokerized := func(s string) int {
+		s = strings.Split(s, " ")[0]
+		return jokerize(s, scoreHand(s))
+		sco := scoreHand(s)
+		jokerCount := strings.Count(s, "J")
+		if jokerCount == 0 {
+			return sco
+		}
+		maxScore := sco
 		for card := range cardScores {
 			if card == 'J' {
 				continue
@@ -139,59 +208,11 @@ func Day7Part2(input string) (string, error) {
 				maxScore = score
 			}
 		}
+		j := jokerize(s, sco)
+		if j != maxScore {
+			panic(fmt.Sprintf("s: %s; score: %d; maxScore: %d; j: %d", s, sco, maxScore, j))
+		}
 		return maxScore
-	}
-
-	jokerize := func(s string, score int) int {
-		jokerCount := strings.Count(s, "J")
-		if jokerCount == 0 {
-			return score
-		}
-
-		if score == fiveOfAKind {
-			return fiveOfAKind
-		}
-		if score == fourOfAKind {
-			// XJJJJ or XXXXJ
-			return fiveOfAKind
-		}
-		if score == fullHouse {
-			// XXJJJ or JJXXX
-			return fiveOfAKind
-		}
-		if score == threeOfAKind {
-			// XYJJJ or XYYYJ or XXXYJ
-			return fourOfAKind
-		}
-		if score == twoPair {
-			if jokerCount == 2 {
-				// 2 others + 2 jokers = 4 of a kind
-				return fourOfAKind
-			} else {
-				if jokerCount != 1 {
-					panic(fmt.Sprintf("%s - %d - %d", s, score, jokerCount))
-				}
-				// 2 others + 1 joker = 3 of a kind
-				return threeOfAKind
-			}
-		}
-		if score == onePair {
-			if jokerCount == 2 {
-				// 1 of 3 different ones + 2 jokers = 3 of a kind
-				return threeOfAKind
-			} else {
-				if jokerCount != 1 {
-					panic(fmt.Sprintf("%s - %d - %d", s, score, jokerCount))
-				}
-				// 2 of a pair + 1 joker = 3 of a kind
-				return threeOfAKind
-			}
-		}
-		if score == highCard {
-			// ABCDJ -> ABCJJ
-			return twoPair
-		}
-		panic(fmt.Sprintf("cannot jokerize %s", s))
 	}
 
 	func(any) {}(jokerize)
