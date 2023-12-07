@@ -12,76 +12,26 @@ func init() {
 }
 
 func Day7Part1(input string) (string, error) {
-	// A, K, Q, J, T, 9, 8, 7, 6, 5, 4, 3, or 2
-	cardScores := make(map[byte]int)
-	for i, card := range []byte{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'} {
-		cardScores[card] = i
-	}
-
-	scoreHand := func(s string) int {
-		s = strings.Split(s, " ")[0]
-		counts := make(map[rune]int)
-		maxCount := 0
-		for _, c := range s {
-			nn := counts[c] + 1
-			counts[c] = nn
-			if nn > maxCount {
-				maxCount = nn
-			}
-		}
-		if maxCount == 5 {
-			return 0 // Five of a kind
-		} else if maxCount == 4 {
-			return 1 // Four of a kind
-		} else if len(counts) == 2 {
-			return 2 // Full house (must be XXXYY or XXYYY - cannot be XYYYY as that's four of a kind)
-		} else if maxCount == 3 {
-			return 3 // Three of a kind
-		} else if len(counts) == 3 {
-			return 4 // Two pair
-		} else if maxCount == 2 {
-			return 5 // One pair
-		} else if len(counts) == 5 {
-			return 6 // High card
-		}
-		panic(fmt.Sprintf("invalid hand? %s -> %+v", s, counts))
-	}
-
-	lines := strings.Split(input, "\n")
-	sort.Slice(lines, func(i, j int) bool {
-		l, r := lines[i], lines[j]
-		ls, rs := scoreHand(l), scoreHand(r)
-		if ls == rs {
-			for k := 0; k < len(l); k++ {
-				lc, rc := l[k], r[k]
-				if lc == rc {
-					continue
-				}
-				lcs, rcs := cardScores[lc], cardScores[rc]
-				return lcs < rcs
-			}
-			panic("woops")
-		}
-		return ls > rs
-	})
-
-	sum := 0
-	for i, line := range lines {
-		bid, err := strconv.Atoi(strings.Split(line, " ")[1])
-		if err != nil {
-			return "", fmt.Errorf("invalid line %s: %w", line, err)
-		}
-		sum += (i + 1) * bid
-	}
-	return strconv.Itoa(sum), nil
+	return day7(input, false)
 }
 
 func Day7Part2(input string) (string, error) {
-	// A, K, Q, J, T, 9, 8, 7, 6, 5, 4, 3, or 2
+	return day7(input, true)
+}
+
+func day7(input string, joker bool) (string, error) {
 	cardScores := make(map[byte]int)
-	// J now in front
-	for i, card := range []byte{'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'} {
+	cards := []byte{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
+	if joker {
+		cards = []byte{'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'}
+	}
+	for i, card := range cards {
 		cardScores[card] = i
+	}
+
+	type entry struct {
+		hand       string
+		score, bid int
 	}
 
 	const (
@@ -95,7 +45,6 @@ func Day7Part2(input string) (string, error) {
 	)
 
 	scoreHand := func(s string) int {
-		s = strings.Split(s, " ")[0]
 		counts := make(map[rune]int)
 		maxCount := 0
 		for _, c := range s {
@@ -106,7 +55,7 @@ func Day7Part2(input string) (string, error) {
 			}
 		}
 		if maxCount == 5 {
-			return fiveOfAKind // Five of a kind
+			return fiveOfAKind
 		} else if maxCount == 4 {
 			return fourOfAKind
 		} else if len(counts) == 2 {
@@ -123,125 +72,71 @@ func Day7Part2(input string) (string, error) {
 		panic(fmt.Sprintf("invalid hand? %s -> %+v", s, counts))
 	}
 
-	check := func(b bool, msg string, s ...any) {
-		if !b {
-			panic(fmt.Sprintf(msg, s...))
-		}
-	}
-
 	jokerize := func(s string, score int) int {
 		jokerCount := strings.Count(s, "J")
-		if jokerCount == 0 {
+		if !joker || jokerCount == 0 {
 			return score
 		}
 
 		if score == fiveOfAKind {
-			check(jokerCount == 5, "%d", jokerCount)
 			return fiveOfAKind
-		}
-		if score == fourOfAKind {
-			check(jokerCount == 1 || jokerCount == 4, "%d", jokerCount)
-			// XJJJJ or XXXXJ
+		} else if score == fourOfAKind {
 			return fiveOfAKind
-		}
-		if score == fullHouse {
-			check(jokerCount == 2 || jokerCount == 3, "%d", jokerCount)
-			// XXJJJ or JJXXX
+		} else if score == fullHouse {
 			return fiveOfAKind
-		}
-		if score == threeOfAKind {
-			check(jokerCount == 3 || jokerCount == 1, "%d", jokerCount)
-			// XYJJJ or XYYYJ or XXXYJ
+		} else if score == threeOfAKind {
 			return fourOfAKind
-		}
-		if score == twoPair {
+		} else if score == twoPair {
 			if jokerCount == 2 {
-				// XXJJY
-				// 2 others + 2 jokers = 4 of a kind
 				return fourOfAKind
-			} else {
-				// XXYYJ
-				if jokerCount != 1 {
-					panic(fmt.Sprintf("%s - %d - %d", s, score, jokerCount))
-				}
-				// 2 others + 1 joker = 3 of a kind
+			} else if jokerCount == 1 {
 				return fullHouse
 			}
-		}
-		if score == onePair {
+		} else if score == onePair {
 			if jokerCount == 2 {
-				// JJXYZ
-				// 1 of 3 different ones + 2 jokers = 3 of a kind
 				return threeOfAKind
-			} else {
-				if jokerCount != 1 {
-					panic(fmt.Sprintf("%s - %d - %d", s, score, jokerCount))
-				}
-				// XXJYZ
-				// 2 of a pair + 1 joker = 3 of a kind
+			} else if jokerCount == 1 {
 				return threeOfAKind
 			}
-		}
-		if score == highCard {
-			// ABCDJ -> ABCJJ
+		} else if score == highCard {
 			return onePair
 		}
 		panic(fmt.Sprintf("cannot jokerize %s", s))
 	}
 
-	scoreHandJokerized := func(s string) int {
-		s = strings.Split(s, " ")[0]
-		return jokerize(s, scoreHand(s))
-		sco := scoreHand(s)
-		jokerCount := strings.Count(s, "J")
-		if jokerCount == 0 {
-			return sco
-		}
-		maxScore := sco
-		for card := range cardScores {
-			if card == 'J' {
-				continue
-			}
-			rep := strings.ReplaceAll(s, "J", string([]byte{card}))
-			score := scoreHand(rep)
-			if score < maxScore {
-				maxScore = score
-			}
-		}
-		j := jokerize(s, sco)
-		if j != maxScore {
-			panic(fmt.Sprintf("s: %s; score: %d; maxScore: %d; j: %d", s, sco, maxScore, j))
-		}
-		return maxScore
-	}
-
-	func(any) {}(jokerize)
-
 	lines := strings.Split(input, "\n")
-	sort.Slice(lines, func(i, j int) bool {
-		l, r := lines[i], lines[j]
-		ls, rs := scoreHandJokerized(l), scoreHandJokerized(r)
-		if ls == rs {
-			for k := 0; k < len(l); k++ {
-				lc, rc := l[k], r[k]
-				if lc == rc {
-					continue
-				}
-				lcs, rcs := cardScores[lc], cardScores[rc]
-				return lcs < rcs
-			}
-			panic("woops")
-		}
-		return ls > rs
-	})
-
-	sum := 0
+	entries := make([]entry, len(lines))
 	for i, line := range lines {
-		bid, err := strconv.Atoi(strings.Split(line, " ")[1])
+		parts := strings.Split(line, " ")
+		if len(parts) != 2 {
+			return "", fmt.Errorf("invalid line (expected 2 parts but got %d): %s", len(parts), line)
+		}
+		bid, err := strconv.Atoi(parts[1])
 		if err != nil {
 			return "", fmt.Errorf("invalid line %s: %w", line, err)
 		}
-		sum += (i + 1) * bid
+		hand := parts[0]
+		entries[i] = entry{hand: hand, score: jokerize(hand, scoreHand(hand)), bid: bid}
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		l, r := entries[i], entries[j]
+		if l.score == r.score {
+			for k := 0; k < len(l.hand); k++ {
+				lc, rc := l.hand[k], r.hand[k]
+				if lc == rc {
+					continue
+				}
+				return cardScores[lc] < cardScores[rc]
+			}
+			panic("woops")
+		}
+		return l.score > r.score
+	})
+
+	sum := 0
+	for i, e := range entries {
+		sum += (i + 1) * e.bid
 	}
 	return strconv.Itoa(sum), nil
 }
