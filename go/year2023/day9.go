@@ -11,9 +11,16 @@ func init() {
 }
 
 func Day9Part1(input string) (string, error) {
+	return day9(input, false)
+}
+
+func Day9Part2(input string) (string, error) {
+	return day9(input, true)
+}
+
+func day9(input string, left bool) (string, error) {
 	sum := 0
 	for _, line := range strings.Split(input, "\n") {
-		fmt.Printf("Line: %s\n", line)
 		var numbers []int
 		for _, part := range strings.Split(line, " ") {
 			n, err := strconv.Atoi(part)
@@ -22,15 +29,19 @@ func Day9Part1(input string) (string, error) {
 			}
 			numbers = append(numbers, n)
 		}
-		fmt.Printf("\tnumbers: %#v\n", numbers)
 
-		lastNumbers := []int{numbers[len(numbers)-1]}
+		getNum := func() int {
+			if left {
+				return numbers[0]
+			}
+			return numbers[len(numbers)-1]
+		}
+		lastNumbers := []int{getNum()}
 		for {
 			var next []int
 			allZeroes := true
 			for i := 0; i < len(numbers)-1; i++ {
-				n := numbers[i]
-				k := numbers[i+1]
+				n, k := numbers[i], numbers[i+1]
 				j := k - n
 				next = append(next, j)
 				if j != 0 {
@@ -38,29 +49,24 @@ func Day9Part1(input string) (string, error) {
 				}
 			}
 
-			fmt.Printf("\tNext: %#v (allZeroes: %t)\n", next, allZeroes)
 			if allZeroes {
 				break
 			}
-			lastNumbers = append(lastNumbers, next[len(next)-1])
 			numbers = next
+			lastNumbers = append(lastNumbers, getNum())
 		}
 
-		fmt.Printf("\tlastNumbers: %#v\n", lastNumbers)
 		prev := 0
 		for i := len(lastNumbers) - 1; i >= 0; i-- {
 			n := lastNumbers[i]
-			prev += n
+			if left {
+				prev = n - prev
+			} else {
+				prev += n
+			}
 		}
-		fmt.Printf("\tPrev: %v\n", prev)
 		sum += prev
 	}
 
-	fmt.Printf("Sum: %d\n", sum)
-
-	return "", fmt.Errorf("Day 9 part 1 not implemented")
-}
-
-func Day9Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 9 part 2 not implemented")
+	return strconv.Itoa(sum), nil
 }
