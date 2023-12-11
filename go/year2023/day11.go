@@ -1,7 +1,6 @@
 package year2023
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -11,33 +10,37 @@ func init() {
 }
 
 func Day11Part1(input string) (string, error) {
+	return day11(input, 2)
+}
+
+func Day11Part2(input string) (string, error) {
+	return day11(input, 1_000_000)
+}
+
+func day11(input string, expansion int) (string, error) {
 	lines := strings.Split(input, "\n")
-	outLines := make([]string, 0)
-	for _, line := range lines {
-		outLines = append(outLines, line)
+	emptyRows := make(map[int]struct{})
+	for y, line := range lines {
 		if strings.Count(line, ".") == len(line) {
-			outLines = append(outLines, line)
+			emptyRows[y] = struct{}{}
 		}
 	}
-	lines = outLines
 
-	outLines = make([]string, len(lines))
+	emptyCols := make(map[int]struct{})
 	for x := 0; x < len(lines[0]); x += 1 {
 		dots := 0
 		for y := 0; y < len(lines); y++ {
 			c := lines[y][x]
 			if c == '.' {
 				dots += 1
+			} else {
+				break
 			}
-			outLines[y] = outLines[y] + string(c)
 		}
 		if dots == len(lines) {
-			for y := 0; y < len(lines); y++ {
-				outLines[y] = outLines[y] + "."
-			}
+			emptyCols[x] = struct{}{}
 		}
 	}
-	lines = outLines
 
 	type xy struct{ x, y int }
 	galaxies := make(map[xy]struct{})
@@ -55,21 +58,26 @@ func Day11Part1(input string) (string, error) {
 			if pos1 == pos2 {
 				continue
 			}
-			dx := pos2.x - pos1.x
-			if dx < 0 {
-				dx = -dx
+			dx := 0
+			for x := min(pos1.x, pos2.x); x < max(pos1.x, pos2.x); x += 1 {
+				if _, f := emptyCols[x]; f {
+					dx += expansion
+				} else {
+					dx += 1
+				}
 			}
-			dy := pos2.y - pos1.y
-			if dy < 0 {
-				dy = -dy
+
+			dy := 0
+			for y := min(pos1.y, pos2.y); y < max(pos1.y, pos2.y); y += 1 {
+				if _, f := emptyRows[y]; f {
+					dy += expansion
+				} else {
+					dy += 1
+				}
 			}
 			totalDist += dx + dy
 		}
 	}
 
 	return strconv.Itoa(totalDist / 2), nil
-}
-
-func Day11Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 11 part 2 not implemented")
 }
