@@ -13,37 +13,16 @@ func init() {
 func Day13Part1(input string) (string, error) {
 	chunks := strings.Split(input, "\n\n")
 
-	summary := 0
-	for _, chunk := range chunks {
-		lines := strings.Split(chunk, "\n")
-		numRows, numCols := len(lines), len(lines[0])
-
-		row := func(y int) string {
-			return lines[y]
-		}
-
-		col := func(x int) string {
-			var sb strings.Builder
-			for _, line := range lines {
-				sb.WriteByte(line[x])
-			}
-			return sb.String()
-		}
-
-		xMatch := false
-	verticalReflection:
-		for x := 1; x < numCols; x++ {
-			a, b := col(x-1), col(x)
-			if a == b {
+	checkReflection := func(maxNum int, f func(int) string) (bool, int) {
+		for x := 1; x < maxNum; x++ {
+			if a, b := f(x-1), f(x); a == b {
 				offset := 1
 				for {
 					leftX, rightX := x-1-offset, x+offset
-					if leftX < 0 || rightX == numCols {
-						summary += x
-						xMatch = true
-						break verticalReflection
+					if leftX < 0 || rightX == maxNum {
+						return true, x
 					}
-					if left, right := col(leftX), col(rightX); left == right {
+					if left, right := f(leftX), f(rightX); left == right {
 						offset += 1
 						continue
 					}
@@ -51,31 +30,31 @@ func Day13Part1(input string) (string, error) {
 				}
 			}
 		}
+		return false, 0
+	}
+
+	summary := 0
+	for _, chunk := range chunks {
+		lines := strings.Split(chunk, "\n")
+
+		xMatch, xReflection := checkReflection(len(lines[0]), func(x int) string {
+			var sb strings.Builder
+			for _, line := range lines {
+				sb.WriteByte(line[x])
+			}
+			return sb.String()
+		})
+		summary += xReflection
 
 		if xMatch {
 			// Assumption: a chunk cannot have both a horizontal and vertical reflection
 			continue
 		}
 
-	horizontalReflection:
-		for y := 1; y < numRows; y++ {
-			a, b := row(y-1), row(y)
-			if a == b {
-				offset := 1
-				for {
-					topY, bottomY := y-1-offset, y+offset
-					if topY < 0 || bottomY == numRows {
-						summary += y * 100
-						break horizontalReflection
-					}
-					if top, bottom := row(topY), row(bottomY); top == bottom {
-						offset += 1
-						continue
-					}
-					break
-				}
-			}
-		}
+		_, yReflection := checkReflection(len(lines), func(y int) string {
+			return lines[y]
+		})
+		summary += yReflection * 100
 	}
 
 	return strconv.Itoa(summary), nil
