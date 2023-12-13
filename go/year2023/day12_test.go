@@ -33,7 +33,7 @@ func Test_day12line(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s %v", tt.s, tt.nrs), func(t *testing.T) {
-			got := day12line(tt.s, tt.nrs, 0)
+			got := day12line(tt.s, tt.nrs)
 			assert.Equal(t, tt.want, got)
 		})
 	}
