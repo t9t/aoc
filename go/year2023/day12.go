@@ -27,17 +27,57 @@ func Day12Part1(input string) (string, error) {
 			nrs = append(nrs, n)
 		}
 
-		sum += day12line(parts[0], nrs, 0)
+		// TODO: running day1 without cache is 100x faster than with cache
+		sum += day12line(parts[0], nrs)
 	}
 
 	return strconv.Itoa(sum), nil
 }
 
 func Day12Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 12 part 2 not implemented")
+	sum := 0
+	for _, line := range strings.Split(input, "\n") {
+		parts := strings.Split(line, " ")
+		if len(parts) != 2 {
+			return "", fmt.Errorf("invalid line (expected 2 parts but got %d): %s", len(parts), line)
+		}
+
+		nrs := make([]int, 0)
+		for _, nr := range strings.Split(strings.Repeat(","+parts[1], 5)[1:], ",") {
+			n, err := strconv.Atoi(nr)
+			if err != nil {
+				return "", fmt.Errorf("invalid line %s: %w", line, err)
+			}
+			nrs = append(nrs, n)
+		}
+
+		sum += day12line(strings.Repeat("?"+parts[0], 5)[1:], nrs)
+	}
+
+	return strconv.Itoa(sum), nil
 }
 
-func day12line(s string, nrs []int, d int) int {
+type day12CacheKey struct {
+	s   string
+	nrs [30]int // hopefully there are no inputs with more than 30 numbers
+}
+
+var day12cache = make(map[day12CacheKey]int)
+
+func day12line(s string, nrs []int) int {
+	k := day12CacheKey{s: s}
+	for i, n := range nrs {
+		k.nrs[i] = n
+	}
+	v, f := day12cache[k]
+	if !f {
+		v = day12line_(s, nrs)
+		day12cache[k] = v
+	}
+	return v
+}
+
+func day12line_(s string, nrs []int) int {
 	if len(s) == 0 && len(nrs) == 0 {
 		return 1
 	} else if len(nrs) == 0 {
@@ -50,7 +90,7 @@ func day12line(s string, nrs []int, d int) int {
 	} else if len(s) == 0 {
 		return 0
 	} else if s[0] == '.' {
-		return day12line(s[1:], nrs, d+1)
+		return day12line(s[1:], nrs)
 	}
 
 	nr := nrs[0]
@@ -63,7 +103,7 @@ func day12line(s string, nrs []int, d int) int {
 		if chunk[0] == '#' {
 			return 0
 		} else {
-			return day12line(s[1:], nrs, d+1)
+			return day12line(s[1:], nrs)
 		}
 	}
 
@@ -86,14 +126,14 @@ func day12line(s string, nrs []int, d int) int {
 			return 0
 		}
 
-		return day12line(next, newNrs, d+1)
+		return day12line(next, newNrs)
 	}
 
 	if afterC == '#' {
-		return day12line(s[1:], nrs, d+1)
+		return day12line(s[1:], nrs)
 	}
 
-	a := day12line(s[1:], nrs, d+1)
-	b := day12line(next, newNrs, d+1)
+	a := day12line(s[1:], nrs)
+	b := day12line(next, newNrs)
 	return a + b
 }
