@@ -33,8 +33,7 @@ func Day13Part1(input string) (string, error) {
 		return false, 0
 	}
 
-	summary := 0
-	for _, chunk := range chunks {
+	findReflectionXy := func(chunk string) (int, int) {
 		lines := strings.Split(chunk, "\n")
 
 		xMatch, xReflection := checkReflection(len(lines[0]), func(x int) string {
@@ -44,17 +43,23 @@ func Day13Part1(input string) (string, error) {
 			}
 			return sb.String()
 		})
-		summary += xReflection
 
 		if xMatch {
 			// Assumption: a chunk cannot have both a horizontal and vertical reflection
-			continue
+			return xReflection, 0
 		}
 
 		_, yReflection := checkReflection(len(lines), func(y int) string {
 			return lines[y]
 		})
-		summary += yReflection * 100
+		return 0, yReflection
+	}
+
+	summary := 0
+	for _, chunk := range chunks {
+		x, y := findReflectionXy(chunk)
+		summary += x
+		summary += y * 100
 	}
 
 	return strconv.Itoa(summary), nil
