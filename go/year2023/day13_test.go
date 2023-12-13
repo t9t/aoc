@@ -1,0 +1,31 @@
+package year2023
+
+import (
+	"testing"
+)
+
+func Test_Day13Part1(t *testing.T) {
+	basicMultiTest(t, Day13Part1, []testInput{
+		{`#.##..##.
+..#.##.#.
+##......#
+##......#
+..#.##.#.
+..##..##.
+#.#.##.#.
+
+#...##..#
+#....#..#
+..##..###
+#####.##.
+#####.##.
+..##..###
+#....#..#`, "405"},
+	})
+}
+
+func Test_Day13Part2(t *testing.T) {
+	basicMultiTest(t, Day13Part2, []testInput{
+		{"", ""},
+	})
+}
