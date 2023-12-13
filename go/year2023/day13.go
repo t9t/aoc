@@ -10,143 +10,57 @@ func init() {
 }
 
 func Day13Part1(input string) (string, error) {
-	chunks := strings.Split(input, "\n\n")
-
-	checkReflection := func(maxNum int, f func(int) string) (bool, int) {
-		for x := 1; x < maxNum; x++ {
-			if a, b := f(x-1), f(x); a == b {
-				offset := 1
-				for {
-					leftX, rightX := x-1-offset, x+offset
-					if leftX < 0 || rightX == maxNum {
-						return true, x
-					}
-					if left, right := f(leftX), f(rightX); left == right {
-						offset += 1
-						continue
-					}
-					break
-				}
-			}
-		}
-		return false, 0
-	}
-
-	findReflectionXy := func(chunk string) (int, int) {
-		lines := strings.Split(chunk, "\n")
-
-		xMatch, xReflection := checkReflection(len(lines[0]), func(x int) string {
-			var sb strings.Builder
-			for _, line := range lines {
-				sb.WriteByte(line[x])
-			}
-			return sb.String()
-		})
-
-		if xMatch {
-			// Assumption: a chunk cannot have both a horizontal and vertical reflection
-			return xReflection, 0
-		}
-
-		_, yReflection := checkReflection(len(lines), func(y int) string {
-			return lines[y]
-		})
-		return 0, yReflection
-	}
-
-	summary := 0
-	for _, chunk := range chunks {
-		x, y := findReflectionXy(chunk)
-		summary += x
-		summary += y * 100
-	}
-
-	return strconv.Itoa(summary), nil
+	return day13(input, 0)
 }
 
 func Day13Part2(input string) (string, error) {
-	chunks := strings.Split(input, "\n\n")
+	return day13(input, 1)
+}
 
-	checkReflection := func(maxNum int, notN int, f func(int) string) (bool, int) {
-		for x := 1; x < maxNum; x++ {
-			if x == notN {
-				continue
-			}
-			if a, b := f(x-1), f(x); a == b {
-				offset := 1
-				for {
-					leftX, rightX := x-1-offset, x+offset
-					if leftX < 0 || rightX == maxNum {
-						return true, x
-					}
-					if left, right := f(leftX), f(rightX); left == right {
-						offset += 1
-						continue
-					}
+func day13(input string, maxDiff int) (string, error) {
+	chunks := strings.Split(input, "\n\n")
+	summary := 0
+
+	findReflectionLine := func(maxDim1, maxDim2 int, getc func(int, int) byte) (bool, int) {
+	outer:
+		for n := 0; n < maxDim1-1; n += 1 {
+			differences := 0
+			for dn := 0; dn < maxDim1; dn += 1 {
+				mind, plusd := n-dn, n+dn+1
+				if mind < 0 || plusd >= maxDim1 {
 					break
 				}
+				for k := 0; k < maxDim2; k += 1 {
+					if getc(mind, k) != getc(plusd, k) {
+						differences += 1
+						if differences > maxDiff {
+							continue outer
+						}
+					}
+				}
+			}
+			if differences == maxDiff {
+				return true, n
 			}
 		}
 		return false, 0
 	}
 
-	findReflectionXy := func(lines []string, notX, notY int) (int, int, bool) {
-		yMatch, yReflection := checkReflection(len(lines), notY, func(y int) string {
-			return lines[y]
-		})
-
-		if yMatch {
-			// Assumption: a chunk cannot have both a horizontal and vertical reflection
-			return 0, yReflection, true
-		}
-
-		xMatch, xReflection := checkReflection(len(lines[0]), notX, func(x int) string {
-			var sb strings.Builder
-			for _, line := range lines {
-				sb.WriteByte(line[x])
-			}
-			return sb.String()
-		})
-
-		if xMatch {
-			return xReflection, 0, true
-		}
-		return 0, 0, false
-	}
-	summary := 0
-kek:
 	for _, chunk := range chunks {
+		lines := strings.Split(chunk, "\n")
+		numRows, numCols := len(lines), len(lines[0])
 
-		origLines := strings.Split(chunk, "\n")
-		origX, origY, origMatch := findReflectionXy(origLines, -1, -1)
-		if !origMatch {
-			panic("")
+		if f, x := findReflectionLine(numCols, numRows, func(x, y int) byte {
+			return lines[y][x]
+		}); f {
+			summary += x + 1
 		}
 
-		for sy := 0; sy < len(origLines); sy += 1 {
-			for sx := 0; sx < len(origLines[0]); sx += 1 {
-				copyLines := make([]string, len(origLines))
-				copy(copyLines, origLines)
-				line := []byte(copyLines[sy])
-				if line[sx] == '.' {
-					line[sx] = '#'
-				} else {
-					line[sx] = '.'
-				}
-				copyLines[sy] = string(line)
-
-				fixedX, fixedY, match := findReflectionXy(copyLines, origX, origY)
-				diff := chunk != strings.TrimSpace(strings.Join(copyLines, "\n"))
-				if match && diff && (fixedX != origX || fixedY != origY) {
-					func(int, int) {}(origX, origY)
-
-					summary += fixedX
-					summary += fixedY * 100
-					continue kek
-				}
-			}
+		if f, y := findReflectionLine(numRows, numCols, func(y, x int) byte {
+			return lines[y][x]
+		}); f {
+			summary += 100 * (y + 1)
 		}
-		panic("no answer")
 	}
 
 	return strconv.Itoa(summary), nil
