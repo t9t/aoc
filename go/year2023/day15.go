@@ -38,9 +38,8 @@ func Day15Part2(input string) (string, error) {
 		var label string
 		var operation byte
 		var focalLength int
-		if strings.HasSuffix(step, "-") {
-			operation = '-'
-			label = strings.TrimSuffix(step, "-")
+		if step[len(step)-1] == '-' {
+			operation, label = '-', step[:len(step)-1]
 		} else {
 			operation = '='
 			parts := strings.Split(step, "=")
@@ -61,29 +60,27 @@ func Day15Part2(input string) (string, error) {
 			hash %= 256
 		}
 		box := boxes[hash]
+		newBox := make([]lens, 0)
 		if operation == '-' {
-			newBox := make([]lens, 0)
 			for _, item := range box {
 				if item.label != label {
 					newBox = append(newBox, item)
 				}
 			}
-			boxes[hash] = newBox
 		} else if operation == '=' {
-			newBox, found := make([]lens, 0), false
+			lens, addAtEnd := lens{label: label, focalLength: focalLength}, true
 			for _, item := range box {
 				if item.label == label {
-					newBox = append(newBox, lens{label: label, focalLength: focalLength})
-					found = true
+					newBox, addAtEnd = append(newBox, lens), false
 				} else {
 					newBox = append(newBox, item)
 				}
 			}
-			if !found {
-				newBox = append(newBox, lens{label: label, focalLength: focalLength})
+			if addAtEnd {
+				newBox = append(newBox, lens)
 			}
-			boxes[hash] = newBox
 		}
+		boxes[hash] = newBox
 	}
 
 	sum := 0
