@@ -1,7 +1,6 @@
 package year2023
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -11,6 +10,33 @@ func init() {
 }
 
 func Day16Part1(input string) (string, error) {
+	lines := strings.Split(input, "\n")
+	n := day16shine(lines, 0, 0, 1)
+	return strconv.Itoa(n), nil
+}
+
+func Day16Part2(input string) (string, error) {
+	lines := strings.Split(input, "\n")
+	energized := 0
+
+	try := func(x, y, dir int) {
+		energized = max(energized, day16shine(lines, x, y, dir))
+	}
+
+	for x := 0; x < len(lines[0]); x += 1 {
+		try(x, 0, 2)            // up
+		try(x, len(lines)-1, 0) // down
+	}
+
+	for y := 0; y < len(lines); y += 1 {
+		try(0, y, 1)               // right
+		try(len(lines[0])-1, y, 3) // left
+	}
+
+	return strconv.Itoa(energized), nil
+}
+
+func day16shine(lines []string, startX, startY, startDir int) int {
 	type xy struct{ x, y int }
 	type direction int
 	const (
@@ -20,7 +46,6 @@ func Day16Part1(input string) (string, error) {
 		left
 	)
 	lightMap := make(map[xy]map[direction]struct{})
-	lines := strings.Split(input, "\n")
 	xLen, yLen := len(lines[0]), len(lines)
 
 	type beam struct {
@@ -28,7 +53,7 @@ func Day16Part1(input string) (string, error) {
 		dir  direction
 	}
 
-	beams := []beam{{x: 0, y: 0, dir: right}}
+	beams := []beam{{x: startX, y: startY, dir: direction(startDir)}}
 	for len(beams) != 0 {
 		b := beams[0]
 		beams = beams[1:]
@@ -101,9 +126,5 @@ func Day16Part1(input string) (string, error) {
 		}
 	}
 
-	return strconv.Itoa(len(lightMap)), nil
-}
-
-func Day16Part2(input string) (string, error) {
-	return "", fmt.Errorf("Day 16 part 2 not implemented")
+	return len(lightMap)
 }
